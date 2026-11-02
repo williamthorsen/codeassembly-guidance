@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.5.0 — 2026-11-02
+
+### 🎉 Features
+
+- Adds rules to the `shared-data-conventions` rulebook stating that an agent's verdict that decides a write to shared state includes evidence that a script checks before the write, and that a skill writing to shared state runs against the real data before merge, stopping at its approval checkpoint or in a dry run. (#2245)
+- Extends the data-change guidance in `create-ticket`, `design-and-plan`, `plan`, and `align-ticket-with-implementation` to require an acceptance criterion for the evidence check and a `## Verification` step that runs the skill against the real data without writing. (#2245)
+- Adds a "Judged writes" check to `plan-reviewer`, which reports a plan for a skill that writes to shared state when the plan does not run the skill against the real data before merge or does not name the script that checks a verdict's evidence. (#2245)
+
+### 📦 Dependencies
+
+- Pins `codeassembly` and `@williamthorsen/kb` in guidance to their published releases `0.20.0` and `0.11.1` in place of `workspace:*`, and exempts both from the 24-hour `minimumReleaseAge` in `pnpm-workspace.yaml` so that guidance can install a release as soon as this repository's CI publishes it. (#2246)
+
+### 📚 Documentation
+
+- Moves the `run-index.json`, `run-log.jsonl`, and `status.json` specification from guidance's `artifact-conventions.md` to `packages/run-core/docs/run-data-format.md`, beside the Zod schemas that implement it. (#2246)
+
 ## 0.4.0 — 2026-11-02
 
 ### 🎉 Features
