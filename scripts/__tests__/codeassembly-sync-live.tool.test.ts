@@ -17,12 +17,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 const scriptSource = path.join(import.meta.dirname, '..', 'codeassembly-sync-live.sh');
 
-const expectedSteps = [
-  'pnpm install --frozen-lockfile',
-  'pnpm exec nmr build',
-  'codeassembly install --link',
-  'codeassembly sync --global',
-];
+const cliBinPath = path.join('packages', 'agents', 'bin', 'codeassembly.js');
 
 describe('codeassembly-sync-live', () => {
   let fixture: Fixture;
@@ -35,15 +30,53 @@ describe('codeassembly-sync-live', () => {
     rmSync(fixture.baseDir, { recursive: true, force: true });
   });
 
-  it('advances live to origin/main and deploys from the live worktree', () => {
+  it('advances live to origin/main, builds both live worktrees, and deploys with the sibling CLI', () => {
     const target = commitAndPush(fixture, 'second');
+    const cliHead = readHead(fixture.cliDir);
 
     const result = runSyncLive(fixture);
 
     expect(result.status).toBe(0);
     expect(readHead(fixture.liveDir)).toBe(target);
+    expect(readHead(fixture.cliDir)).toBe(cliHead);
     expect(result.stdout).toContain(`to ${target.slice(0, 8)} (origin/main)`);
-    expect(readDeployLog(fixture)).toStrictEqual(expectedSteps.map((step) => `${step}|${fixture.liveDir}`));
+    expect(readDeployLog(fixture)).toStrictEqual(buildExpectedLog(fixture, fixture.cliDir));
+  });
+
+  it('deploys with the CLI that CODEASSEMBLY_LIVE_DIR names in place of the sibling', () => {
+    const overrideDir = createCliWorktree(path.join(fixture.baseDir, 'elsewhere', 'packages.live'));
+
+    const result = runSyncLive(fixture, [], { CODEASSEMBLY_LIVE_DIR: overrideDir });
+
+    expect(result.status).toBe(0);
+    expect(readDeployLog(fixture)).toStrictEqual(buildExpectedLog(fixture, overrideDir));
+  });
+
+  it('refuses before advancing live when the sibling CLI worktree is missing', () => {
+    commitAndPush(fixture, 'second');
+    rmSync(fixture.cliDir, { recursive: true, force: true });
+    const before = readHead(fixture.liveDir);
+
+    const result = runSyncLive(fixture);
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(`${fixture.cliDir} (the sibling path)`);
+    expect(result.stderr).toContain('Set CODEASSEMBLY_LIVE_DIR');
+    expect(readHead(fixture.liveDir)).toBe(before);
+    expect(readDeployLog(fixture)).toStrictEqual([]);
+  });
+
+  it('refuses before advancing live when CODEASSEMBLY_LIVE_DIR names a directory without the CLI', () => {
+    commitAndPush(fixture, 'second');
+    const before = readHead(fixture.liveDir);
+    const missingDir = path.join(fixture.baseDir, 'missing');
+
+    const result = runSyncLive(fixture, [], { CODEASSEMBLY_LIVE_DIR: missingDir });
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(`${missingDir} (from CODEASSEMBLY_LIVE_DIR)`);
+    expect(readHead(fixture.liveDir)).toBe(before);
+    expect(readDeployLog(fixture)).toStrictEqual([]);
   });
 
   it('advances live to an explicit commit', () => {
@@ -61,7 +94,7 @@ describe('codeassembly-sync-live', () => {
 
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('live is already at');
-    expect(readDeployLog(fixture)).toHaveLength(expectedSteps.length);
+    expect(readDeployLog(fixture)).toStrictEqual(buildExpectedLog(fixture, fixture.cliDir));
   });
 
   it('refuses an unknown ref with exit 2', () => {
@@ -107,11 +140,8 @@ describe('codeassembly-sync-live', () => {
     const result = runSyncLive(fixture, [], { STUB_PNPM_FAIL_ON: 'nmr' });
 
     expect(result.status).toBe(1);
-    expect(result.stderr).toContain("deploy step 'build' failed");
-    expect(readDeployLog(fixture)).toStrictEqual([
-      `${expectedSteps[0]}|${fixture.liveDir}`,
-      `${expectedSteps[1]}|${fixture.liveDir}`,
-    ]);
+    expect(result.stderr).toContain("deploy step 'build guidance' failed");
+    expect(readDeployLog(fixture)).toStrictEqual(buildExpectedLog(fixture, fixture.cliDir).slice(0, 2));
   });
 });
 
@@ -119,10 +149,23 @@ describe('codeassembly-sync-live', () => {
 
 interface Fixture {
   baseDir: string;
+  cliDir: string;
   logPath: string;
   liveDir: string;
   repoDir: string;
   stubBinDir: string;
+}
+
+/** Lists the deploy steps, each as `<command>|<cwd>`, that a complete run records with the CLI in `cliDir`. */
+function buildExpectedLog(fixture: Fixture, cliDir: string): string[] {
+  return [
+    `pnpm install --frozen-lockfile|${fixture.liveDir}`,
+    `pnpm exec nmr build|${fixture.liveDir}`,
+    `pnpm install --frozen-lockfile|${cliDir}`,
+    `pnpm exec nmr build|${cliDir}`,
+    `codeassembly ${cliDir} install --link|${fixture.liveDir}`,
+    `codeassembly ${cliDir} sync --global|${fixture.liveDir}`,
+  ];
 }
 
 /** Adds an empty commit to the fixture's main branch, pushes it to origin, and returns its SHA. */
@@ -133,14 +176,40 @@ function commitAndPush(fixture: Fixture, message: string): string {
 }
 
 /**
- * Builds a scratch repository whose main branch contains a copy of the script and a stub agents bin, with a bare
- * origin, a live worktree, and a stub pnpm. Both stubs append their arguments and working directory to a log.
+ * Creates a git repository at `dir` that stands in for the packages repository's live worktree: Its stub CLI appends
+ * its own worktree, its arguments, and its working directory to the log.
+ */
+function createCliWorktree(dir: string): string {
+  const binPath = path.join(dir, cliBinPath);
+  mkdirSync(path.dirname(binPath), { recursive: true });
+  writeFileSync(
+    binPath,
+    [
+      "import { appendFileSync } from 'node:fs';",
+      "import path from 'node:path';",
+      "const worktree = path.resolve(import.meta.dirname, '..', '..', '..');",
+      "appendFileSync(process.env.SYNC_LIVE_LOG, `codeassembly ${worktree} ${process.argv.slice(2).join(' ')}|${process.cwd()}\\n`);",
+      '',
+    ].join('\n'),
+  );
+  writeFileSync(path.join(dir, 'package.json'), '{ "type": "module" }\n');
+  runGit(dir, ['init', '--quiet', '--initial-branch=live']);
+  runGit(dir, ['add', '.']);
+  runGit(dir, ['commit', '--quiet', '--message', 'initial']);
+  return dir;
+}
+
+/**
+ * Builds a scratch guidance repository whose main branch contains a copy of the script, with a bare origin, a live
+ * worktree, a stub pnpm, and a stand-in for the packages repository's live worktree at the sibling path. The stubs
+ * append each deploy step to a log.
  */
 function createFixture(): Fixture {
   const baseDir = realpathSync(mkdtempSync(path.join(tmpdir(), 'sync-live-')));
   const originDir = path.join(baseDir, 'origin.git');
   const repoDir = path.join(baseDir, 'repo');
   const liveDir = path.join(baseDir, 'repo.live');
+  const cliDir = createCliWorktree(path.join(baseDir, 'codeassembly.live'));
   const stubBinDir = path.join(baseDir, 'stub-bin');
   const logPath = path.join(baseDir, 'deploy.log');
 
@@ -151,18 +220,6 @@ function createFixture(): Fixture {
   mkdirSync(path.dirname(scriptPath), { recursive: true });
   copyFileSync(scriptSource, scriptPath);
   chmodSync(scriptPath, 0o755);
-
-  const binPath = path.join(repoDir, 'packages', 'agents', 'bin', 'codeassembly.js');
-  mkdirSync(path.dirname(binPath), { recursive: true });
-  writeFileSync(
-    binPath,
-    [
-      "import { appendFileSync } from 'node:fs';",
-      "appendFileSync(process.env.SYNC_LIVE_LOG, `codeassembly ${process.argv.slice(2).join(' ')}|${process.cwd()}\\n`);",
-      '',
-    ].join('\n'),
-  );
-  writeFileSync(path.join(repoDir, 'package.json'), '{ "type": "module" }\n');
 
   runGit(repoDir, ['add', '.']);
   runGit(repoDir, ['commit', '--quiet', '--message', 'initial']);
@@ -183,7 +240,7 @@ function createFixture(): Fixture {
   );
   chmodSync(pnpmPath, 0o755);
 
-  return { baseDir, liveDir, logPath, repoDir, stubBinDir };
+  return { baseDir, cliDir, liveDir, logPath, repoDir, stubBinDir };
 }
 
 /** Reads the deploy steps recorded by the stubs, one `<command>|<cwd>` entry per step. */
@@ -208,11 +265,13 @@ function runGit(dir: string, args: string[]): void {
 
 /** Runs the fixture's copy of the script from the base directory, with the stub pnpm first on `PATH`. */
 function runSyncLive(fixture: Fixture, args: string[] = [], env: Record<string, string> = {}) {
+  // Keep the developer's own override from redirecting the fixture's CLI lookup.
+  const { CODEASSEMBLY_LIVE_DIR: _ignored, ...inheritedEnv } = process.env;
   return spawnSync(path.join(fixture.repoDir, 'scripts', 'codeassembly-sync-live.sh'), args, {
     cwd: fixture.baseDir,
     encoding: 'utf8',
     env: {
-      ...process.env,
+      ...inheritedEnv,
       PATH: `${fixture.stubBinDir}${path.delimiter}${process.env['PATH'] ?? ''}`,
       SYNC_LIVE_LOG: fixture.logPath,
       ...env,

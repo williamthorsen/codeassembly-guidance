@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# codeassembly-sync-live.sh: Fast-forwards the live worktree to a commit and deploys guidance from it.
+# codeassembly-sync-live.sh: Fast-forwards the guidance live worktree to a commit and deploys guidance from it.
 #
 # The worktree checked out on the `live` branch is the one from which the machine's deployed guidance is built.
-# This script fetches `origin`, resolves the ref to one commit, fast-forwards `live` to it, then deploys from that
-# worktree's own build: It installs dependencies, builds every package, and runs the worktree's own `codeassembly`
-# binary for `install` and `sync --global`. It deploys even when `live` is already at the commit, so a rerun
-# completes a deploy that failed partway.
+# This script fetches `origin`, resolves the ref to one commit, fast-forwards `live` to it, and builds that worktree.
+# It then builds the `live` worktree of the CodeAssembly packages repository, without fetching or advancing it, and
+# runs that worktree's `codeassembly` binary for `install` and `sync --global`. It deploys even when `live` is already
+# at the commit, so a rerun completes a deploy that failed partway.
 #
 # Usage:
 #   codeassembly-sync-live [<ref>]
@@ -16,6 +16,7 @@ set -euo pipefail
 readonly PROG="$(basename "$0")"
 readonly DEFAULT_REF="origin/main"
 readonly LIVE_BRANCH_REF="refs/heads/live"
+readonly CLI_BIN_PATH="packages/agents/bin/codeassembly.js"
 
 # BASH_SOURCE names this file when run by path and the ~/.local/bin link when run as a command; resolving the link
 # locates the repository whose live worktree this script deploys.
@@ -30,7 +31,7 @@ if [[ -z "$_self" ]]; then
 fi
 repo_dir="$(cd "$(dirname "$_self")" && git rev-parse --show-toplevel 2>/dev/null)" || true
 if [[ -z "$repo_dir" ]]; then
-  echo "$PROG: cannot locate the CodeAssembly repository from $_self" >&2
+  echo "$PROG: cannot locate the guidance repository from $_self" >&2
   exit 1
 fi
 readonly repo_dir
@@ -58,6 +59,11 @@ main() {
   for cmd in git node pnpm; do
     command -v "$cmd" &>/dev/null || die "required command '$cmd' not found" 127
   done
+
+  # Locate the packages repository's live worktree, which provides the CLI
+  local cli_dir
+  cli_dir="$(find_cli_worktree)" || die "no CodeAssembly live worktree containing $CLI_BIN_PATH at $(describe_cli_worktree)
+  Set CODEASSEMBLY_LIVE_DIR to the worktree of williamthorsen/codeassembly that has live checked out; live is unchanged"
 
   # Locate the live worktree
   local live_dir
@@ -89,10 +95,12 @@ main() {
     echo "Advanced live from ${old_sha:0:8} to ${sha:0:8} ($ref)."
   fi
 
-  # Deploy from the live worktree's own build
-  local bin="$live_dir/packages/agents/bin/codeassembly.js"
-  run_deploy_step "install dependencies" "$live_dir" pnpm install --frozen-lockfile
-  run_deploy_step "build" "$live_dir" pnpm exec nmr build
+  # Build both live worktrees, then deploy with the packages repository's CLI
+  local bin="$cli_dir/$CLI_BIN_PATH"
+  run_deploy_step "install guidance dependencies" "$live_dir" pnpm install --frozen-lockfile
+  run_deploy_step "build guidance" "$live_dir" pnpm exec nmr build
+  run_deploy_step "install CLI dependencies" "$cli_dir" pnpm install --frozen-lockfile
+  run_deploy_step "build CLI" "$cli_dir" pnpm exec nmr build
   run_deploy_step "codeassembly install" "$live_dir" node "$bin" install --link
   run_deploy_step "codeassembly sync --global" "$live_dir" node "$bin" sync --global
   echo "Deployed guidance from live at ${sha:0:8}."
@@ -110,6 +118,22 @@ die() {
 die_with_usage() {
   echo "$PROG: $1" >&2
   show_usage "${2:-1}"
+}
+
+# Prints where the packages repository's live worktree is looked for, naming the source of the path.
+describe_cli_worktree() {
+  if [[ -n "${CODEASSEMBLY_LIVE_DIR:-}" ]]; then
+    echo "$CODEASSEMBLY_LIVE_DIR (from CODEASSEMBLY_LIVE_DIR)"
+  else
+    echo "$(dirname "$repo_dir")/codeassembly.live (the sibling path)"
+  fi
+}
+
+# Prints the path of the packages repository's live worktree, or fails when that path doesn't contain the CLI.
+find_cli_worktree() {
+  local dir="${CODEASSEMBLY_LIVE_DIR:-$(dirname "$repo_dir")/codeassembly.live}"
+  [[ -f "$dir/$CLI_BIN_PATH" ]] || return 1
+  echo "$dir"
 }
 
 # Prints the path of the worktree that has the live branch checked out, or nothing when none does.
@@ -135,7 +159,7 @@ run_deploy_step() {
 # Displays command-line syntax. Can exit with or without an error code.
 show_usage() {
   cat >&2 <<USAGE
-Fast-forward the live worktree to a commit and deploy guidance from it.
+Fast-forward the guidance live worktree to a commit and deploy guidance from it.
 
 Usage:
   $PROG [<ref>]
@@ -147,15 +171,23 @@ Arguments:
 Options:
   -h, --help  Show this help
 
+Environment:
+  CODEASSEMBLY_LIVE_DIR  The live worktree of williamthorsen/codeassembly,
+                         which provides the CLI (default: codeassembly.live
+                         beside this repository's worktree)
+
 Fetches origin, resolves <ref> to one commit, and fast-forwards live to it.
-Then, in the live worktree, runs pnpm install --frozen-lockfile, nmr build,
-and the worktree's own codeassembly binary for install --link and
-sync --global. It deploys even when live is already at the commit.
+Then runs pnpm install --frozen-lockfile and nmr build in the live worktree
+and in the CodeAssembly live worktree, which it neither fetches nor advances.
+Last, it runs the CodeAssembly worktree's codeassembly binary for
+install --link and sync --global from the live worktree. It deploys even when
+live is already at the commit.
 
 Exit status:
   0    live is at the commit and the deploy succeeded
-  1    the fetch failed, the live worktree is missing or has uncommitted
-       changes, live cannot fast-forward to the commit, or a deploy step failed
+  1    the fetch failed, either live worktree is missing, the live worktree
+       has uncommitted changes, live cannot fast-forward to the commit, or a
+       deploy step failed
   2    usage error, including an unknown ref
   127  git, node, or pnpm is not installed
 
