@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+name: Code quality checks
+
+on:
+  push:
+    branches:
+      - main
+      - next
+
+  pull_request:
+    branches:
+      - main
+      - next
+
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The legs together run every constituent of `nmr check:strict`, each on
+  # its own runner. Splitting the chain stops the root `check:strict:post`
+  # hook from firing, so the static leg runs it explicitly.
+  code-quality:
+    uses: williamthorsen/.github/.github/workflows/code-quality-pnpm-workflow.yaml@v8
+    with:
+      check-commands: |
+        [
+          { "name": "test", "command": "pnpm exec nmr test" },
+          { "name": "lint", "command": "pnpm exec nmr lint:strict" },
+          { "name": "static", "command": "pnpm exec nmr typecheck && pnpm exec nmr fmt:check && pnpm run check:strict:post" }
+        ]
+      shellspec-version: '0.28.1'

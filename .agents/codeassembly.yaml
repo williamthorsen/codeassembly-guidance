@@ -1,0 +1,20 @@
+collections:
+  use:
+    - recommended
+harnesses:
+  use:
+    - claude
+    - rovo
+packages:
+  use:
+    - '@williamthorsen/nmr'
+rulebooks:
+  use:
+    - codeassembly-content-specification
+    - codeassembly-repo-conventions
+    - live-worktree-policy
+sources:
+  - name: codeassembly-guidance
+    path: ../packages/guidance/content
+  - name: codeassembly-repo
+    path: content

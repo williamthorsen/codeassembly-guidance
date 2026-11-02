@@ -9,13 +9,13 @@
     "rulebooks",
     "skills"
   ],
-  "homepage": "https://github.com/williamthorsen/codeassembly/tree/main/packages/guidance#readme",
+  "homepage": "https://github.com/williamthorsen/codeassembly-guidance/tree/main/packages/guidance#readme",
   "bugs": {
-    "url": "https://github.com/williamthorsen/codeassembly/issues"
+    "url": "https://github.com/williamthorsen/codeassembly-guidance/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/williamthorsen/codeassembly.git",
+    "url": "https://github.com/williamthorsen/codeassembly-guidance.git",
     "directory": "packages/guidance"
   },
   "license": "ISC",
@@ -58,7 +58,7 @@
     "@williamthorsen/toolbelt.errors": "catalog:",
     "@williamthorsen/toolbelt.terminal": "catalog:",
     "@williamthorsen/toolbelt.testing": "catalog:",
-    "codeassembly": "0.20.0",
+    "codeassembly": "catalog:",
     "esbuild": "catalog:",
     "eslint": "catalog:",
     "happy-dom": "catalog:",

@@ -1,0 +1,27 @@
+// Monorepo root TSConfig: the shared base plus the settings that this repo adds. Packages extend this file.
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@williamthorsen/tsconfig/tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+
+    // Enable JSON imports.
+    "resolveJsonModule": true,
+    "sourceMap": true,
+
+    // TypeScript no longer includes ambient `@types` packages automatically, so a package that imports a
+    // `node:` builtin sees no declaration for it unless "node" is named here.
+    "types": ["node"],
+  },
+  "include": [
+    // This file covers only the monorepo root. Packages have their own tsconfig.json files that extend this one.
+    ".config/**/*.ts",
+    ".readyup/**/*.ts",
+    "__tests__/",
+    "config/",
+    "scripts/",
+    "*.ts",
+  ],
+}

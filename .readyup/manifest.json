@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "kits": [
+    {
+      "checklistChecks": [
+        {
+          "checklist": "default",
+          "checks": [
+            ".meta/label-map.json exists",
+            ".meta/label-map.json scopes match the workspace",
+            ".meta/label-map.json $schema matches the installed change-grammar"
+          ]
+        }
+      ],
+      "checklists": [
+        "default"
+      ],
+      "esbuildVersion": "0.28.2",
+      "inputs": [
+        {
+          "hash": "5a563562",
+          "kind": "module",
+          "path": "kits/default.ts"
+        },
+        {
+          "hash": "4284a857",
+          "kind": "module",
+          "path": "lib/label-map-drift.ts"
+        }
+      ],
+      "name": "default",
+      "path": "kits/default.js",
+      "readyupVersion": "0.44.0",
+      "source": "kits/default.ts",
+      "sourceHash": "5a563562",
+      "targetHash": "da842cef"
+    }
+  ]
+}

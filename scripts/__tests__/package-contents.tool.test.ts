@@ -10,7 +10,6 @@ import { describe, expect, it } from 'vitest';
  * matches by prefix, so an exact file path names itself and a directory names everything under it.
  */
 const requiredPaths: Readonly<Record<string, ReadonlyArray<string>>> = {
-  codeassembly: ['dist/esm/cli.js'],
   'codeassembly-guidance': ['content/codeassembly-content.yaml'],
 };
 

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://github.com/williamthorsen/node-monorepo-tools/raw/change-grammar-v0.3.0/packages/change-grammar/schemas/label-map.json",
+  "types": {
+    "feat": "feature",
+    "drop": "removal",
+    "deprecate": "deprecation",
+    "fix": "fix",
+    "sec": "security",
+    "perf": "performance",
+    "internal": "internal",
+    "refactor": "refactoring",
+    "tests": "tests",
+    "tooling": "tooling",
+    "ci": "ci",
+    "deps": "dependencies",
+    "ai": "ai",
+    "docs": "documentation",
+    "fmt": "formatting"
+  },
+  "scopes": {
+    "guidance": "scope:guidance",
+    "root": "scope:root"
+  }
+}

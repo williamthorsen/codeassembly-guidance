@@ -1,0 +1,58 @@
+{
+  "name": "codeassembly-guidance-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CodeAssembly guidance library monorepo",
+  "keywords": [
+    "agents",
+    "ai",
+    "monorepo"
+  ],
+  "homepage": "https://github.com/williamthorsen/codeassembly-guidance#readme",
+  "bugs": {
+    "url": "https://github.com/williamthorsen/codeassembly-guidance/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/williamthorsen/codeassembly-guidance.git"
+  },
+  "license": "ISC",
+  "author": "William Thorsen <william@thorsen.dev> (https://github.com/williamthorsen)",
+  "type": "module",
+  "scripts": {
+    "agents:install-launchers": "bash packages/guidance/scripts/install-launchers.sh",
+    "agents:sync": "codeassembly sync",
+    "bootstrap": "nmr build && pnpm run agents:sync",
+    "check:strict:post": "pnpm --filter codeassembly-guidance run check:content",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@typescript/native-preview": "7.0.0-dev.20260707.2",
+    "@vitest/coverage-v8": "5.0.5",
+    "@vitest/eslint-plugin": "1.6.28",
+    "@williamthorsen/eslint-config-typescript": "20.1.3",
+    "@williamthorsen/nmr": "catalog:",
+    "@williamthorsen/release-kit": "16.0.0",
+    "@williamthorsen/strict-lint": "14.2.1",
+    "@williamthorsen/toolbelt.errors": "catalog:",
+    "@williamthorsen/toolbelt.testing": "catalog:",
+    "@williamthorsen/toolbelt.vitest": "catalog:",
+    "@williamthorsen/tsconfig": "0.12.1",
+    "codeassembly": "catalog:",
+    "eslint": "catalog:",
+    "eslint-import-resolver-typescript": "4.4.5",
+    "lefthook": "2.2.1",
+    "prettier": "catalog:",
+    "readyup": "catalog:",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.72.1",
+    "v11y-check": "0.19.8",
+    "vite": "catalog:",
+    "vitest": "catalog:"
+  },
+  "packageManager": "pnpm@12.16.1",
+  "engines": {
+    "node": ">=24"
+  }
+}

@@ -1,0 +1,42 @@
+allowBuilds:
+  esbuild: true
+  lefthook: true
+  unrs-resolver: false
+
+catalog:
+  '@types/node': '24.19.2'
+  '@williamthorsen/change-grammar': '0.3.0'
+  '@williamthorsen/nmr': '0.53.1'
+  '@williamthorsen/toolbelt.errors': '0.9.0'
+  '@williamthorsen/toolbelt.terminal': '0.3.0'
+  '@williamthorsen/toolbelt.testing': '0.8.0'
+  '@williamthorsen/toolbelt.vitest': '0.13.0'
+  codeassembly: '0.20.0'
+  esbuild: '0.28.2'
+  eslint: '10.13.0'
+  happy-dom: '21.0.4'
+  prettier: '3.9.10'
+  readyup: '0.44.0'
+  vite: '8.3.5'
+  vitest: '5.0.5'
+  yaml: '2.9.1'
+  zod: '4.6.7'
+
+minimumReleaseAge: 1440 # 24h supply-chain soak (minutes)
+# Published by williamthorsen/codeassembly's CI and consumed here right after release.
+minimumReleaseAgeExclude:
+  - '@williamthorsen/kb'
+  - codeassembly
+
+packages:
+  - packages/*
+
+savePrefix: ''
+
+# Refuse a release whose provenance is weaker than that of an earlier release of the same package,
+# which can signal a compromised publisher.
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  # A 2023 backport of a ReDoS fix to the v6 line, published without provenance after 7.5.x had it;
+  # Babel, which eslint-plugin-react-hooks uses, requires semver ^6.
+  - semver@6.3.1

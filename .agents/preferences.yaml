@@ -1,0 +1,29 @@
+# yaml-language-server: $schema=../packages/guidance/src/schemas/preferences.v1.json
+artifacts:
+  base_dir: ~/ai-artifacts
+commit:
+  title_format: '[[{scope}|]{type}: ]{title}'
+editors:
+  - extensions: '*.md'
+    name: Webstorm
+    command: webstorm
+integrations:
+  jira:
+    enabled: false
+merge:
+  title_format: '[{ticket_ref} ][[{scope}|]{type}: ]{title}[ (#{pr_number})]'
+pr:
+  title_format: '[{ticket_ref} ]{title}'
+project:
+  audience: public
+  maturity: early
+  sensitivity: low
+  slug: codeassembly-guidance
+  ticket_ref_prefix: '#'
+repository:
+  default_remote:
+    name: origin
+    default_branch: main
+scm: github
+ticket:
+  title_format: '{title}'
