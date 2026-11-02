@@ -42,7 +42,7 @@ Each surfaced cluster takes one disposition:
 
 A ticket disposition names the repository that owns its target:
 
-- An artifact with a `<!-- codeassembly-` marker, or one in the CodeAssembly guidance library, belongs to the CodeAssembly repository, whose name the marker's provenance or the library's `Source:` line states.
+- An artifact with a `<!-- codeassembly-` marker, or one in the CodeAssembly guidance library, belongs to the CodeAssembly guidance repository (`williamthorsen/codeassembly-guidance`), whose name the marker's provenance or the library's `Source:` line states.
 - A project's `.agents/content` artifact belongs to that project's repository: Take it from the events' `repo` field, and confirm it with `gh repo view {repo} --json nameWithOwner`.
 - A new or undecided target belongs to the current repository.
 

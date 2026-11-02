@@ -2,7 +2,7 @@
 
 # codeassembly-guidance
 
-The CodeAssembly library of agent guidance: rulebooks, skills, and subagents for coding harnesses, which the [`codeassembly`](../agents/README.md) CLI deploys into Claude Code and Rovo Dev.
+The CodeAssembly library of agent guidance: rulebooks, skills, and subagents for coding harnesses, which the [`codeassembly`](https://github.com/williamthorsen/codeassembly/blob/main/packages/agents/README.md) CLI deploys into Claude Code and Rovo Dev.
 
 <!-- section:release-notes --><!-- /section:release-notes -->
 
@@ -13,13 +13,13 @@ A declaration names the library as a source and selects artifacts from it, usual
 ```yaml
 sources:
   - name: codeassembly-guidance
-    path: ~/repos/codeassembly/packages/guidance/content
+    path: ~/repos/codeassembly-guidance/packages/guidance/content
 collections:
   use:
     - recommended
 ```
 
-Then run `codeassembly install` and `codeassembly sync --global`. A project declares the same in its own `.agents/codeassembly.yaml` and runs `codeassembly sync`. [Project declaration](../agents/docs/project-declaration.md) documents the declaration format.
+Then run `codeassembly install` and `codeassembly sync --global`. A project declares the same in its own `.agents/codeassembly.yaml` and runs `codeassembly sync`. [Project declaration](https://github.com/williamthorsen/codeassembly/blob/main/packages/agents/docs/project-declaration.md) documents the declaration format.
 
 ## What the content contains
 

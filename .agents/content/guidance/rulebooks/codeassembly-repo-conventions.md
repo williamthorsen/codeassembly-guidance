@@ -1,11 +1,11 @@
 ---
 slug: codeassembly-repo-conventions
-description: Conventions for authoring content in the CodeAssembly repository itself -- the library's own tests, collection dispositions, sweep doctrine, skill-local reinforcement, model declarations, and artifact naming.
+description: Conventions for authoring content in the CodeAssembly guidance repository itself -- the library's own tests, collection dispositions, sweep doctrine, skill-local reinforcement, model declarations, and artifact naming.
 delivery: skill
 version: '3'
 ---
 
-# CodeAssembly repository conventions
+# CodeAssembly guidance repository conventions
 
 These conventions supplement {rulebook:codeassembly-content-specification}, the contract for any content root, with the doctrine that applies to the library in this repository. A path below is relative to the library's content root, `packages/guidance/content/`.
 

@@ -60,7 +60,7 @@ Decide the mode, and give its reason in one sentence:
 - **An existing rule states the lesson**: `strengthen`, `relocate`, or `illustrate` it, per "Choosing a kind" in the content specification.
 - **The guidance does not state it**: a new artifact, `new {kind} in {content root}`, with the kind and the content root chosen per the same section.
 
-Decide which repository owns the target. A file with a `<!-- codeassembly-` marker, or a file in the CodeAssembly guidance library, belongs to the CodeAssembly repository, per [deployed-file provenance](../_data/deployed-file-provenance.md); a project's `.agents/content` file or `AGENTS.md` belongs to that project's repository. When the owner is not the current repository, do not edit the file: Offer to file the lesson there with {skill:create-ticket} `--repo {repo}`, and stop.
+Decide which repository owns the target. A file with a `<!-- codeassembly-` marker, or a file in the CodeAssembly guidance library, belongs to the CodeAssembly guidance repository (`williamthorsen/codeassembly-guidance`), per [deployed-file provenance](../_data/deployed-file-provenance.md); a project's `.agents/content` file or `AGENTS.md` belongs to that project's repository. When the owner is not the current repository, do not edit the file: Offer to file the lesson there with {skill:create-ticket} `--repo {repo}`, and stop.
 
 Present the placement: the lesson, the mode and its reason, and the target file or the new artifact's path. Ask for confirmation before drafting.
 
