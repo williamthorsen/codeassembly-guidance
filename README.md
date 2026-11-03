@@ -16,7 +16,7 @@ pnpm install && pnpm run bootstrap
 
 ## Deploying from a clone
 
-A developer machine deploys guidance from this repository's `live` worktree; see [Deploying guidance from the live worktree](docs/live-deployment.md).
+A developer machine deploys guidance from this repository's `live` worktree, and a consumer machine from its main clone on `main`; see [Deploying guidance with codeassembly-sync-live](docs/live-deployment.md).
 
 ## For AI agents
 
