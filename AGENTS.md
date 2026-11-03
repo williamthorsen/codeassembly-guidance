@@ -20,7 +20,7 @@ Content appearing identically in two or more skill or subagent files belongs in 
 
 ## Deployment
 
-A developer machine deploys guidance from this repository's `live` worktree with `codeassembly-sync-live`; see `docs/live-deployment.md`.
+A machine deploys guidance with `codeassembly-sync-live`: A developer machine from this repository's `live` worktree, a consumer machine from its main clone on `main`; see `docs/live-deployment.md`.
 
 ## Gotchas
 
