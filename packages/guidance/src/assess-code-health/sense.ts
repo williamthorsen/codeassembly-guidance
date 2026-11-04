@@ -6,7 +6,7 @@ import path from 'node:path';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { buildLogArgs, computeCoChange, computeHotspots, parseNumstatLog } from './git-history.ts';
-import type { SenseDocument, SensorResult } from './schemas.ts';
+import { buildSensorResult, type SenseDocument, type SensorResult } from './schemas.ts';
 import { parseCoverageSummary, parseJunit } from './test-reports.ts';
 
 /** A repository check that `sense` runs through the shell, such as a linter or a typecheck. */
@@ -91,14 +91,14 @@ export function runSense(options: SenseOptions, dependencies: SenseDependencies)
       commits.flatMap((change) => change.files).filter((file) => tracked.has(file)),
     );
     sensors.push(
-      buildResult('hotspots', gitVersion, 'ok', null, null, computeHotspots(commits, lineCounts)),
-      buildResult('co-change', gitVersion, 'ok', null, null, computeCoChange(commits, tracked)),
+      buildSensorResult('hotspots', gitVersion, 'ok', null, null, computeHotspots(commits, lineCounts)),
+      buildSensorResult('co-change', gitVersion, 'ok', null, null, computeCoChange(commits, tracked)),
     );
   } catch (error) {
     const detail = describeError(error);
     sensors.push(
-      buildResult('hotspots', gitVersion, 'failed', detail, null, null),
-      buildResult('co-change', gitVersion, 'failed', detail, null, null),
+      buildSensorResult('hotspots', gitVersion, 'failed', detail, null, null),
+      buildSensorResult('co-change', gitVersion, 'failed', detail, null, null),
     );
   }
 
@@ -114,18 +114,6 @@ export function runSense(options: SenseOptions, dependencies: SenseDependencies)
 }
 
 // region | Helpers
-
-/** Builds one sensor result. */
-function buildResult(
-  name: string,
-  version: string | null,
-  status: SensorResult['status'],
-  detail: string | null,
-  outputPath: string | null,
-  data: unknown,
-): SensorResult {
-  return { name, version, status, detail, outputPath, data };
-}
 
 /** Counts the lines of each file that is present on disk, keyed by its repository-relative path. */
 function countLines(root: string, files: readonly string[]): Map<string, number> {
@@ -156,12 +144,12 @@ function readReport(
   root: string,
   parse: (text: string) => unknown,
 ): SensorResult {
-  if (file === undefined) return buildResult(name, null, 'not-applicable', 'no report was given', null, null);
+  if (file === undefined) return buildSensorResult(name, null, 'not-applicable', 'no report was given', null, null);
   const absolute = path.resolve(root, file);
   try {
-    return buildResult(name, null, 'ok', null, absolute, parse(readFileSync(absolute, 'utf8')));
+    return buildSensorResult(name, null, 'ok', null, absolute, parse(readFileSync(absolute, 'utf8')));
   } catch (error) {
-    return buildResult(name, null, 'failed', describeError(error), absolute, null);
+    return buildSensorResult(name, null, 'failed', describeError(error), absolute, null);
   }
 }
 
@@ -172,11 +160,11 @@ function readReport(
 function runCheckSensor(check: CheckSpec, root: string, outDir: string, dependencies: SenseDependencies): SensorResult {
   const logPath = path.join(outDir, `${check.name}.log`);
   const outcome = dependencies.runCheck(check.command, root, logPath);
-  if ('spawnError' in outcome) return buildResult(check.name, null, 'failed', outcome.spawnError, logPath, null);
+  if ('spawnError' in outcome) return buildSensorResult(check.name, null, 'failed', outcome.spawnError, logPath, null);
   if (outcome.exitCode === 126 || outcome.exitCode === 127) {
-    return buildResult(check.name, null, 'failed', `the shell exited ${outcome.exitCode}`, logPath, null);
+    return buildSensorResult(check.name, null, 'failed', `the shell exited ${outcome.exitCode}`, logPath, null);
   }
-  return buildResult(check.name, null, 'ok', null, logPath, { exitCode: outcome.exitCode });
+  return buildSensorResult(check.name, null, 'ok', null, logPath, { exitCode: outcome.exitCode });
 }
 
 // endregion | Helpers

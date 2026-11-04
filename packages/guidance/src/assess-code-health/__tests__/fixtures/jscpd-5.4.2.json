@@ -1,0 +1,43 @@
+{
+  "duplicates": [
+    {
+      "firstFile": {
+        "end": 131,
+        "endLoc": {
+          "column": 8,
+          "line": 131,
+          "position": 5438
+        },
+        "name": "/repo/packages/guidance/src/assess-code-health/sense.ts",
+        "start": 113,
+        "startLoc": {
+          "column": 79,
+          "line": 113,
+          "position": 5018
+        }
+      },
+      "format": "typescript",
+      "fragment": "…",
+      "isNew": false,
+      "kind": "exact",
+      "lines": 19,
+      "secondFile": {
+        "end": 154,
+        "endLoc": {
+          "column": 8,
+          "line": 154,
+          "position": 5655
+        },
+        "name": "/repo/packages/guidance/src/assess-code-health/structural-sensors.ts",
+        "start": 138,
+        "startLoc": {
+          "column": 3,
+          "line": 138,
+          "position": 5267
+        }
+      },
+      "tokens": 59
+    }
+  ],
+  "statistics": {}
+}
