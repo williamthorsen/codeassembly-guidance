@@ -1,8 +1,8 @@
 ---
 slug: cli-conventions
-description: 'How a command-line tool talks to its user: subcommands and options, standard option names, configuration, writing modes, help on every command, exit codes, error messages, JSON output, progress and outcome reports, check results, color, the split of logic from presentation, and help topics. Consult before writing or changing any command-line tool, in any language.'
+description: 'How a command-line tool talks to its user: subcommands and options, standard option names, configuration, writing modes, help on every command, exit codes, error messages, unexpected crashes, JSON output, progress and outcome reports, check results, color, the split of logic from presentation, and help topics. Consult before writing or changing any command-line tool, in any language.'
 delivery: skill
-version: '5'
+version: '6'
 ---
 
 # CLI conventions
@@ -123,6 +123,21 @@ Example, for a command that needs an access token:
 
 - ❌ `<bin> publish --token <value>`
 - ✅ `<bin> publish --token-file <path>`, or the token piped to `<bin> publish --token-stdin`
+
+## Unexpected crashes
+
+An unexpected crash is a bug in the tool, as opposed to a failure that the tool anticipated and reports as an error message.
+
+- **A last-resort handler reports a crash as `<bin>: internal error: <message>` on stderr, followed by the stack frames.** The prefix follows "Error messages", and `internal error` tells the reader that the fault is the tool's.
+- **The stack frames are always printed, not only under a debug flag.** A crash may not reproduce, and the stack frames are where a bug report starts.
+- **A thrown value that is not an error is reported by its string form**, without stack frames, because it does not have any.
+- **A crash exits 1**, as "Any other failure while running" in the exit-code table states.
+- **A handled error never takes the crash shape, and a crash never takes the shape of a handled error**, so that a reader can tell a bug in the tool from a mistake in their own input.
+
+Example, for a crash caused by reading a property of an undefined value:
+
+- ❌ `Error: Cannot read properties of undefined (reading 'name')`, which reads as a handled error
+- ✅ `<bin>: internal error: Cannot read properties of undefined (reading 'name')`, followed by the stack frames
 
 ## JSON output
 
