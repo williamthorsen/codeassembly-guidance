@@ -128,9 +128,9 @@ Example, for a command that needs an access token:
 
 An unexpected crash is a bug in the tool, as opposed to a failure that the tool anticipated and reports as an error message.
 
-- **A last-resort handler reports a crash as `<bin>: internal error: <message>` on stderr, followed by the stack trace.** The prefix follows "Error messages", and `internal error` tells the reader that the fault is the tool's.
-- **The stack trace is always printed, not only under a debug flag.** A crash may not reproduce, and the stack trace is where a bug report starts.
-- **A thrown value that is not an error is reported by its string form**, without a stack trace, because it does not have one.
+- **A last-resort handler reports a crash as `<bin>: internal error: <message>` on stderr, followed by the stack frames.** The prefix follows "Error messages", and `internal error` tells the reader that the fault is the tool's.
+- **The stack frames are always printed, not only under a debug flag.** A crash may not reproduce, and the stack frames are where a bug report starts.
+- **A thrown value that is not an error is reported by its string form**, without stack frames, because it does not have any.
 - **A crash exits 1**, as "Any other failure while running" in the exit-code table states.
 - **A handled error never takes the crash shape, and a crash never takes the shape of a handled error**, so that a reader can tell a bug in the tool from a mistake in their own input.
 
