@@ -31,10 +31,14 @@ export interface SenseOptions {
 /** The outcome of one check command: its exit code, or the reason that it could not be spawned. */
 export type CheckOutcome = { exitCode: number } | { spawnError: string };
 
+/** The outcome of one tool run: its exit code and captured output, or the reason that it could not be spawned. */
+export type ToolOutcome = { exitCode: number; stdout: string; stderr: string } | { spawnError: string };
+
 /** The processes that `sense` starts, injected so that tests can supply fixtures. */
 export interface SenseDependencies {
   git(args: readonly string[], cwd: string): string;
   runCheck(command: string, cwd: string, logPath: string): CheckOutcome;
+  runTool(command: string, args: readonly string[], cwd: string): ToolOutcome;
 }
 
 /** Sensor names that a check may not take, because the built-in sensors use them. */
@@ -57,6 +61,11 @@ export const realSenseDependencies: SenseDependencies = {
     } finally {
       closeSync(fd);
     }
+  },
+  runTool(command, args, cwd) {
+    const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1_024 * 1_024 });
+    if (result.error !== undefined) return { spawnError: describeError(result.error) };
+    return { exitCode: result.status ?? 1, stdout: result.stdout, stderr: result.stderr };
   },
 };
 
