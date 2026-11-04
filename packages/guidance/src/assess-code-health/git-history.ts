@@ -14,6 +14,8 @@ export interface HotspotRow {
   lines: number;
   score: number;
   rank: number;
+  /** The files in the unit that import this one, or null when the dependency graph does not list it. */
+  importers: number | null;
 }
 
 /** A pair of files that changed together in the same commits. */
@@ -46,6 +48,11 @@ export const DEFAULT_EXCLUDE_PATHSPECS: readonly string[] = [
   ].map((name) => `:(exclude,glob)**/${name}`),
 ];
 
+/** The pathspecs that leave out the default exclusions and each `--exclude` glob. */
+export function buildExcludePathspecs(excludeGlobs: readonly string[]): string[] {
+  return [...DEFAULT_EXCLUDE_PATHSPECS, ...excludeGlobs.map((glob) => `:(exclude,glob)${glob}`)];
+}
+
 /** The `git log` arguments that `parseNumstatLog` reads, restricted to the unit and the exclusions. */
 export function buildLogArgs(unit: string, windowDays: number, excludeGlobs: readonly string[]): string[] {
   return [
@@ -56,8 +63,7 @@ export function buildLogArgs(unit: string, windowDays: number, excludeGlobs: rea
     `--format=tformat:${COMMIT_MARKER}%x09%H%x09%cI`,
     '--',
     unit,
-    ...DEFAULT_EXCLUDE_PATHSPECS,
-    ...excludeGlobs.map((glob) => `:(exclude,glob)${glob}`),
+    ...buildExcludePathspecs(excludeGlobs),
   ];
 }
 
@@ -88,13 +94,13 @@ export function computeCoChange(commits: readonly CommitChanges[], existing: Rea
 export function computeHotspots(
   commits: readonly CommitChanges[],
   lineCounts: ReadonlyMap<string, number>,
-): HotspotRow[] {
+): Array<Omit<HotspotRow, 'importers'>> {
   const commitCounts = new Map<string, number>();
   for (const { files } of filterBulkCommits(commits)) {
     const unique = new Set(files);
     for (const file of unique) commitCounts.set(file, (commitCounts.get(file) ?? 0) + 1);
   }
-  const rows: Array<Omit<HotspotRow, 'rank'>> = [];
+  const rows: Array<Omit<HotspotRow, 'importers' | 'rank'>> = [];
   for (const [path, count] of commitCounts) {
     const lines = lineCounts.get(path);
     if (lines !== undefined) rows.push({ path, commits: count, lines, score: count * lines });

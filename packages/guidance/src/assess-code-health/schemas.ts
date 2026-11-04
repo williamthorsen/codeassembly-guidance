@@ -62,6 +62,18 @@ export const ProposalSchema = z.strictObject({
 
 export const ProposalsSchema = z.array(ProposalSchema);
 
+/** Builds one sensor result. */
+export function buildSensorResult(
+  name: string,
+  version: string | null,
+  status: SensorResult['status'],
+  detail: string | null,
+  outputPath: string | null,
+  data: unknown,
+): SensorResult {
+  return { name, version, status, detail, outputPath, data };
+}
+
 export type Evidence = z.infer<typeof EvidenceSchema>;
 export type Proposal = z.infer<typeof ProposalSchema>;
 export type SenseDocument = z.infer<typeof SenseDocumentSchema>;

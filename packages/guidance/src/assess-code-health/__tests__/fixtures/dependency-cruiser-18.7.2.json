@@ -1,0 +1,122 @@
+{
+  "modules": [
+    {
+      "source": "packages/guidance/src/assess-code-health/cli.ts",
+      "dependencies": [
+        {
+          "module": "../lib/is-entry-point.js",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["local", "require"],
+          "resolved": "packages/guidance/src/lib/is-entry-point.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../lib/parse-flags.js",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["local", "require"],
+          "resolved": "packages/guidance/src/lib/parse-flags.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "../triage-spike-findings/labels.js",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["local", "require"],
+          "resolved": "packages/guidance/src/triage-spike-findings/labels.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "packages/guidance/src/assess-code-health/__tests__/check-evidence.unit.test.ts",
+        "packages/guidance/src/assess-code-health/__tests__/cli.unit.test.ts",
+        "packages/guidance/src/assess-code-health/__tests__/sense.tool.test.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "packages/guidance/src/assess-code-health/sense.ts",
+      "dependencies": [
+        {
+          "module": "./git-history.js",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["local", "require"],
+          "resolved": "packages/guidance/src/assess-code-health/git-history.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "./test-reports.js",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["local", "require"],
+          "resolved": "packages/guidance/src/assess-code-health/test-reports.ts",
+          "coreModule": false,
+          "followable": true,
+          "couldNotResolve": false,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        },
+        {
+          "module": "@williamthorsen/toolbelt.errors",
+          "moduleSystem": "cjs",
+          "dynamic": false,
+          "exoticallyRequired": false,
+          "dependencyTypes": ["unknown"],
+          "resolved": "@williamthorsen/toolbelt.errors",
+          "coreModule": false,
+          "followable": false,
+          "couldNotResolve": true,
+          "matchesDoNotFollow": false,
+          "circular": false,
+          "valid": true
+        }
+      ],
+      "dependents": [
+        "packages/guidance/src/assess-code-health/cli.ts",
+        "packages/guidance/src/assess-code-health/test-utils/build-context.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    },
+    {
+      "source": "packages/guidance/src/assess-code-health/git-history.ts",
+      "dependencies": [],
+      "dependents": [
+        "packages/guidance/src/assess-code-health/sense.ts",
+        "packages/guidance/src/assess-code-health/__tests__/git-history.unit.test.ts"
+      ],
+      "orphan": false,
+      "valid": true
+    }
+  ],
+  "summary": {}
+}

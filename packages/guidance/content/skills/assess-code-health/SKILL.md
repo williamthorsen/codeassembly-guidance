@@ -43,7 +43,7 @@ node {harness_home_dir}/skills/assess-code-health/assess-code-health.mjs sense -
   --coverage-summary {summary path} --junit {junit path} --exclude {glob}
 ```
 
-Omit `--coverage-summary` or `--junit` when the test command cannot write that report; the sensor is then recorded as not applicable. A sensor that fails is recorded with its reason and does not stop the run.
+Omit `--coverage-summary` or `--junit` when the test command cannot write that report; the sensor is then recorded as not applicable. A sensor that fails is recorded with its reason and does not stop the run. The dead-code, duplication, and dependency-graph sensors run on every invocation from the project's copy of each tool, or through `pnpm dlx` with registry access; the helper doc states how each one decides its status.
 
 ### 2. Write the brief
 
@@ -53,13 +53,13 @@ Compose the brief with these sections:
 2. **Reference points.** The reuse-candidate directory and the library inventory. Take the directory from the implementation guidance spliced below when it names one. The inventory is the repository's declared dependencies plus any library that the guidance names.
 3. **Lenses.** Five, each with its name, its slug, its ID prefix, its subject, the rulebooks that it reads by path, and its proposal cap (10 by default):
 
-   | Lens                                | Slug          | Prefix | Subject                                                                                                                                |
-   | ----------------------------------- | ------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-   | Convention conformance              | `conventions` | `C`    | What the linters miss, cited by rulebook path, section, and quoted sentence                                                            |
-   | Structure                           | `structure`   | `S`    | Smells with a metric attached, and coupling from the co-change pairs                                                                   |
-   | Extraction                          | `extraction`  | `X`    | Code duplicated across packages, code that belongs in the reuse-candidate directory, and code equivalent to a library in the inventory |
-   | Error handling and input validation | `errors`      | `E`    | Statically evidenced patterns only; performance is out of scope                                                                        |
-   | Tests                               | `tests`       | `T`    | Coverage intersected with hotspots, duration outliers, duplicated setup, and tests below the bar of the testing conventions            |
+   | Lens                                | Slug          | Prefix | Subject                                                                                                                                                                   |
+   | ----------------------------------- | ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | Convention conformance              | `conventions` | `C`    | What the linters miss, cited by rulebook path, section, and quoted sentence                                                                                               |
+   | Structure                           | `structure`   | `S`    | Smells with a metric attached, dead code from `dead-code`, and coupling from the co-change pairs and `dependency-graph`                                                   |
+   | Extraction                          | `extraction`  | `X`    | Code duplicated within the unit or across packages (`duplication`), code that belongs in the reuse-candidate directory, and code equivalent to a library in the inventory |
+   | Error handling and input validation | `errors`      | `E`    | Statically evidenced patterns only; performance is out of scope                                                                                                           |
+   | Tests                               | `tests`       | `T`    | Coverage intersected with hotspots, duration outliers, duplicated setup, and tests below the bar of the testing conventions                                               |
 
    List the deployed rulebooks and guidance skills under `{harness_home_dir}/skills/`, and the guidance spliced below, and assign each to the lenses whose subject it governs: the testing conventions to tests, layout and language preferences to conventions and extraction, and every code rulebook to conventions. Name each by its absolute path.
 

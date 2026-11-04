@@ -36,15 +36,20 @@ interface SenseDocument {
 }
 ```
 
-| Sensor      | Source                                         | `data` rows                                |
-| ----------- | ---------------------------------------------- | ------------------------------------------ |
-| `hotspots`  | `git log --numstat` over the window            | `{ path, commits, lines, score, rank }`    |
-| `co-change` | the same log                                   | `{ a, b, commits }`                        |
-| `coverage`  | an istanbul `json-summary` file                | `{ path, lines, branches, functions }` (%) |
-| `timings`   | a JUnit XML file                               | `{ file, name, durationMs }`, slowest 100  |
-| each check  | the command's exit code, logged beside `--out` | `{ exitCode }`                             |
+| Sensor             | Source                                         | `data` rows                                                                      |
+| ------------------ | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| `hotspots`         | `git log --numstat` over the window            | `{ path, commits, lines, score, rank, importers }`                               |
+| `co-change`        | the same log                                   | `{ a, b, commits }`                                                              |
+| `coverage`         | an istanbul `json-summary` file                | `{ path, lines, branches, functions }` (%)                                       |
+| `timings`          | a JUnit XML file                               | `{ file, name, durationMs }`, slowest 100                                        |
+| `dead-code`        | knip                                           | `{ path, kind, name, line }`; `kind` is knip's issue type                        |
+| `duplication`      | jscpd                                          | `{ lines, tokens, a, b }`, each side `{ path, startLine, endLine }`, largest 100 |
+| `dependency-graph` | dependency-cruiser                             | `{ path, importers, imports }`, each a list of paths                             |
+| each check         | the command's exit code, logged beside `--out` | `{ exitCode }`                                                                   |
 
 The history sensors leave out lockfiles, `package.json` manifests, paths that `.gitattributes` marks `linguist-generated`, the `--exclude` globs, and commits that touch more than 50 files. A hotspot's score is its commits in the window times its current line count; a file deleted at `HEAD` is dropped. A co-change pair needs three shared commits. A check that exits non-zero is `ok`, since its output is evidence; one that the shell cannot find or run is `failed`. An absent report flag makes its sensor `not-applicable`, and an unreadable report makes it `failed`.
+
+The structural sensors, `dead-code`, `duplication`, and `dependency-graph`, run on every `sense`. Each one runs the project's copy of its tool from `node_modules/.bin` when the root has one, and otherwise the release that `src/assess-code-health/structural-sensors.ts` pins, through `pnpm dlx` with its cache under the temporary directory; `version` is the version that ran, or null when the project's copy does not report one. A row names only a file that is tracked under the unit and not excluded as above, except that a `dead-code` row of an unused dependency names the `package.json` under the unit that declares it. All paths are relative to the root, and a hotspot's `importers` counts the graph's `importers` of that file, null when the graph does not list it or is not `ok`. `dead-code` and `dependency-graph` are `not-applicable` for a unit without JavaScript or TypeScript files, and `duplication` for a unit without files. A tool that exits non-zero with output that parses is `ok`; one that cannot spawn, or whose output does not parse, is `failed`, with stderr's start in `detail`. `outputPath` names the tool's raw output.
 
 ## Proposals
 

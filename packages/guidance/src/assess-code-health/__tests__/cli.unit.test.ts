@@ -9,6 +9,7 @@ describe('runCli', () => {
     ['sense without --unit', ['sense', '--out', 'o.json']],
     ['a check without a name', ['sense', '--unit', 'u', '--out', 'o.json', '--check', '=lint']],
     ['a reserved check name', ['sense', '--unit', 'u', '--out', 'o.json', '--check', 'hotspots=x']],
+    ['a structural sensor name', ['sense', '--unit', 'u', '--out', 'o.json', '--check', 'dead-code=x']],
     ['a repeated check name', ['sense', '--unit', 'u', '--out', 'o.json', '--check', 'a=x', '--check', 'a=y']],
     ['a non-numeric window', ['sense', '--unit', 'u', '--out', 'o.json', '--window', 'soon']],
     ['a repeated single-value flag', ['sense', '--unit', 'u', '--unit', 'v', '--out', 'o.json']],

@@ -39,8 +39,8 @@ describe('sense', () => {
     expect(result).toMatchObject({ ok: true });
     const document = SenseDocumentSchema.parse(JSON.parse(readFileSync(out, 'utf8')));
     expect(findSensor(document, 'hotspots').data).toEqual([
-      { path: 'pkg/a.ts', commits: 3, lines: 4, score: 12, rank: 1 },
-      { path: 'pkg/b.ts', commits: 3, lines: 1, score: 3, rank: 2 },
+      { path: 'pkg/a.ts', commits: 3, lines: 4, score: 12, rank: 1, importers: null },
+      { path: 'pkg/b.ts', commits: 3, lines: 1, score: 3, rank: 2, importers: null },
     ]);
     expect(findSensor(document, 'co-change').data).toEqual([{ a: 'pkg/a.ts', b: 'pkg/b.ts', commits: 3 }]);
     expect(findSensor(document, 'coverage').status).toBe('not-applicable');
@@ -69,6 +69,47 @@ describe('sense', () => {
     expect(findSensor(document, 'lint')).toMatchObject({ status: 'ok', data: { exitCode: 3 } });
     expect(readFileSync(path.join(scratch, 'out', 'lint.log'), 'utf8')).toBe('found\n');
     expect(findSensor(document, 'gone').status).toBe('failed');
+  });
+
+  it('records each structural sensor that cannot spawn as failed and still writes the document', async () => {
+    const out = path.join(scratch, 'out', 'sense.json');
+
+    const result = await runCli(['sense', '--unit', 'pkg', '--out', out], buildContext(scratch));
+
+    expect(result).toMatchObject({ ok: true });
+    const document = SenseDocumentSchema.parse(JSON.parse(readFileSync(out, 'utf8')));
+    for (const name of ['dead-code', 'duplication', 'dependency-graph']) {
+      expect(findSensor(document, name).status).toBe('failed');
+    }
+    expect(findSensor(document, 'hotspots').status).toBe('ok');
+  });
+
+  it('counts the importers of each hotspot from the dependency graph, over tracked, non-excluded files only', async () => {
+    const out = path.join(scratch, 'out', 'sense.json');
+    const graph = {
+      modules: [
+        { source: 'pkg/a.ts', dependencies: [], dependents: ['pkg/b.ts', 'pkg/gen.ts'] },
+        { source: 'pkg/b.ts', dependencies: [{ resolved: 'pkg/a.ts' }], dependents: [] },
+      ],
+    };
+
+    await runCli(
+      ['sense', '--unit', 'pkg', '--out', out],
+      buildContext(scratch, {
+        sense: {
+          runTool: (_command, args) =>
+            args.includes('depcruise')
+              ? { exitCode: 0, stdout: JSON.stringify(graph), stderr: '' }
+              : { spawnError: 'not under test' },
+        },
+      }),
+    );
+
+    const document = SenseDocumentSchema.parse(JSON.parse(readFileSync(out, 'utf8')));
+    expect(findSensor(document, 'hotspots').data).toEqual([
+      expect.objectContaining({ path: 'pkg/a.ts', importers: 1 }),
+      expect.objectContaining({ path: 'pkg/b.ts', importers: 0 }),
+    ]);
   });
 
   /** Runs git in the scratch repository with a fixed author. */

@@ -14,7 +14,7 @@ Your dispatch contains four scalars:
 
 - **`brief`**: The path of the code-health brief. Read it in full before your first step.
 - **`lens`**: The name of your lens, as the brief's lens table writes it.
-- **`sense`**: The path of the sense document: the unit's hotspots, co-change pairs, coverage, test timings, and the results of the repository's own checks, each with its status. The `outputPath` of a check names its log.
+- **`sense`**: The path of the sense document: the unit's hotspots with their importer counts, co-change pairs, coverage, test timings, dead code, clone pairs, dependency graph, and the results of the repository's own checks, each with its status. The `outputPath` of a check names its log.
 - **`output`**: Your evidence directory. It exists.
 
 From the brief, take your lens's row: its ID prefix, its subject, the rulebooks that it reads by path, and its proposal cap. Take the unit, the exclusions, the reuse-candidate directory, and the library inventory. Everything that the brief marks settled is settled: Do not re-decide the unit, the lenses, or the caps.
