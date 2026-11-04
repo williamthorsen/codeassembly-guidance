@@ -148,6 +148,25 @@ describe('runStructuralSensors', () => {
     expect(graph).toBeUndefined();
   });
 
+  it('records duplication as failed when jscpd writes no report, whatever an earlier run left', () => {
+    const staleDir = path.join(root, 'out', 'jscpd');
+    mkdirSync(staleDir, { recursive: true });
+    writeFileSync(
+      path.join(staleDir, 'jscpd-report.json'),
+      readFixtureText('jscpd-5.4.2.json').replaceAll('/repo/', () => `${root}/`),
+    );
+    const { results } = runStructuralSensors(
+      buildOptions(),
+      buildDependencies((command, args) =>
+        args.includes('jscpd')
+          ? { exitCode: 1, stdout: '', stderr: 'jscpd crashed' }
+          : answerWithFixtures(command, args),
+      ),
+    );
+
+    expect(findResult(results, 'duplication')).toMatchObject({ status: 'failed', data: null });
+  });
+
   /** Builds options over the fixture paths, rooted at the scratch directory. */
   function buildOptions(
     overrides: { unit?: string; analyzable?: string[]; unitTracked?: string[] } = {},

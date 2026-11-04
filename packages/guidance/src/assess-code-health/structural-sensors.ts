@@ -1,5 +1,5 @@
 /** The dead-code, duplication, and dependency-graph sensors, which run third-party tools over the unit. */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -74,6 +74,8 @@ interface ToolSpec<Row> {
   pinnedVersion: string;
   needsScript: boolean;
   buildArgs(options: StructuralOptions): string[];
+  /** Removes the output of an earlier run, so that a run that writes none fails to parse. */
+  prepare?(options: StructuralOptions): void;
   /** Returns the path of the raw output, writing it from stdout when the tool does not write a file itself. */
   saveOutput(stdout: string, options: StructuralOptions): string;
   parse(json: unknown, options: StructuralOptions): Row[];
@@ -129,6 +131,7 @@ const DUPLICATION_TOOL: ToolSpec<DuplicationRow> = {
     '--absolute',
     ...(excludeGlobs.length > 0 ? ['--ignore', excludeGlobs.join(',')] : []),
   ],
+  prepare: ({ outDir }) => rmSync(path.join(outDir, 'jscpd'), { recursive: true, force: true }),
   saveOutput: (_stdout, { outDir }) => path.join(outDir, 'jscpd', 'jscpd-report.json'),
   parse: (json, options) => filterDuplication(parseJscpdReport(json, options.root), options.analyzable),
 };
@@ -212,6 +215,7 @@ function runStructuralTool<Row>(
   const useProject = existsSync(projectBin);
   const version = useProject ? readProjectVersion(projectBin, root, dependencies) : tool.pinnedVersion;
   const toolArgs = tool.buildArgs(options);
+  tool.prepare?.(options);
   const outcome = useProject
     ? dependencies.runTool(projectBin, toolArgs, root)
     : dependencies.runTool('pnpm', buildDlxArgs(tool, toolArgs), root);
