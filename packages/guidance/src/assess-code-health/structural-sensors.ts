@@ -50,15 +50,24 @@ export interface StructuralOptions {
   excludeGlobs: readonly string[];
 }
 
+/** The structural sensors' results, and the graph rows when the dependency-graph sensor is `ok`. */
+export interface StructuralResults {
+  results: SensorResult[];
+  graph: GraphRow[] | undefined;
+}
+
 /** Runs the three structural sensors. Each one that fails or does not apply is recorded and does not stop the others. */
-export function runStructuralSensors(options: StructuralOptions, dependencies: SenseDependencies): SensorResult[] {
-  return TOOLS.map((tool) => runStructuralTool(tool, options, dependencies));
+export function runStructuralSensors(options: StructuralOptions, dependencies: SenseDependencies): StructuralResults {
+  const deadCode = runStructuralTool(DEAD_CODE_TOOL, options, dependencies);
+  const duplication = runStructuralTool(DUPLICATION_TOOL, options, dependencies);
+  const graph = runStructuralTool(DEPENDENCY_GRAPH_TOOL, options, dependencies);
+  return { results: [deadCode.result, duplication.result, graph.result], graph: graph.rows };
 }
 
 // region | Helpers
 
 /** How one sensor runs its tool and reads the result. */
-interface ToolSpec {
+interface ToolSpec<Row> {
   name: (typeof STRUCTURAL_SENSOR_NAMES)[number];
   bin: string;
   packages: readonly string[];
@@ -67,68 +76,68 @@ interface ToolSpec {
   buildArgs(options: StructuralOptions): string[];
   /** Returns the path of the raw output, writing it from stdout when the tool does not write a file itself. */
   saveOutput(stdout: string, options: StructuralOptions): string;
-  parse(json: unknown, options: StructuralOptions): unknown;
+  parse(json: unknown, options: StructuralOptions): Row[];
 }
 
 const SCRIPT_PATTERN = /\.[cm]?[jt]sx?$/;
 
 const STDERR_EXCERPT_LENGTH = 500;
 
-const TOOLS: readonly ToolSpec[] = [
-  {
-    name: 'dead-code',
-    bin: 'knip',
-    packages: [`knip@${KNIP_VERSION}`],
-    pinnedVersion: KNIP_VERSION,
-    needsScript: true,
-    buildArgs: () => ['--reporter', 'json', '--no-progress', '--no-exit-code'],
-    saveOutput: (stdout, { outDir }) => writeOutput(outDir, 'dead-code.json', stdout),
-    parse: (json, options) => filterDeadCode(parseKnipReport(json, options.root), options),
-  },
-  {
-    name: 'duplication',
-    bin: 'jscpd',
-    packages: [`jscpd@${JSCPD_VERSION}`],
-    pinnedVersion: JSCPD_VERSION,
-    needsScript: false,
-    buildArgs: ({ unit, outDir, excludeGlobs }) => [
-      unit,
-      '--reporters',
-      'json',
-      '--output',
-      path.join(outDir, 'jscpd'),
-      '--silent',
-      '--absolute',
-      ...(excludeGlobs.length > 0 ? ['--ignore', excludeGlobs.join(',')] : []),
-    ],
-    saveOutput: (_stdout, { outDir }) => path.join(outDir, 'jscpd', 'jscpd-report.json'),
-    parse: (json, options) => filterDuplication(parseJscpdReport(json, options.root), options.analyzable),
-  },
-  {
-    name: 'dependency-graph',
-    bin: 'depcruise',
-    packages: [`dependency-cruiser@${DEPENDENCY_CRUISER_VERSION}`, `typescript@${TYPESCRIPT_VERSION}`],
-    pinnedVersion: DEPENDENCY_CRUISER_VERSION,
-    needsScript: true,
-    buildArgs: ({ root, unit }) => [
-      unit,
-      '--output-type',
-      'json',
-      '--no-config',
-      '--do-not-follow',
-      'node_modules',
-      ...findTsConfig(root, unit),
-    ],
-    saveOutput: (stdout, { outDir }) => writeOutput(outDir, 'dependency-graph.json', stdout),
-    parse: (json, options) => filterGraph(parseDependencyCruiserReport(json, options.root), options.analyzable),
-  },
-];
+const DEAD_CODE_TOOL: ToolSpec<DeadCodeRow> = {
+  name: 'dead-code',
+  bin: 'knip',
+  packages: [`knip@${KNIP_VERSION}`],
+  pinnedVersion: KNIP_VERSION,
+  needsScript: true,
+  buildArgs: () => ['--reporter', 'json', '--no-progress', '--no-exit-code'],
+  saveOutput: (stdout, { outDir }) => writeOutput(outDir, 'dead-code.json', stdout),
+  parse: (json, options) => filterDeadCode(parseKnipReport(json, options.root), options),
+};
+
+const DEPENDENCY_GRAPH_TOOL: ToolSpec<GraphRow> = {
+  name: 'dependency-graph',
+  bin: 'depcruise',
+  packages: [`dependency-cruiser@${DEPENDENCY_CRUISER_VERSION}`, `typescript@${TYPESCRIPT_VERSION}`],
+  pinnedVersion: DEPENDENCY_CRUISER_VERSION,
+  needsScript: true,
+  buildArgs: ({ root, unit }) => [
+    unit,
+    '--output-type',
+    'json',
+    '--no-config',
+    '--do-not-follow',
+    'node_modules',
+    ...findTsConfig(root, unit),
+  ],
+  saveOutput: (stdout, { outDir }) => writeOutput(outDir, 'dependency-graph.json', stdout),
+  parse: (json, options) => filterGraph(parseDependencyCruiserReport(json, options.root), options.analyzable),
+};
+
+const DUPLICATION_TOOL: ToolSpec<DuplicationRow> = {
+  name: 'duplication',
+  bin: 'jscpd',
+  packages: [`jscpd@${JSCPD_VERSION}`],
+  pinnedVersion: JSCPD_VERSION,
+  needsScript: false,
+  buildArgs: ({ unit, outDir, excludeGlobs }) => [
+    unit,
+    '--reporters',
+    'json',
+    '--output',
+    path.join(outDir, 'jscpd'),
+    '--silent',
+    '--absolute',
+    ...(excludeGlobs.length > 0 ? ['--ignore', excludeGlobs.join(',')] : []),
+  ],
+  saveOutput: (_stdout, { outDir }) => path.join(outDir, 'jscpd', 'jscpd-report.json'),
+  parse: (json, options) => filterDuplication(parseJscpdReport(json, options.root), options.analyzable),
+};
 
 /**
  * Builds the `pnpm dlx` arguments for the pinned release. The cache lives under the temporary directory because an
  * agent sandbox commonly refuses writes to pnpm's default cache.
  */
-function buildDlxArgs(tool: ToolSpec, toolArgs: readonly string[]): string[] {
+function buildDlxArgs(tool: ToolSpec<unknown>, toolArgs: readonly string[]): string[] {
   return [
     `--config.cache-dir=${path.join(tmpdir(), 'assess-code-health-pnpm-cache')}`,
     'dlx',
@@ -186,13 +195,17 @@ function readProjectVersion(command: string, root: string, dependencies: SenseDe
 }
 
 /** Runs one tool and records its rows, or the reason that it failed or does not apply. */
-function runStructuralTool(tool: ToolSpec, options: StructuralOptions, dependencies: SenseDependencies): SensorResult {
+function runStructuralTool<Row>(
+  tool: ToolSpec<Row>,
+  options: StructuralOptions,
+  dependencies: SenseDependencies,
+): { result: SensorResult; rows: Row[] | undefined } {
   const { root, analyzable } = options;
   const files = [...analyzable];
   const missing = tool.needsScript ? files.every((file) => !SCRIPT_PATTERN.test(file)) : files.length === 0;
   if (missing) {
     const detail = tool.needsScript ? 'the unit has no JavaScript or TypeScript files' : 'the unit has no files';
-    return buildSensorResult(tool.name, null, 'not-applicable', detail, null, null);
+    return { result: buildSensorResult(tool.name, null, 'not-applicable', detail, null, null), rows: undefined };
   }
 
   const projectBin = path.join(root, 'node_modules', '.bin', tool.bin);
@@ -202,17 +215,19 @@ function runStructuralTool(tool: ToolSpec, options: StructuralOptions, dependenc
   const outcome = useProject
     ? dependencies.runTool(projectBin, toolArgs, root)
     : dependencies.runTool('pnpm', buildDlxArgs(tool, toolArgs), root);
-  if ('spawnError' in outcome) return buildSensorResult(tool.name, version, 'failed', outcome.spawnError, null, null);
+  if ('spawnError' in outcome) {
+    return { result: buildSensorResult(tool.name, version, 'failed', outcome.spawnError, null, null), rows: undefined };
+  }
 
   let outputPath: string | null = null;
   try {
     outputPath = tool.saveOutput(outcome.stdout, options);
-    const data = tool.parse(JSON.parse(readFileSync(outputPath, 'utf8')), options);
-    return buildSensorResult(tool.name, version, 'ok', null, outputPath, data);
+    const rows = tool.parse(JSON.parse(readFileSync(outputPath, 'utf8')), options);
+    return { result: buildSensorResult(tool.name, version, 'ok', null, outputPath, rows), rows };
   } catch (error) {
     const stderr = outcome.stderr.trim().slice(0, STDERR_EXCERPT_LENGTH);
     const detail = `${tool.bin} exited ${outcome.exitCode}: ${describeError(error)}${stderr === '' ? '' : `; stderr: ${stderr}`}`;
-    return buildSensorResult(tool.name, version, 'failed', detail, outputPath, null);
+    return { result: buildSensorResult(tool.name, version, 'failed', detail, outputPath, null), rows: undefined };
   }
 }
 

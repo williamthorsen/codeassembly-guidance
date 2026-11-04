@@ -5,8 +5,16 @@ import path from 'node:path';
 
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
-import { buildLogArgs, computeCoChange, computeHotspots, parseNumstatLog } from './git-history.ts';
+import {
+  buildExcludePathspecs,
+  buildLogArgs,
+  computeCoChange,
+  computeHotspots,
+  type HotspotRow,
+  parseNumstatLog,
+} from './git-history.ts';
 import { buildSensorResult, type SenseDocument, type SensorResult } from './schemas.ts';
+import { runStructuralSensors, STRUCTURAL_SENSOR_NAMES } from './structural-sensors.ts';
 import { parseCoverageSummary, parseJunit } from './test-reports.ts';
 
 /** A repository check that `sense` runs through the shell, such as a linter or a typecheck. */
@@ -42,9 +50,15 @@ export interface SenseDependencies {
 }
 
 /** Sensor names that a check may not take, because the built-in sensors use them. */
-export const RESERVED_SENSOR_NAMES: readonly string[] = ['co-change', 'coverage', 'hotspots', 'timings'];
+export const RESERVED_SENSOR_NAMES: readonly string[] = [
+  'co-change',
+  'coverage',
+  'hotspots',
+  'timings',
+  ...STRUCTURAL_SENSOR_NAMES,
+];
 
-/** The adapter that runs git and the check commands. */
+/** The adapter that runs git, the check commands, and the third-party tools. */
 export const realSenseDependencies: SenseDependencies = {
   git(args, cwd) {
     const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', maxBuffer: 256 * 1_024 * 1_024 });
@@ -76,8 +90,16 @@ export const realSenseDependencies: SenseDependencies = {
 export function runSense(options: SenseOptions, dependencies: SenseDependencies): SenseDocument {
   const { root, unit } = options;
   const commit = dependencies.git(['rev-parse', 'HEAD'], root).trim();
-  const tracked = new Set(dependencies.git(['ls-files', '-z', '--', unit], root).split('\0').filter(Boolean));
+  const tracked = listFiles(dependencies, root, [unit]);
   const gitVersion = readGitVersion(dependencies, root);
+  const outDir = path.dirname(options.out);
+
+  const analyzable = listFiles(dependencies, root, [unit, ...buildExcludePathspecs(options.excludeGlobs)]);
+  const { results: structural, graph } = runStructuralSensors(
+    { root, unit, outDir, analyzable, unitTracked: tracked, excludeGlobs: options.excludeGlobs },
+    dependencies,
+  );
+  const importers = graph === undefined ? undefined : new Map(graph.map((row) => [row.path, row.importers.length]));
 
   const sensors: SensorResult[] = [];
   let windowStart: string | null = null;
@@ -91,7 +113,14 @@ export function runSense(options: SenseOptions, dependencies: SenseDependencies)
       commits.flatMap((change) => change.files).filter((file) => tracked.has(file)),
     );
     sensors.push(
-      buildSensorResult('hotspots', gitVersion, 'ok', null, null, computeHotspots(commits, lineCounts)),
+      buildSensorResult(
+        'hotspots',
+        gitVersion,
+        'ok',
+        null,
+        null,
+        addImporters(computeHotspots(commits, lineCounts), importers),
+      ),
       buildSensorResult('co-change', gitVersion, 'ok', null, null, computeCoChange(commits, tracked)),
     );
   } catch (error) {
@@ -105,15 +134,23 @@ export function runSense(options: SenseOptions, dependencies: SenseDependencies)
   sensors.push(
     readReport('coverage', options.coverageSummary, root, (text) => parseCoverageSummary(JSON.parse(text), root, unit)),
     readReport('timings', options.junit, root, parseJunit),
+    ...structural,
   );
 
-  const outDir = path.dirname(options.out);
   for (const check of options.checks) sensors.push(runCheckSensor(check, root, outDir, dependencies));
 
   return { unit, windowDays: options.windowDays, windowStart, commit, sensors };
 }
 
 // region | Helpers
+
+/** Adds each hotspot's importer count, null when the graph does not list the file. */
+function addImporters(
+  rows: ReadonlyArray<Omit<HotspotRow, 'importers'>>,
+  importers: ReadonlyMap<string, number> | undefined,
+): HotspotRow[] {
+  return rows.map((row) => ({ ...row, importers: importers?.get(row.path) ?? null }));
+}
 
 /** Counts the lines of each file that is present on disk, keyed by its repository-relative path. */
 function countLines(root: string, files: readonly string[]): Map<string, number> {
@@ -126,6 +163,16 @@ function countLines(root: string, files: readonly string[]): Map<string, number>
     counts.set(file, text === '' ? 0 : text.split('\n').length - (text.endsWith('\n') ? 1 : 0));
   }
   return counts;
+}
+
+/** Lists the tracked files that a pathspec selects, as root-relative paths. */
+function listFiles(dependencies: SenseDependencies, root: string, pathspecs: readonly string[]): Set<string> {
+  return new Set(
+    dependencies
+      .git(['ls-files', '-z', '--', ...pathspecs], root)
+      .split('\0')
+      .filter(Boolean),
+  );
 }
 
 /** Returns the version that `git --version` reports, or null when it cannot be read. */

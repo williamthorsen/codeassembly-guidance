@@ -32,7 +32,7 @@ describe('runStructuralSensors', () => {
   });
 
   it('records every sensor as not applicable when the unit has no files', () => {
-    const results = runStructuralSensors(
+    const { results } = runStructuralSensors(
       buildOptions({ analyzable: [] }),
       buildDependencies(() => fail()),
     );
@@ -45,7 +45,7 @@ describe('runStructuralSensors', () => {
   });
 
   it('runs only duplication when the unit has no JavaScript or TypeScript files', () => {
-    const results = runStructuralSensors(
+    const { results } = runStructuralSensors(
       buildOptions({ analyzable: ['pkg/run.py'] }),
       buildDependencies(() => fail()),
     );
@@ -59,7 +59,7 @@ describe('runStructuralSensors', () => {
   });
 
   it('runs the pinned releases through pnpm dlx and records the pins as versions', () => {
-    const results = runStructuralSensors(buildOptions(), buildDependencies(answerWithFixtures));
+    const { results } = runStructuralSensors(buildOptions(), buildDependencies(answerWithFixtures));
 
     const knipCall = calls.find(({ args }) => args.includes('knip'));
     expect(knipCall?.command).toBe('pnpm');
@@ -76,7 +76,7 @@ describe('runStructuralSensors', () => {
   });
 
   it('keeps only rows that name analyzable files, and dependency rows of a manifest under the unit', () => {
-    const results = runStructuralSensors(
+    const { results, graph } = runStructuralSensors(
       buildOptions({
         unit: 'packages/guidance',
         analyzable: [`${SRC}/sense.ts`, `${SRC}/cli.ts`, `${SRC}/git-history.ts`],
@@ -108,12 +108,13 @@ describe('runStructuralSensors', () => {
       { path: `${SRC}/git-history.ts`, importers: [`${SRC}/sense.ts`], imports: [] },
       { path: `${SRC}/sense.ts`, importers: [`${SRC}/cli.ts`], imports: [`${SRC}/git-history.ts`] },
     ]);
+    expect(graph).toEqual(findResult(results, 'dependency-graph').data);
   });
 
   it('runs a project-installed copy and records the version that it reports', () => {
     installProjectBin('knip');
     installProjectBin('depcruise');
-    const results = runStructuralSensors(
+    const { results } = runStructuralSensors(
       buildOptions(),
       buildDependencies((command, args) => {
         if (args[0] === '--version') return command.endsWith('knip') ? succeed('knip\n6.0.0\n') : fail();
@@ -129,7 +130,7 @@ describe('runStructuralSensors', () => {
   });
 
   it('records a tool that cannot spawn, or whose output does not parse, as failed with its reason', () => {
-    const results = runStructuralSensors(
+    const { results, graph } = runStructuralSensors(
       buildOptions(),
       buildDependencies((_command, args) =>
         args.includes('knip')
@@ -144,6 +145,7 @@ describe('runStructuralSensors', () => {
     expect(deadCode.detail).toContain('knip: config error');
     expect(readFileSync(deadCode.outputPath ?? '', 'utf8')).toBe('not json');
     expect(findResult(results, 'duplication')).toMatchObject({ status: 'failed', detail: 'spawn pnpm ENOENT' });
+    expect(graph).toBeUndefined();
   });
 
   /** Builds options over the fixture paths, rooted at the scratch directory. */
