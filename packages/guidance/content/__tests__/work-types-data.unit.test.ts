@@ -12,9 +12,6 @@ import { findDefects } from '../../src/describe-change/find-defects.ts';
 import { loadTaxonomy } from '../../src/lib/work-types.ts';
 import { buildSchemaUrl } from '../../src/schemas/build-schema-documents.ts';
 
-/** Recursive shape of any JSON-decoded value, matching the validator's `Json` parameter. */
-type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue } | null;
-
 /** Shape of a single record under `types[]`, used to type the live JSON for cross-element checks. */
 interface WorkTypeRecord {
   aliases: string[];
@@ -65,6 +62,9 @@ const liveData = parseJsonFile<WorkTypesDocument>(liveDataPath, 'data');
 
 describe('live work-types.json', () => {
   it('accepts the live `content/skills/_data/work-types.json`', async () => {
+    /** Recursive shape of any JSON-decoded value, matching the validator's `Json` parameter. */
+    type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue } | null;
+
     // Going through `JSON.parse` produces an `any`-typed result that assigns into the structural
     // `JsonValue` shape (matching the validator's `Json` parameter) without a forbidden type assertion.
     // eslint-disable-next-line unicorn/prefer-structured-clone -- structuredClone preserves typing; the JSON round-trip yields `any`, which assigns into `JsonValue` without a type assertion.

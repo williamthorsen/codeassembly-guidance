@@ -12,9 +12,6 @@ import { isMissingFile } from '../lib/type-guards.ts';
 import type { WorkType } from '../lib/work-types.ts';
 import type { ExemplarRequest, ExemplarSelection, LedeExemplar, Widening } from './types.ts';
 
-/** Whether a candidate's breaking marker matches the request's. */
-type MarkerFit = 'match' | 'other';
-
 /** An exemplar paired with the taxonomy entry to which its recorded work type resolves; `null` for an undeclared type. */
 interface Candidate {
   exemplar: LedeExemplar;
@@ -65,6 +62,9 @@ export async function selectExemplars(input: {
   minQuality?: LedeQuality;
   withPair?: boolean;
 }): Promise<ExemplarSelection> {
+  /** Whether a candidate's breaking marker matches the request's. */
+  type MarkerFit = 'match' | 'other';
+
   const eventsDir = resolveEventsDir(input.storePath);
   const filenames = await readEventFilenames(eventsDir);
 
