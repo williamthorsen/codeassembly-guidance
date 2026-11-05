@@ -6,7 +6,7 @@ export const WAVE_SIZE = 4;
 
 const SCOPE_PREFIX = 'scope:';
 
-const DAY_MS = 24 * 60 * 60 * 1_000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Keeps the issues that every selector admits. `--scope` admits an issue with any of the named scope labels,

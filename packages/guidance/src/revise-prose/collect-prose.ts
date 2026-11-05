@@ -186,7 +186,7 @@ const VENDOR_MARKERS: Readonly<Record<ProseKind, RegExp>> = {
  * line, while a formatted source file stays two orders of magnitude below this. Markdown is exempt: A paragraph on
  * one line is the house convention, not a signal.
  */
-const MACHINE_LINE_WIDTH = 1_000;
+const MACHINE_LINE_WIDTH = 1000;
 
 /** Builds the pattern that opens a marker line: optional indentation, one of the kind's comment openers, and spacing. */
 function buildCommentAnchor(openerPattern: string): string {

@@ -94,7 +94,7 @@ describe(parseArgs, () => {
   });
 
   it('reads a batch budget', () => {
-    expect(parseArgs(['--batch-budget', '4096']).budget).toBe(4_096);
+    expect(parseArgs(['--batch-budget', '4096']).budget).toBe(4096);
   });
 });
 

@@ -9,7 +9,7 @@ import { buildPng } from '../test-utils/build-png.ts';
 
 describe(intakeScreenshot, () => {
   it('stores the capture unchanged in the shots directory under its slug and version', async () => {
-    const original = buildPng(1_280, 8);
+    const original = buildPng(1280, 8);
     const { setDir, sourcePath } = await makeCapture(original);
 
     const result = await intakeScreenshot({ sourcePath, setDir, slug: 'dense', version: 2 });

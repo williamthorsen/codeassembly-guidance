@@ -57,7 +57,7 @@ const execFileAsync = promisify(execFile);
 const FIELD_SEPARATOR = '\u{1F}';
 
 /** Output cap for one git invocation, sized past a long log or a repository with many branches. */
-const GIT_MAX_BUFFER = 256 * 1_024 * 1_024;
+const GIT_MAX_BUFFER = 256 * 1024 * 1024;
 
 const ORIGIN_PREFIX = 'refs/remotes/origin/';
 

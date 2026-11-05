@@ -13,9 +13,6 @@ import { parse as parseYaml } from 'yaml';
 
 import { buildSchemaUrl } from '../../schemas/build-schema-documents.ts';
 
-/** Recursive shape of any JSON-decoded value, matching the validator's `Json` parameter. */
-type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue } | null;
-
 /** Three levels up from this file reaches the package root (`packages/guidance/`); two more reach the repo root. */
 const thisDir = path.dirname(fileURLToPath(import.meta.url));
 const packageRoot = path.resolve(thisDir, '../../..');
@@ -42,6 +39,9 @@ describe('preferences.v1.json schema', () => {
   });
 
   it('accepts the live `.agents/preferences.yaml`', async () => {
+    /** Recursive shape of any JSON-decoded value, matching the validator's `Json` parameter. */
+    type JsonValue = string | number | boolean | JsonValue[] | { [key: string]: JsonValue } | null;
+
     const yamlText = readFileSync(livePreferencesPath, 'utf8');
 
     // `parse()` is typed `any`; the local is annotated `unknown` to keep the value opaque. Round-tripping

@@ -16,9 +16,9 @@ export type MetricClass = 'good' | 'needs-improvement' | 'poor';
  */
 export const THRESHOLDS: Readonly<Partial<Record<Metric, readonly [good: number, needsImprovement: number]>>> = {
   cls: [0.1, 0.25],
-  fcp: [1_800, 3_000],
+  fcp: [1800, 3000],
   inp: [200, 500],
-  lcp: [2_500, 4_000],
+  lcp: [2500, 4000],
   tbt: [200, 600],
 };
 

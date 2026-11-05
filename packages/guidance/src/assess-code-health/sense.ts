@@ -61,7 +61,7 @@ export const RESERVED_SENSOR_NAMES: readonly string[] = [
 /** The adapter that runs git, the check commands, and the third-party tools. */
 export const realSenseDependencies: SenseDependencies = {
   git(args, cwd) {
-    const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', maxBuffer: 256 * 1_024 * 1_024 });
+    const result = spawnSync('git', ['-C', cwd, ...args], { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     if (result.error !== undefined) throw result.error;
     if (result.status !== 0) throw new Error(`git ${args[0] ?? ''} failed: ${result.stderr.trim()}`);
     return result.stdout;
@@ -77,7 +77,7 @@ export const realSenseDependencies: SenseDependencies = {
     }
   },
   runTool(command, args, cwd) {
-    const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1_024 * 1_024 });
+    const result = spawnSync(command, args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     if (result.error !== undefined) return { spawnError: describeError(result.error) };
     return { exitCode: result.status ?? 1, stdout: result.stdout, stderr: result.stderr };
   },

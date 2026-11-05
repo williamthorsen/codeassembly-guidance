@@ -1,7 +1,7 @@
 import { type ParsedNote, parseNote } from '@williamthorsen/kb/frontmatter';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1_000;
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const ACCEPTED_DATE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}Z)?$/;
 

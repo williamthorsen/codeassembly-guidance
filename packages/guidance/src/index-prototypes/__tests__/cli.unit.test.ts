@@ -290,7 +290,7 @@ describe(runIndexPrototypes, () => {
   it("stores a screenshot under the registration's version and records it on the entry", async () => {
     const setDir = await makeSetDir();
     const capture = path.join(setDir, 'capture.png');
-    const png = buildPng(1_280, 2);
+    const png = buildPng(1280, 2);
     await writeFile(capture, png);
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
 

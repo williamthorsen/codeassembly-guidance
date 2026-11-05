@@ -10,7 +10,7 @@ import type { CommandRunner, Issue } from './types.ts';
 const execFileAsync = promisify(execFile);
 
 /** The most issues that one `collect` reads; a backlog past it is swept in more than one run. */
-export const ISSUE_FETCH_LIMIT = 5_000;
+export const ISSUE_FETCH_LIMIT = 5000;
 
 /** The `gh issue` fields that every fetch requests, relations included; `gh` 2.100 is the first to return them all. */
 const ISSUE_FIELDS =
@@ -72,7 +72,7 @@ export interface RepositoryInfo {
 
 /** Runs a command through `execFile`, with a buffer large enough for a whole backlog's JSON. */
 export const runCommand: CommandRunner = async (command, args, cwd) => {
-  const { stdout } = await execFileAsync(command, [...args], { cwd, maxBuffer: 512 * 1_024 * 1_024 });
+  const { stdout } = await execFileAsync(command, [...args], { cwd, maxBuffer: 512 * 1024 * 1024 });
   return stdout;
 };
 

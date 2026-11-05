@@ -8,9 +8,9 @@ describe('readLabMetrics', () => {
   it('reads each metric audit numeric value', () => {
     expect(readLabMetrics(LighthouseReportSchema.parse(buildReport()))).toEqual({
       cls: 0.02,
-      fcp: 3_100,
-      lcp: 4_200,
-      speedIndex: 4_800,
+      fcp: 3100,
+      lcp: 4200,
+      speedIndex: 4800,
       tbt: 450,
     });
   });
@@ -53,11 +53,11 @@ describe('readPsiField', () => {
   const response = PsiResponseSchema.parse(buildPsiResponse(buildReport(), { field: true }));
 
   it('reads URL-level percentiles and divides CLS by 100', () => {
-    expect(readPsiField(response.loadingExperience, 'url')).toEqual({ cls: 0.08, inp: 240, lcp: 3_100 });
+    expect(readPsiField(response.loadingExperience, 'url')).toEqual({ cls: 0.08, inp: 240, lcp: 3100 });
   });
 
   it('reads origin-level percentiles', () => {
-    expect(readPsiField(response.originLoadingExperience, 'origin')).toEqual({ cls: 0.3, inp: 150, lcp: 2_400 });
+    expect(readPsiField(response.originLoadingExperience, 'origin')).toEqual({ cls: 0.3, inp: 150, lcp: 2400 });
   });
 
   it('does not take origin data that PSI substituted for a URL as URL data', () => {
@@ -73,7 +73,7 @@ describe('readCruxField', () => {
   it('reads the p75 of each metric, parsing the string that the API gives for CLS', () => {
     const record = CruxRecordSchema.parse(buildCruxRecord());
     expect(readCruxField({ url: record, origin: null })).toEqual({
-      url: { cls: 0.12, inp: 180, lcp: 2_900 },
+      url: { cls: 0.12, inp: 180, lcp: 2900 },
       origin: null,
     });
   });

@@ -40,7 +40,7 @@ const FIELD = '\u{1F}';
  * Output cap for the log invocation, sized well past a long branch. The 1 MiB default throws `ENOBUFS`, which a caller
  * cannot tell from a branch without commits.
  */
-const GIT_MAX_BUFFER = 64 * 1_024 * 1_024;
+const GIT_MAX_BUFFER = 64 * 1024 * 1024;
 
 /** The suffix that makes `rev-parse` resolve a ref to the commit that it names, failing when it names none. */
 const PEEL_TO_COMMIT = '^{commit}';

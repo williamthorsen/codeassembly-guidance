@@ -62,7 +62,7 @@ export function parseJunit(xml: string): TimingRow[] {
     rows.push({
       file: attributes.get('file') ?? (suite || (attributes.get('classname') ?? '')),
       name: attributes.get('name') ?? '',
-      durationMs: Math.round(seconds * 1_000),
+      durationMs: Math.round(seconds * 1000),
     });
   }
   rows.sort((left, right) => right.durationMs - left.durationMs || left.name.localeCompare(right.name));

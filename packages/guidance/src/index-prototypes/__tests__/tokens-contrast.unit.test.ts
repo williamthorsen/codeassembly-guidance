@@ -36,7 +36,7 @@ function computeRelativeLuminance(hex: string): number {
     throw new Error(`expected an opaque #rrggbb colour, got ${hex}`);
   }
   const [red, green, blue] = match.slice(1).map((channel) => linearizeChannel(Number.parseInt(channel, 16) / 255));
-  return 0.212_6 * (red ?? 0) + 0.715_2 * (green ?? 0) + 0.072_2 * (blue ?? 0);
+  return 0.2126 * (red ?? 0) + 0.7152 * (green ?? 0) + 0.0722 * (blue ?? 0);
 }
 
 /** Converts a gamma-encoded sRGB channel in [0, 1] to linear light. */

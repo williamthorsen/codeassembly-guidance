@@ -240,7 +240,7 @@ describe('render command', () => {
   });
 
   it('warns about a page over the warning threshold', async () => {
-    const setDir = await makeSetDirWithShotOfSize(Math.ceil((PAGE_WARN_BYTES * 3) / 4) + 1_000);
+    const setDir = await makeSetDirWithShotOfSize(Math.ceil((PAGE_WARN_BYTES * 3) / 4) + 1000);
 
     const result = await render(setDir, path.join(setDir, 'index.html'));
 
@@ -251,7 +251,7 @@ describe('render command', () => {
   });
 
   it('refuses a page over the artifact cap without writing it', async () => {
-    const setDir = await makeSetDirWithShotOfSize(Math.ceil((PAGE_LIMIT_BYTES * 3) / 4) + 1_000);
+    const setDir = await makeSetDirWithShotOfSize(Math.ceil((PAGE_LIMIT_BYTES * 3) / 4) + 1000);
 
     const result = await render(setDir, path.join(setDir, 'index.html'));
 

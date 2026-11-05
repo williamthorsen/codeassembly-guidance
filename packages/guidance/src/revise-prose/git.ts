@@ -18,7 +18,7 @@ export const realGit: ReviseProseGit = {
 // region | Helpers
 
 /** Output cap for one `git ls-files`, sized past the listing produced by a large repository. */
-const GIT_MAX_BUFFER = 256 * 1_024 * 1_024;
+const GIT_MAX_BUFFER = 256 * 1024 * 1024;
 
 /** Runs both `git ls-files` forms, tracked and untracked-but-not-ignored, and merges their paths. */
 function listFiles(root: string, paths: readonly string[]): string[] {

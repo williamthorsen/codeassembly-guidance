@@ -35,7 +35,7 @@ describe('parseJunit', () => {
     ].join('\n');
 
     expect(parseJunit(xml)).toEqual([
-      { file: 'src/a.test.ts', name: 'slow', durationMs: 1_500 },
+      { file: 'src/a.test.ts', name: 'slow', durationMs: 1500 },
       { file: 'src/b.test.ts', name: 'mid', durationMs: 200 },
       { file: 'src/a.test.ts', name: 'fast & small', durationMs: 1 },
     ]);

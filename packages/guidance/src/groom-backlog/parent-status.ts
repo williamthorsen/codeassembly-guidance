@@ -5,7 +5,7 @@ import type { Issue } from './types.ts';
 const TICKET_READS = 3;
 
 /** The pause between reads of a ticket that still reads as open, in milliseconds. */
-const TICKET_READ_INTERVAL_MS = 2_000;
+const TICKET_READ_INTERVAL_MS = 2000;
 
 /** The parent of the merged ticket, with its children's counts and its unchecked criteria. */
 export interface ParentSummary {
