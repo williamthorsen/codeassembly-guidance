@@ -11,7 +11,7 @@ import type { Batch, Candidate, ScannedFile } from './types.ts';
  * Default ceiling on a batch's combined file bytes. Roughly 24k tokens of file content, which leaves a subagent room
  * for its rule set and the report that it composes.
  */
-export const DEFAULT_BATCH_BUDGET = 96 * 1_024;
+export const DEFAULT_BATCH_BUDGET = 96 * 1024;
 
 /**
  * Partitions `files` into batches under `budget`, deterministically and in the order the sweep resolved them.

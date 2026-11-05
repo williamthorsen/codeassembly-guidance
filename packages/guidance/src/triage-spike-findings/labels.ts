@@ -49,7 +49,7 @@ export async function checkLabels(run: CommandRunner, root: string): Promise<Lab
 
 /** Runs `gh` through `execFile`, with a buffer large enough for a repository's whole label list. */
 export const runCommand: CommandRunner = async (command, args, cwd) => {
-  const { stdout } = await execFileAsync(command, [...args], { cwd, maxBuffer: 16 * 1_024 * 1_024 });
+  const { stdout } = await execFileAsync(command, [...args], { cwd, maxBuffer: 16 * 1024 * 1024 });
   return stdout;
 };
 

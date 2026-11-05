@@ -97,7 +97,7 @@ describe(readParentStatus, () => {
     });
 
     expect(status).toMatchObject({ offer: true, ticketState: 'closed' });
-    expect(pauses).toStrictEqual([2_000]);
+    expect(pauses).toStrictEqual([2000]);
   });
 
   it('stops after three reads of a ticket that stays open, without offering', async () => {

@@ -15,7 +15,7 @@ export function makeAnalyzePerformanceSmokeTest(): SmokeTestInvocation {
   mkdirSync(path.join(dir, slug));
   const runs = [];
   for (const formFactor of ['mobile', 'desktop']) {
-    for (const [offset, lcp] of [2_000, 3_000].entries()) {
+    for (const [offset, lcp] of [2000, 3000].entries()) {
       const file = path.join(slug, `${formFactor}-${offset + 1}.lighthouse.json`);
       writeFileSync(path.join(dir, file), JSON.stringify(buildReport(lcp)), 'utf8');
       runs.push({ formFactor, index: offset + 1, file, error: null });
@@ -57,7 +57,7 @@ function assertMedianLcp(result: unknown): void {
   const mobile = isRecord(lab) ? lab['mobile'] : undefined;
   const metrics = isRecord(mobile) ? mobile['metrics'] : undefined;
   const lcp = isRecord(metrics) ? metrics['lcp'] : undefined;
-  if (!isRecord(lcp) || lcp['value'] !== 2_500) {
+  if (!isRecord(lcp) || lcp['value'] !== 2500) {
     throw new Error(`expected a median mobile LCP of 2500, got ${JSON.stringify(lcp)}`);
   }
 }

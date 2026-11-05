@@ -21,14 +21,14 @@ describe('summarize', () => {
   });
 
   it('takes the median of each lab metric across runs, keeps each run value, and classes the median', async () => {
-    const lcpValues = [3_000, 5_000, 4_000];
+    const lcpValues = [3000, 5000, 4000];
     let run = 0;
     const summary = await collectAndSummarize(out, ['http://localhost/'], {
       lighthouse: () => buildReport({ lcp: lcpValues[run++ % 3] ?? 0 }),
     });
 
     const lcp = summary.pages[0]?.lab.mobile.metrics.lcp;
-    expect(lcp).toEqual({ value: 4_000, values: [3_000, 5_000, 4_000], class: 'needs-improvement' });
+    expect(lcp).toEqual({ value: 4000, values: [3000, 5000, 4000], class: 'needs-improvement' });
   });
 
   it('labels lab TBT as a proxy for INP', async () => {
@@ -99,7 +99,7 @@ describe('summarize', () => {
 
     const field = summary.pages[0]?.field;
     expect(field?.source).toBe('psi');
-    expect(field?.byFormFactor.mobile.url?.lcp).toEqual({ value: 3_100, class: 'needs-improvement' });
+    expect(field?.byFormFactor.mobile.url?.lcp).toEqual({ value: 3100, class: 'needs-improvement' });
     expect(field?.byFormFactor.mobile.origin?.cls).toEqual({ value: 0.3, class: 'poor' });
     expect(summary.unmeasured).toEqual([]);
   });
@@ -116,7 +116,7 @@ describe('summarize', () => {
 
     const page = summary.pages[0];
     expect(page?.tool).toBe('lighthouse');
-    expect(page?.field.byFormFactor.mobile.url?.lcp).toEqual({ value: 3_100, class: 'needs-improvement' });
+    expect(page?.field.byFormFactor.mobile.url?.lcp).toEqual({ value: 3100, class: 'needs-improvement' });
     expect(page?.field.byFormFactor.desktop).toEqual({ url: null, origin: null });
   });
 

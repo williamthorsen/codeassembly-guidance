@@ -68,7 +68,7 @@ export const realCollectDependencies: CollectDependencies = {
     return { status: response.status, body };
   },
   runPnpm: async (args, cwd) => {
-    const { stdout } = await execFileAsync('pnpm', [...args], { cwd, maxBuffer: 64 * 1_024 * 1_024 });
+    const { stdout } = await execFileAsync('pnpm', [...args], { cwd, maxBuffer: 64 * 1024 * 1024 });
     return stdout;
   },
   readCruxKey: () => process.env[CRUX_KEY_VARIABLE] || undefined,

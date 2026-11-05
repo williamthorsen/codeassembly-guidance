@@ -29,7 +29,7 @@ export const realGit: StreamlineGit = {
 const FIELD_SEPARATOR = '\u{1F}';
 
 /** Output cap for one git invocation, sized to exceed the output of a long history or a large repository's listing. */
-const GIT_MAX_BUFFER = 256 * 1_024 * 1_024;
+const GIT_MAX_BUFFER = 256 * 1024 * 1024;
 
 /** The most commits reported for one phrase. */
 const HISTORY_LIMIT = 5;

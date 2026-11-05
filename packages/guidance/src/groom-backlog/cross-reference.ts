@@ -9,7 +9,7 @@ import type { BacklogGit } from './git.ts';
 import type { CommandRunner, Commit, CrossReference, Issue } from './types.ts';
 
 /** The most merged pull requests that one pass reads. */
-export const PR_FETCH_LIMIT = 5_000;
+export const PR_FETCH_LIMIT = 5000;
 
 const KIND_ORDER = { 'closing-pr': 0, 'pr-mention': 1, 'commit-mention': 2 } as const;
 
