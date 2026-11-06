@@ -61,7 +61,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'machine-readable-output-conventions',
-    { bodyHash: '68d5acf5acdd3395e4c2aaa1408ec3c8685d26a331003ffcce061fe976b4f657', version: '1' },
+    { bodyHash: '607eeb0602c5a75e81f7ba7012e7a44af017072c285af2dde46b8b94672520d8', version: '1' },
   ],
   [
     'readme-conventions',

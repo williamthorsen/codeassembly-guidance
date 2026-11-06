@@ -57,7 +57,7 @@ The embedded data is part of the page's interface: A published field follows the
 ## Sensitive fields
 
 - **The result type marks a sensitive field**, such as a secret.
-- **The copy and the embedded data redact a sensitive field by default.** Embedded data appears in page snapshots, test traces, and logs, which a person never sees.
+- **The copy and the embedded data redact a sensitive field by default.** Embedded data reaches page snapshots, test traces, and logs, which outlive the page and reach readers other than the person viewing it.
 - **Including a sensitive field is an explicit act**, such as turning on an "Include secret" control beside the copy.
 - **Redacted data names what it leaves out**, so that a reader can tell a redacted field from an absent one.
 
