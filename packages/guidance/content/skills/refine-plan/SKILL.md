@@ -161,7 +161,7 @@ Run `{harness_home_dir}/scripts/resolve-frontmatter.sh --format json` via Bash. 
 
 The `provenance:` block is **not** populated from the script. Construct it manually per the case branches below.
 
-**Round-trip preservation:** The top-level canonical fields (`branch`, `commit`, etc.) are always re-resolved from current session context via the script; they are not copied from `{input-provenance}`. This is correct: The output is a new artifact at a new point in time on a potentially different branch. The `provenance:` block's camelCase convention (`baseSha`, `isInteractive`, `refinedBy`) is preserved as-is on both read and write; the keys are not renamed. Provenance fields copied from the input are `skill`, `baseSha`, `isInteractive`, and `iteration` (per the case branches).
+**Round-trip preservation:** The top-level canonical fields (`branch`, `commit`, etc.) are always re-resolved from current session context via the script; they are not copied from `{input-provenance}`. This is correct: The output is a new artifact at a new point in time on a potentially different branch. The `provenance:` block's camelCase convention (`baseSha`, `isInteractive`, `refinedBy`) is preserved as-is on both read and write; the keys are not renamed. Provenance fields copied from the input are `skill`, `baseSha`, `isInteractive`, and `iteration` (per the case branches). `parent` is not copied: It is set from the input plan's file name, so that each revision names its own predecessor.
 
 **When `{input-provenance}` is non-empty:**
 
@@ -170,6 +170,7 @@ The `provenance:` block is **not** populated from the script. Construct it manua
 3. Construct updated provenance:
    - `skill`: Preserve from `{input-provenance}` (the original authoring skill)
    - `refinedBy`: Set to `refine-plan`
+   - `parent`: The file name of `{plan_path}`, without its directory
    - `timestamp`: Use the script's `timestamp`
    - `baseSha`: The script's value (or preserved original)
    - `isInteractive`: Preserve from `{input-provenance}` if present
@@ -181,6 +182,7 @@ The `provenance:` block is **not** populated from the script. Construct it manua
    provenance:
      skill: design-and-plan
      refinedBy: refine-plan
+     parent: 20260309-140000Z_example_plan.md
      timestamp: 2026-03-10T08:00:00Z
      baseSha: abc123def456...
      isInteractive: true
@@ -201,6 +203,7 @@ The `provenance:` block is **not** populated from the script. Construct it manua
 3. Construct provenance:
    - `skill`: `unknown`
    - `refinedBy`: `refine-plan`
+   - `parent`: The file name of `{plan_path}`, without its directory
    - `timestamp`: Script's value
    - `baseSha`: Script's value (omit when absent)
    - `isInteractive`: Always `true`. `refine-plan` is an interactive user-invocable skill: When it stamps a plan without prior provenance, the stamp itself is always produced inside that interactive session.
@@ -212,6 +215,7 @@ The `provenance:` block is **not** populated from the script. Construct it manua
    provenance:
      skill: unknown
      refinedBy: refine-plan
+     parent: 20260309-140000Z_example_plan.md
      timestamp: 2026-03-10T08:00:00Z
      baseSha: abc123def456...
      isInteractive: true
