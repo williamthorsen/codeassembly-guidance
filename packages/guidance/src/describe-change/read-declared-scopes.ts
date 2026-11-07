@@ -85,6 +85,9 @@ async function readEntry(entry: unknown, projectRoot: string): Promise<ScopeDir 
   if (relative === '..' || relative.startsWith(`..${path.sep}`)) {
     return `has a path ${declaredPath} outside the repository`;
   }
+  if (relative === '' && typeof name !== 'string') {
+    return 'names the repository root without a `name`, so its scope would change with the checkout directory';
+  }
 
   try {
     if (!(await stat(dir)).isDirectory()) {

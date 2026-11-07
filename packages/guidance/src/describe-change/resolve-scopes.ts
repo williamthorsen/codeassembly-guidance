@@ -7,10 +7,15 @@ import { getWorkspacePackageDirs, isMonorepoRoot } from '@williamthorsen/nmr/wor
  * Discovers the workspace directories that `projectRoot` declares, as absolute paths.
  *
  * A root that doesn't declare a pnpm workspace has none, as in a repository on another package manager. Its scopes are
- * then the directories that it declares, if any.
+ * then the directories that it declares, if any. The root itself is never a workspace directory, even when it declares
+ * itself as a package, because a scope named after it would change with the checkout directory's name.
  */
 export function discoverWorkspaceDirs(projectRoot: string): string[] {
-  return isMonorepoRoot(projectRoot) ? getWorkspacePackageDirs(projectRoot) : [];
+  if (!isMonorepoRoot(projectRoot)) {
+    return [];
+  }
+  const root = path.resolve(projectRoot);
+  return getWorkspacePackageDirs(projectRoot).filter((dir) => path.resolve(dir) !== root);
 }
 
 /**

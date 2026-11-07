@@ -30,6 +30,24 @@ describe(readDeclaredScopes, () => {
     ]);
   });
 
+  it.each(['.', './'])('warns and skips an entry %s that names the root without a `name`', async (declaredPath) => {
+    const root = await writeRoot([], `project:\n  scopes:\n    - path: ${declaredPath}\n`);
+    const file = join(root, '.agents', 'preferences.yaml');
+
+    expect(await readDeclaredScopes(root)).toEqual({
+      scopeDirs: [],
+      warnings: [
+        `${file}: project.scopes[0] names the repository root without a \`name\`, so its scope would change with the checkout directory; skipping it`,
+      ],
+    });
+  });
+
+  it('reads an entry that names the root with a `name`', async () => {
+    const root = await writeRoot([], 'project:\n  scopes:\n    - path: .\n      name: app\n');
+
+    expect(await readDeclaredScopes(root)).toEqual({ scopeDirs: [{ dir: root, name: 'app' }], warnings: [] });
+  });
+
   it.each([
     ['the root does not contain a preferences file', undefined],
     ['the file does not have a `project` section', 'commit:\n  title_format: x\n'],
