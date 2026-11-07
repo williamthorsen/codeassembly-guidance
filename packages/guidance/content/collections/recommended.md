@@ -27,7 +27,7 @@ The skills belong here on different grounds. A rulebook of the personal collecti
 
 `generated-content-policy` qualifies on its own terms too: What it states is a mechanism that every consumer meets, not a preference, and the guidance that a reader needs beyond the trigger is in the linked reference rather than in the ambient body loaded by every session.
 
-`accessibility-conventions` also qualifies on its own terms. It states an external standard, WCAG 2.2 AA, and floors that do not name any author, repository, or tool. Its body does not contain any invocation token, so its closure is empty.
+`accessibility-conventions` also qualifies on its own terms. It states WCAG 2.2 AA, an external standard, and adds floors and rules for interactive controls that do not name any author, repository, or tool. Its body does not contain any invocation token, so its closure is empty.
 
 `cli-conventions` qualifies on its own terms as well. What it asks of a CLI's options, configuration, help, exit codes, errors, JSON output, progress reports, and check results, and of the split between its logic and its presentation, follows from who reads them, a person at a terminal that cannot follow a link and a script or an agent that reads the exit code and the streams, rather than from a preference. It does not name any author, repository, language, or tool. Its body does not contain any invocation token, so its closure is empty.
 
@@ -41,4 +41,4 @@ Adding a skill that declares a guidance hook has a drawback that the current mem
 
 `shared-data-conventions` qualifies on its own terms too. It states a standard practice, expand, migrate, contract, the rule that unmerged code does not write to shared state, and the checks that a skill writing to shared state needs before merge, and it does not name any author, platform, or store: Each repository's `AGENTS.md` names its own. Its body does not contain any invocation token, so its closure is empty.
 
-`ui-copy-conventions` qualifies on its own terms as well. What it asks of the text on a page follows from who reads that text, the person who returns to the page every week, rather than from a preference, and it does not name any author, repository, product, or tool. A project that has content guidelines of its own names them, and they take precedence. Its body does not contain any invocation token, so its closure is empty.
+`ui-copy-conventions` qualifies on its own terms as well. What it asks of the text on a page follows from who reads that text, the person who returns to the page every week, rather than from a preference, and it does not name any author, repository, product, or tool. A project that has content guidelines of its own names them, and they take precedence. Its invocation tokens name one artifact, `accessibility-conventions`, which is already a member, so admitting it does not add any other artifact to what this collection deploys.

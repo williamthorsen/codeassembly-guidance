@@ -2,7 +2,7 @@
 slug: ui-copy-conventions
 description: 'Text in a product surface: written for the person who returns to the page, with rules for labels, helper text, errors, and empty states, and a copy budget. Consult before writing labels, helper text, messages, or empty states for a page, a prototype, or a UI component.'
 delivery: [skill]
-version: '1'
+version: '2'
 ---
 
 # UI copy conventions
@@ -13,7 +13,7 @@ When a project names its own content guidelines, such as a design system's, thos
 
 ## Rules
 
-- **Labels** are nouns. **Buttons** are verbs that name the action that they perform.
+- **Labels** are nouns. **Buttons** are verbs that name the action that they perform, except a toggle, whose label names what it governs and stays the same in both states, as {rulebook:accessibility-conventions} states.
 - **Helper text** states a constraint or a consequence: the format that a field accepts, or what an action changes.
 - **An error** names the problem and the fix.
 - **Register.** A sentence never explains the page, reassures, congratulates, or narrates the reader ("you are done", "you can…").
