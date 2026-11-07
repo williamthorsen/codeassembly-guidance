@@ -21048,6 +21048,11 @@ rejections:
   - rule: overused-word
     rule-version: '1'
     file: packages/guidance/content/skills/_partials/option-format.md
+    phrase: It costs the developer a context switch
+    ground: the verb already names the unit, which is the repair that the entry asks for
+  - rule: overused-word
+    rule-version: '1'
+    file: packages/guidance/content/skills/_partials/option-format.md
     phrase: Mark at the strength that you actually hold
     ground: holding a view means having a belief, not the storage sense
   - rule: overused-word

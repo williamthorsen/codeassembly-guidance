@@ -19,7 +19,7 @@ A detector rule is one that the registry in `rules.ts` lists. A unit is a versio
 
 `--batch-budget` is the ceiling on a batch's combined file bytes, defaulting to 98304 (96 KiB), roughly 24k tokens of file content.
 
-`--resweep` lists every versioned rule as `unswept` in every batch, whatever coverage the record holds, so that a deliberate second sweep reaches files that the record already covers. Recorded rejections still suppress their sites, and `record` records coverage as after any run.
+`--resweep` lists every versioned rule as `unswept` in every batch, whatever coverage the record lists, so that a deliberate second sweep includes files that the record already covers. Recorded rejections still suppress their sites, and `record` records coverage as after any run.
 
 ## Detectors
 

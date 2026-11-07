@@ -19,7 +19,7 @@ Apply is the default. `--dry-run` produces the report alone.
 | `<path>`                 | One or more files or directories narrowing the sweep. Repeatable.                 | No       |
 | `--batch-budget <bytes>` | Ceiling on a batch's combined file bytes. Passed to the helper unchanged.         | No       |
 | `--dry-run`              | Report and stop without dispatching a subagent, editing, or writing the record.   | No       |
-| `--resweep`              | Sweep every file again, whatever coverage the record holds. Passed to the helper. | No       |
+| `--resweep`              | Sweep every file again, whatever coverage the record lists. Passed to the helper. | No       |
 | `--rule <id>`            | One rule that this document declares, narrowing the sweep. Repeatable.            | No       |
 
 Without a path, the sweep covers the whole repository. That is this skill's default, because removing every violation from a repository requires a full sweep. It is how this skill differs from `{skill:revise-comments}`, whose default is the current branch's diff.

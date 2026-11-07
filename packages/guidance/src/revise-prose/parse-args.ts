@@ -18,7 +18,7 @@ const FLAG_SPECS: ReadonlyArray<FlagSpec<'batch-budget' | 'resweep' | 'rule' | '
  * has a detector for it; `--rule <name>=<unit>` names a rule that does not declare a sweep version, which is swept but
  * never recorded. `--unit <name>=<version>` names a unit in force and the version it is at. Both repeat.
  * `--batch-budget <bytes>` overrides the default ceiling. `--resweep` reports every versioned rule as unswept for every
- * scanned file, whatever coverage the record holds.
+ * scanned file, whatever coverage the record lists.
  *
  * @internal - Exported to allow testing.
  */

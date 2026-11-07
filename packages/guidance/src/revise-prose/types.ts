@@ -312,7 +312,7 @@ export interface ParsedArgs {
   units: ReadonlyMap<string, string>;
   /** Ceiling on a batch's combined file bytes. */
   budget: number;
-  /** Whether every versioned rule counts as unswept for every scanned file, whatever coverage the record holds. */
+  /** Whether every versioned rule counts as unswept for every scanned file, whatever coverage the record lists. */
   resweep: boolean;
 }
 
