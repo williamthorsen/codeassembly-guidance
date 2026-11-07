@@ -91,4 +91,4 @@ This prohibition against `@` tags does not apply to
 
 ## Machine-readable results
 
-Build a result or a journal that {rulebook:machine-readable-output-conventions} covers on the readout packages, which its "TypeScript packages" section names, rather than by hand.
+When {rulebook:machine-readable-output-conventions} covers a result or a journal, build it on the readout packages that its "TypeScript packages" section names, not by hand.
