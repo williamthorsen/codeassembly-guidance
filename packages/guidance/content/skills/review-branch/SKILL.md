@@ -304,13 +304,13 @@ The next-steps block has four independent sub-blocks. Each is shown only when it
 
 Use `~/`-relative paths when possible and absolute paths otherwise. Every line subordinate to an option (invocation guidance as much as a pro or con) is a nested list item, never a whitespace-indented continuation; see [option format](#option-format).
 
-**Naming a skill in the render.** Name a skill in the rendered option only when the user must carry the invocation across a session boundary: clearing context, handing off to another session, or waiting for someone else to act. When the agent runs the skill in the current session, the skill name appears in the sub-block's Options table and the rendered line is a bare action. This limits each rendered line to the step that the user performs.
+**Naming a skill in the render.** Name a skill in the rendered option only when the user must run the invocation after a session boundary: clearing context, handing off to another session, or waiting for someone else to act. When the agent runs the skill in the current session, the skill name appears in the sub-block's Options table and the rendered line is a bare action. This limits each rendered line to the step that the user performs.
 
 **Reviewer and author roles.** A review reports findings; the author disposes of them. The options below send the reviewer's output to the author or record what the review found; they never ask the reviewer to re-design, re-plan, or coordinate a workflow, none of which is the reviewer's job.
 
 ### Proposed-edit preview
 
-Three of the sub-blocks below offer options that rewrite an artifact, one each: the Deviations sub-block rewrites the ticket's acceptance criteria, the source-divergence sub-block rewrites the PR description, and the Findings sub-block rewrites the source. The user consents to that rewrite by picking a number, so every such option renders a preview of the edit that it would make. The reviewer judges which criteria are genuinely in conflict with the implementation and which findings name a change that it can carry out; the preview makes those judgments reviewable instead of silent.
+Three of the sub-blocks below offer options that rewrite an artifact, one each: the Deviations sub-block rewrites the ticket's acceptance criteria, the source-divergence sub-block rewrites the PR description, and the Findings sub-block rewrites the source. The user consents to that rewrite by picking a number, so every such option renders a preview of the edit that it would make. The reviewer judges which criteria are genuinely in conflict with the implementation and which findings name a change that it can make; the preview makes those judgments reviewable instead of silent.
 
 **Placement.** The preview renders above the numbered options, inside its sub-block, under a `Proposed edit to the {target}:` label naming what it would change; the source target's label is plural, `Proposed edits to the source:`, because it covers every open finding. Option lines stay bare actions: The preview is never a pro, a con, or a line nested beneath an option. An option that mutates nothing, such as "Leave as-is", does not render a preview.
 
@@ -320,7 +320,7 @@ Ticket and PR-description deltas render as a flat list, one line per change. Sou
 
 - **Ticket targets** derive their delta from the in-conflict criteria rows of `## Specification compliance`'s ticket subsection, and from nothing else. Unplanned work is never a source: Implementation that goes beyond the criteria is not a deviation, so it does not yield a line. Because a ticket's `## Problem`, `## Context`, and `## Proposed solution` record what was known and proposed when it was written, this menu does not offer an edit that changes them; a divergence between one of them and the implementation is reported in the PR description instead.
   - `Reword: {old} → {new}` for a criterion whose direction the implementation deliberately contradicts
-  - `Drop: {criterion}` for a criterion that the implementation deliberately abandoned, never for one that it has not yet reached
+  - `Drop: {criterion}` for a criterion that the implementation deliberately abandoned, never for one that it has not yet met
 - **PR-description targets** render the concrete claim changes, each keyed to the divergent `D{n}` row from which it came: `D2: {claim as written} → {claim as built}`.
 - **Source targets** derive their delta from the open findings, one entry per finding, keyed to its ID. An entry states two things: the surface that the change touches (source, test, comment, docs, config) and the substance of the edit. Its form follows the edit's own granularity rather than a fixed notation, so a literal single-site edit is a `{old} → {new}` clause, many sites sharing one edit are a table captioned with what is invariant across its rows, and a structural edit is a prose clause naming the shape of the resulting diff. A code snippet is one rendering among these, never the required form.
   - When an entry covers several sites and deliberately leaves one of them alone, it names that site with the reason. The entry states its own boundary rather than leaving the reader to infer it from silence.
@@ -331,7 +331,7 @@ Do not render an exclusions line. A criterion genuinely arguable as in conflict 
 
 **Open findings.** When a ticket or PR-description delta line would settle or obviate an open finding, follow it with a sibling `⚠️` list item naming that finding, so that the user can see that accepting the edit pre-empts the finding's disposition. Those preview lists stay flat; nothing nests beneath a delta line.
 
-**The preview is the contract.** The edit executed is the edit previewed. When carrying it out reveals a change that the preview did not contain, stop and re-confirm with the new line shown; never widen the edit under consent already given.
+**The preview is the contract.** The edit executed is the edit previewed. If making the edit reveals a change that the preview did not contain, stop and re-confirm with the new line shown; never widen the edit under consent already given.
 
 **Empty delta.** When the judgment drops every line, the Deviations sub-block has nothing to propose and does not render at all; see its [trigger](#deviations-sub-block). When a source divergence proposes a PR-description edit, that delta is never empty, because a divergence that the implementation resolves in the ticket's favor always leaves a claim to reconcile.
 
@@ -413,7 +413,7 @@ Every case that renders offers both, so the pair is fixed; what varies by case i
 
 #### Output format
 
-Render the list per [option format](#option-format). Each option has a marker (■■■/■■□/■□□/□□□); the recommendation rules below determine which option takes the strongest marker per case. Option 1 renders its PR-description delta above the list, per [proposed-edit preview](#proposed-edit-preview); "Leave as-is" has none. Pros and cons are omitted by default; add a `➕` or `➖` line only when the specific divergence presents a tradeoff that survives the option-format tests (e.g., "the diverging AC was load-bearing for adjacent work that has already shipped"). Generic restatements are noise and must be omitted. That default applies to pros and cons alone: It never suppresses the proposed-edit preview, which is required content.
+Render the list per [option format](#option-format). Each option has a marker (■■■/■■□/■□□/□□□); the recommendation rules below determine which option takes the strongest marker per case. Option 1 renders its PR-description delta above the list, per [proposed-edit preview](#proposed-edit-preview); "Leave as-is" has none. Pros and cons are omitted by default; add a `➕` or `➖` line only when the specific divergence presents a tradeoff that survives the option-format tests (e.g., "the diverging AC was load-bearing for adjacent work that has already been merged"). Generic restatements are noise and must be omitted. That default applies to pros and cons alone: It never suppresses the proposed-edit preview, which is required content.
 
 Case 2 (implementation matches ticket; PR description is the stale source):
 
@@ -457,7 +457,7 @@ The trigger does not include a tier condition; do not reintroduce one. Every fin
 
 Stating the trigger as a list of tiers is the failure that this rule replaces: An enumeration goes stale the next time the finding scheme changes, and silently withdraws the menu from whichever tier it omits.
 
-Legacy (`-L`) findings trigger the sub-block on the same terms, with the full option pool. Do not trim the author hand-offs for a legacy-only review: That would leave implementing-in-place as the only route and forfeit the adversarial second look, which pre-existing code needs at least as much as authored code, since a legacy fix is not constrained by any ticket criterion or supported by any design discussion. The recommendation rules handle legacy findings without a carve-out: A legacy fix naming a single change satisfies rule 2 like any other, and one leaving its choice to the author falls through to a ticket or a hand-off.
+Legacy (`-L`) findings trigger the sub-block on the same terms, with the full option pool. Do not trim the author hand-offs for a legacy-only review: That would leave implementing-in-place as the only option and forfeit the adversarial second look, which pre-existing code needs at least as much as authored code, since a legacy fix is not constrained by any ticket criterion or supported by any design discussion. The recommendation rules handle legacy findings without a carve-out: A legacy fix naming a single change satisfies rule 2 like any other, and one leaving its choice to the author falls through to a ticket or a hand-off.
 
 The option set depends on whether the review covers a pull request. Select the variant by the review that the agent just produced: A `review-pr` run has a PR reference in the review header and a PR-description spec source, and its author is typically someone else; a `review-branch` run has neither, and its code is typically our own.
 
