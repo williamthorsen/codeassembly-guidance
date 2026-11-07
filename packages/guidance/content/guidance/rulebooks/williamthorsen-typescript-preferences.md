@@ -1,13 +1,13 @@
 ---
 slug: williamthorsen-typescript-preferences
-description: 'TypeScript language mechanics, module shape, and documentation form: type safety, exports and barrels, import specifiers, type placement, and doc tags. Consult before writing or modifying TypeScript.'
+description: 'TypeScript language mechanics, module shape, and documentation form: type safety, exports and barrels, import specifiers, type placement, doc tags, and the packages for machine-readable results. Consult before writing or modifying TypeScript.'
 delivery: [hook, skill]
-version: '4'
+version: '5'
 ---
 
 # William Thorsen's TypeScript preferences
 
-TypeScript language mechanics, the shape of a module's public surface, and documentation form.
+TypeScript language mechanics, the shape of a module's public surface, documentation form, and the packages for machine-readable results.
 
 ## Exports
 
@@ -88,3 +88,7 @@ This prohibition against `@` tags does not apply to
 
 - symbols exported from a package's published entry point
 - custom tags such as `@internal` and `@stage`
+
+## Machine-readable results
+
+When {rulebook:machine-readable-output-conventions} covers a result or a journal, build it on the readout packages that its "TypeScript packages" section names, not by hand.

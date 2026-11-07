@@ -1,8 +1,8 @@
 ---
 slug: machine-readable-output-conventions
-description: 'Results that a program shows to a person and that an agent or a script also reads: one result object under every renderer, the scope test, canonical values, the command-line case, structured data beside a result on a page, formats, sensitive fields, and a journal of domain events. Consult before writing a command, a page, a dialog, or a component that shows a person a result, a report, or a confirmation, and before building an app whose state an agent or an end-to-end test verifies.'
+description: 'Results that a program shows to a person and that an agent or a script also reads: one result object under every renderer, the scope test, canonical values, the command-line case, structured data beside a result on a page, formats, sensitive fields, a journal of domain events, and the TypeScript packages that implement them. Consult before writing a command, a page, a dialog, or a component that shows a person a result, a report, or a confirmation, and before building an app whose state an agent or an end-to-end test verifies.'
 delivery: [skill]
-version: '1'
+version: '2'
 ---
 
 # Machine-readable output conventions
@@ -75,3 +75,11 @@ An app that an agent or an end-to-end test must verify after a person's actions 
 - **An entry has an id, a timestamp, a type, the ids of its subjects, and canonical data.** The sentence that a person reads and the JSON are two renderers over the entry.
 - **The app never reads its journal to compute state.** The state stays the one source of truth, and the journal records what changed in it.
 - **The journal is a test oracle.** An end-to-end test or an agent reads it to confirm what happened, and the app exposes it as it exposes any other result.
+
+## TypeScript packages
+
+Three packages implement these rules, and an implementation in TypeScript can start from them. The rules above remain the contract, whether or not an implementation uses them. Each package's README states its API.
+
+- **[`@williamthorsen/readout`](https://github.com/williamthorsen/showroom/tree/main/packages/readout#readme)** supplies the result type, with its sensitive fields marked; a JSON serializer that redacts them and names what it leaves out; the escaping that embedded data needs; and typed renderers over the result. It implements "Formats", "Sensitive fields", and the embedded data of "Results on a page".
+- **[`@williamthorsen/readout-journal`](https://github.com/williamthorsen/showroom/tree/main/packages/readout-journal#readme)** supplies a journal that a wrapped reducer derives from each state transition, its JSON form, and a renderer for each entry type. It implements "Journal".
+- **[`@williamthorsen/readout-react`](https://github.com/williamthorsen/showroom/tree/main/packages/readout-react#readme)** supplies React components for a copy button, a JSON view, a view that reveals a result's data beside the result, and a drawer that lists the journal. It implements the revealable element of "Results on a page" in a React app.
