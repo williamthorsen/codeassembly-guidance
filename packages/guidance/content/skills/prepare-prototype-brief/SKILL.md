@@ -61,7 +61,7 @@ The failure that this prevents: the lens paragraph reproduced as helper text und
 
 ### Require a salience order
 
-Require a salience order in every working view: the current state in one place, the next thing to happen more prominent than the rest, and every action visibly an action. Name {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} as the floor, and state that usability outranks restraint. Require that a status repeated on every row be a mark, a column, or a style, not a sentence.
+Require a salience order in every working view: the current state in one place, the next thing to happen more prominent than the rest, and every action visibly an action. Name {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} as the floor, including the accessibility rulebook's named-model, placement, and toggle rules, and state that usability outranks restraint. A builder departs from the named model only for a reason, which it reports with its distinctive ideas. Require that a status repeated on every row be a mark, a column, or a style, not a sentence.
 
 The failure that this prevents: a page in one colour, in which the operator hunts for the control, and "Hidden from the players." written out on every hidden row.
 
