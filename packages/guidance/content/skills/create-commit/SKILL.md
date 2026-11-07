@@ -1,6 +1,6 @@
 ---
 name: create-commit
-description: Compose and record a commit for one logical unit of work. Pass the paths to stage and a one-line statement of the change's purpose.
+description: Compose and record a commit for one logical unit of work. Pass the paths to stage, a one-line statement of the change's purpose, and, when the change is in a worktree other than the session's cwd, that worktree's path.
 background: false
 context: fork
 model: sonnet
@@ -17,8 +17,13 @@ The conventions to which the message is composed -- title format, body voice and
 
 - **Paths**: The paths that this commit records. When the arguments do not name any, the candidates are every changed path in the working tree.
 - **Purpose**: One line stating why the change was made. The diff shows what changed; the purpose is the only source of why. When the arguments do not state one, compose the body from the diff alone, and never state a reason that the diff does not show.
+- **Working directory**: The worktree that contains the change, `{dir}` below. When the arguments do not name one, it is the directory in which this procedure starts. Every command below runs against it: each git call as `git -C {dir}`, the session-context deriver with `--cwd {dir}`, and the title renderer with `--project-root {dir}`, so that the branch, the ticket ref, and the title format all come from the worktree that is committed.
 
 Everything else comes from the repository: This procedure may run without the conversation that produced the change, so it never relies on anything that only that conversation contains.
+
+## What this procedure writes
+
+It writes the commit message file and the commit, and nothing else. It never edits, creates, or deletes any other file, and never installs or builds anything: A commit records work that is already done, so a change missing from the working tree is a reason to stop, never one to produce it.
 
 ## What one commit contains
 
@@ -28,9 +33,9 @@ Record each unit as it is finished. Several single-concern commits read better t
 
 ## Process
 
-1. **Read what changed.** Run `git status --short` for which paths changed, then `git diff` and `git diff --cached` for what changed in them. The message reports the diff, so compose it from the diff rather than from what the work set out to do.
+1. **Read what changed.** Run `git -C {dir} status --short` for which paths changed, then `git -C {dir} diff` and `git -C {dir} diff --cached` for what changed in them. The message reports the diff, so compose it from the diff rather than from what the work set out to do.
 
-2. **Stage the unit.** Stage the paths that the arguments name, then confirm that the message will describe exactly the staged set. When the arguments do not name any, stage every changed path, but only if those changes form one unit per [What one commit contains](#what-one-commit-contains); if they don't, stop without committing and report the units that you found.
+2. **Stage the unit.** First confirm that the working tree contains the change that the arguments describe. When a path that the arguments name is unchanged, or when none of the changed paths matches the stated purpose, stop without committing and without staging, and report `{dir}` and what `git -C {dir} status --short` showed there. Otherwise, stage the paths that the arguments name, then confirm that the message will describe exactly the staged set. When the arguments do not name any, stage every changed path, but only if those changes form one unit per [What one commit contains](#what-one-commit-contains); if they don't, stop without committing and report the units that you found.
 
 3. **Resolve the title's fields.** The scope and the work type per the conventions, choosing the type by [Work type test](#work-type-test); the title text per [`title-voice.md`](../_data/title-voice.md), with any backticks stripped.
 
@@ -43,7 +48,7 @@ Record each unit as it is finished. Several single-concern commits read better t
    ```bash
    body_path="{absolute path from the write step}"
    [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
-   git commit --file "$body_path"
+   git -C "{dir}" commit --file "$body_path"
    ```
 
 7. **Report the result**: the new commit's short SHA and title, or, when step 2 stopped or the commit failed, why nothing was committed. Do not comment on the title's format. The template sets which tokens the title contains, a ticket reference among them, so neither a token that the title omits nor a difference from earlier commits is a finding.
@@ -54,7 +59,7 @@ Record each unit as it is finished. Several single-concern commits read better t
 
 ## Rendering the title
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash for `ticket_ref`, then render:
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs --cwd {dir}` via Bash for `ticket_ref`, then render, passing `{dir}` as `{project_root}`:
 
 <!-- include: ../_partials/commit-title-rendering.md / -->
 
