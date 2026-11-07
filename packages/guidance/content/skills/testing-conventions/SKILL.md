@@ -1,6 +1,6 @@
 ---
 name: testing-conventions
-description: What a test is for, how to name and structure it, and how it calls git and other external programs. Consult before writing or changing a test.
+description: What a test is for, how to name and structure it, how it calls git and other external programs, and how it controls time. Consult before writing or changing a test.
 user-invocable: false
 ---
 
@@ -189,6 +189,17 @@ When the code under test writes output, intercept it in the test that triggers i
 - **Silence** the output when it is incidental to the behavior under test.
 
 Intercept only the channels that the test expects to fire. A silencer installed for a whole file or suite, or one that covers every channel, hides the unexpected output that this rule exists to surface.
+
+The `typescript-testing-conventions` skill names the TypeScript techniques.
+
+## Time-driven behavior
+
+The clock is a dependency that the test controls. Behavior is time-driven when its outcome depends on when something happens: polling, retries and reconnect delays, debounces and throttles, timeouts, and code that reads the current time.
+
+- **Fake the clock.** A test of time-driven behavior runs on fake timers and advances time explicitly, by the amount that the behavior names. It never sleeps on real time: A real sleep passes on an idle machine and fails under load, when the scheduler delays the timer past the sleep.
+- **Show that nothing more happens by advancing.** To assert that the code stops, such as a poller after it is cancelled, advance past the next tick that would have been due and assert that the count did not change. Never wait a real interval and assert silence.
+- **Wait on a condition across a process boundary.** When the timer runs in another process, such as an entry point that the test spawns, the test cannot fake that clock. Wait for the condition that the behavior produces, with a deadline, never for a fixed delay.
+- **Run a changed test under load before committing it.** Before committing a new or changed test of time-driven behavior, run it repeatedly while the machine is under CPU load. An idle run does not expose a race.
 
 The `typescript-testing-conventions` skill names the TypeScript techniques.
 
