@@ -19,7 +19,7 @@ version: '13'
 
 Never create a branch or worktree without explicit authorization. Each ticket is implemented in its own worktree, and the developer's tooling relies on that: Do all of one ticket's work in that worktree, never switch a worktree to another branch, and start a new session in another ticket's own worktree for work on that ticket. Which branch or worktree a ticket's work uses is settled, so never ask it.
 
-A skill with `context: fork` starts in the session's cwd, not in the worktree that the session works in. When a session works in a worktree other than its cwd, pass that worktree to every such skill, such as through the working-directory argument of `create-commit`, or commit inline with `git -C`.
+When a session works in a worktree other than its cwd, pass that worktree to every skill that takes a working directory, such as `create-commit`, or commit inline with `git -C`: A skill with `context: fork` starts in the session's cwd, and the skill listing does not show which skills fork.
 
 After a merge, say nothing about worktree or branch state and never offer to manage it. The worktree stays as long as its branch does, so there is nothing to clean up and nothing to ask about.
 
