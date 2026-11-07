@@ -237,7 +237,7 @@ Keys inside the `provenance:` block use **camelCase** (e.g., `baseSha`, `isInter
 
 ### Field definitions
 
-The table below lists only the universal fields. Artifact-specific extensions (`provenance.iteration`, `session_type`, `tickets_created`, `title`, `scope`, `type`, `responding_to`, etc.) are documented in the per-artifact sections below.
+The table below lists only the universal fields. Artifact-specific extensions (`provenance.iteration`, `provenance.parent`, `session_type`, `tickets_created`, `title`, `scope`, `type`, `responding_to`, etc.) are documented in the per-artifact sections below.
 
 | Field                      | Required | Description                                                                                                                                                                              |
 | -------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -268,7 +268,7 @@ The table below lists only the universal fields. Artifact-specific extensions (`
 
 Most skills and subagents produce frontmatter by running `resolve-frontmatter.sh` in its default YAML mode and prepending the output verbatim. Two sites are deliberate exceptions and compose the YAML block themselves:
 
-- `refine-plan`: The `provenance:` block is case-branched on the input artifact's existing provenance (preserving `skill`, `baseSha`, `isInteractive`, and `iteration` from the original authoring skill, with fallbacks when the input does not have provenance). The shell flag surface cannot express this conditional logic cleanly.
+- `refine-plan`: The `provenance:` block is case-branched on the input artifact's existing provenance (preserving `skill`, `baseSha`, `isInteractive`, and `iteration` from the original authoring skill, with fallbacks when the input does not have provenance), and `parent` is set from the input's file name. The shell flag surface cannot express this conditional logic cleanly.
 - `wrap-up` (deferred-findings artifact): `tickets_created` is a list of `{id, items}` objects, a structure that does not have a clean CLI expression and is best composed in the skill's own logic.
 
 Both read the script's JSON output and write the YAML frontmatter themselves. The pattern is intentional, not a workaround; keep new skills on the YAML mode path unless they have a similarly structural reason to deviate.
@@ -291,11 +291,12 @@ When authoring a new skill that needs session-context fields: Invoke the bundled
 
 ## Plan provenance
 
-This artifact uses the [universal artifact frontmatter](#universal-artifact-frontmatter) plus the following artifact-specific extension:
+This artifact uses the [universal artifact frontmatter](#universal-artifact-frontmatter) plus the following artifact-specific extensions:
 
-| Field                  | Required | Description                                                                                                                     |
-| ---------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `provenance.iteration` | no       | Refinement iteration counter. Absent on first authoring; set to `2` on first refinement, incremented on subsequent refinements. |
+| Field                  | Required | Description                                                                                                                                                                                          |
+| ---------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `provenance.iteration` | no       | Refinement iteration counter. Absent on first authoring; set to `2` on first refinement, incremented on subsequent refinements.                                                                      |
+| `provenance.parent`    | no       | File name of the plan that this plan was revised from. Absent on first authoring; set by `refine-plan` on every revision and never carried forward, so that each revision names its own predecessor. |
 
 Plan-specific `provenance.skill` values include `design-and-plan`, `plan`, `plan-mode`, and `unknown` (when the authoring skill cannot be determined). `refinedBy` is the skill that last processed the plan (typically `refine-plan`).
 
