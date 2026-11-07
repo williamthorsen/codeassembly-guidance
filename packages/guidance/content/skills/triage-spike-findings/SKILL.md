@@ -88,7 +88,7 @@ Compose the bodies:
 
 - **The umbrella**, when at least one item is a `ticket`: its problem (the follow-up work of the findings), its context (a link to the triage ticket, and the tickets that the findings filed without adopting them, listed and not made children), and "Every child is closed" as its acceptance criterion. It does not take a graded label.
 - **One child per `ticket` item**, in the ticket skeleton that {skill:create-ticket} step 2 states: problem, context, and acceptance criteria, with the title and reason of every `merge` item that targets it folded in. Its labels are `confidence:{grade}` and `value:{grade}`.
-- **One follow-up triage ticket per later batch**, when the **Batches** table has more than one row: titled `Triage batch {n} of {findings title}`, with a link to the findings artifact, its path written `~/`-relative as in the [closing post](../_data/spike-conventions.md#closing-post), the batch's items by id and title as its **The batch** input, and `triage-spike-findings` as its next step. Read the triage ticket's parent with `gh issue view {triage ticket} --json parent`: A follow-up takes that parent when there is one, so that it sits beside its siblings, and no parent otherwise. Each follow-up is blocked by the one before it. The first is not blocked: The triage ticket stays open after this run, and this round's dispositions are posted before the follow-ups exist.
+- **One follow-up triage ticket per later batch**, when the **Batches** table has more than one row: titled `Triage batch {n} of {findings title}`, with a link to the findings artifact, its path written `~/`-relative as in the [closing post](../_data/spike-conventions.md#closing-post), a link to the triage ticket, whose dispositions comment records the earlier round, the batch's items by id and title as its **The batch** input, and `triage-spike-findings` as its next step. Read the triage ticket's parent with `gh issue view {triage ticket} --json parent`: A follow-up takes that parent when there is one, so that it sits beside its siblings, and no parent otherwise. Each follow-up is blocked by the one before it. The first is not blocked: The triage ticket stays open after this run, and this round's dispositions are posted before the next round starts. Add one line per follow-up to the record's `notes`, `Batch {n} ({item ids}) is triaged in {follow-up}`, with the follow-up's title in place of `{follow-up}` until step 7 creates it, so that the dispositions comment names every follow-up.
 
 Run the helper's `render --preview` to `{ticket_dir}/triage/preview/`, which writes the dispositions comment with `(pending)` where a number is not yet known, and one comment file per issue that a `comment` disposition names.
 
@@ -101,8 +101,9 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
 1. When at least one item is a `ticket` and `umbrella` is null, create the umbrella with {skill:create-ticket}, and write its number into `umbrella`.
 2. For each `ticket` item, in the order that `validate` reports as `order` for the approved record, run {skill:create-ticket} with `--parent {umbrella}` and `--label confidence:{grade},value:{grade}`, adding `--blocked-by` with the item's blockers as `#{number}` (the recorded `ticket` of each item id, and each issue number) when it has any, and write the returned number into the item's `ticket` as soon as it is returned. Because `order` places every blocker first, each item id that `--blocked-by` names already has its number.
 3. For each `ticket` item, read `gh issue view {ticket} --json parent,blockedBy`, and add what is missing in one `gh issue edit {ticket} --parent {umbrella} --add-blocked-by {numbers}` call, omitting a flag that has nothing to add. {skill:create-ticket} sets the parent and the blockers in one call, so a rejected blocker can drop the parent as well, and this read-back is how a failed link is found. On a re-run, it completes the links of the items that an earlier run created.
-4. Run the helper's `render` to `{ticket_dir}/triage/rendered/`, without `--preview`.
-5. Post each `comment-{issue}.md` on its issue, and then `dispositions-comment.md` on the triage ticket. Before each post, read the issue's comments with `gh issue view {issue} --json comments`, and skip the post when a comment already opens with the first line of the rendered file:
+4. For each later batch, in batch order, skip the batch when its follow-up ticket is already recorded in the **Batches** table. Otherwise create its follow-up with {skill:create-ticket}, adding `--parent` and `--blocked-by` as step 6 composed them, and as soon as the number is returned, write it into the table and replace the follow-up's title with `#{number}` in its `notes` line.
+5. Run the helper's `render` to `{ticket_dir}/triage/rendered/`, without `--preview`.
+6. Post each `comment-{issue}.md` on its issue, and then `dispositions-comment.md` on the triage ticket. Before each post, read the issue's comments with `gh issue view {issue} --json comments`, and skip the post when a comment already opens with the first line of the rendered file:
 
    ```bash
    body_path="{ticket_dir}/triage/rendered/comment-{issue}.md"
@@ -110,8 +111,7 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
    gh issue comment {issue} --body-file "$body_path"
    ```
 
-6. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
-7. For each later batch, in batch order, skip the batch when its follow-up ticket is already recorded in the **Batches** table. Otherwise create its follow-up with {skill:create-ticket}, adding `--parent` and `--blocked-by` as step 6 composed them, and write the returned number into the table as soon as it is returned.
+7. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
 
 ### 8. Report
 
