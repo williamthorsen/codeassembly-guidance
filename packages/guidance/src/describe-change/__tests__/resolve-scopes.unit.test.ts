@@ -4,7 +4,13 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
-import { discoverWorkspaceDirs, mergeScopeDirs, resolveScopes, type ScopeDir } from '../resolve-scopes.ts';
+import {
+  discoverWorkspaceDirs,
+  mergeScopeDirs,
+  resolveScopes,
+  type ScopeDir,
+  type ScopeResolution,
+} from '../resolve-scopes.ts';
 
 describe(discoverWorkspaceDirs, () => {
   it('discovers the directories that the root declares as workspaces', async () => {
@@ -29,6 +35,29 @@ describe(discoverWorkspaceDirs, () => {
     const root = await writeWorkspaceRoot(["  - 'libs/*'"]);
 
     expect(discoverWorkspaceDirs(root)).toEqual([]);
+  });
+
+  it.each(['app', 'app.106'])(
+    'does not discover a root named %s that declares itself as a package',
+    async (rootName) => {
+      const root = await writeWorkspaceRoot(["  - '.'"], rootName);
+
+      expect(discoverWorkspaceDirs(root)).toEqual([]);
+      expect(resolveDiscoveredScopes(root, ['package.json', 'src/main.ts'])).toEqual({
+        pathScopes: { 'package.json': 'root', 'src/main.ts': 'root' },
+        scopes: ['root'],
+      });
+    },
+  );
+
+  it('keeps the nested packages of a root that also declares itself as a package', async () => {
+    const root = await writeWorkspaceRoot(["  - '.'", "  - 'packages/*'"], 'app');
+
+    expect(discoverWorkspaceDirs(root)).toEqual(fixtureDirs(root));
+    expect(resolveDiscoveredScopes(root, ['packages/kb/src/index.ts', 'src/main.ts']).pathScopes).toEqual({
+      'packages/kb/src/index.ts': 'kb',
+      'src/main.ts': 'root',
+    });
   });
 });
 
@@ -179,13 +208,23 @@ function fixtureDirs(root: string): string[] {
   return [join(root, 'packages/agents'), join(root, 'packages/kb')];
 }
 
+/** Resolves the given paths against the scope directories discovered in a fixture root. */
+function resolveDiscoveredScopes(root: string, paths: readonly string[]): ScopeResolution {
+  const scopeDirs = mergeScopeDirs({ declaredDirs: [], packageDirs: discoverWorkspaceDirs(root) });
+  return resolveScopes({ paths, projectRoot: root, scopeDirs });
+}
+
 /**
- * Writes a fixture root declaring the given workspace patterns, with a manifest in `packages/agents` and
- * `packages/kb`.
+ * Writes a fixture root declaring the given workspace patterns, with a manifest at the root, in `packages/agents`, and
+ * in `packages/kb`. A `rootName` places the root in a directory of that name.
  */
-async function writeWorkspaceRoot(patterns: readonly string[] = ["  - 'packages/*'"]): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'resolve-scopes-'));
-  for (const dir of ['packages/agents', 'packages/kb']) {
+async function writeWorkspaceRoot(
+  patterns: readonly string[] = ["  - 'packages/*'"],
+  rootName?: string,
+): Promise<string> {
+  const base = await mkdtemp(join(tmpdir(), 'resolve-scopes-'));
+  const root = rootName === undefined ? base : join(base, rootName);
+  for (const dir of ['.', 'packages/agents', 'packages/kb']) {
     await mkdir(join(root, dir), { recursive: true });
     await writeFile(join(root, dir, 'package.json'), '{}', 'utf8');
   }
