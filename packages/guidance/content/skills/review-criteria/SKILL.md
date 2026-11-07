@@ -87,7 +87,7 @@ Two defects against the placement rules in the `testing-conventions` skill are W
 
 The same defects in tests that the change neither adds nor supersedes are Legacy.
 
-## Database tests and setup cost
+## Database tests and expensive setup
 
 Three defects against the database and setup rules in the `testing-conventions` skill are Warnings:
 
@@ -119,7 +119,7 @@ A change that adds to what every session loads is a Warning unless nearly every 
 Conventions for how findings reference files and code locations.
 
 1. **Repo-relative path required when localizable.** When a finding refers to specific code, the `- **Location:** ` line must be the first bullet under the finding heading, with a repo-relative path. Example: `packages/devtools-panel/config/renderReleaseNotesHtml.ts:69-76`, not `renderReleaseNotesHtml.ts:69-76`.
-2. **Multi-range syntax.** Multiple ranges or single lines in the same file concatenate with comma separation, dropping the path on subsequent entries: `path/to/file.ts:42, :69-76, :152-155`.
+2. **Multi-range syntax.** Join multiple ranges or single lines in the same file with commas, dropping the path on subsequent entries: `path/to/file.ts:42, :69-76, :152-155`.
 3. **Multiple files.** Findings that span multiple files use one `- **Location:** ` bullet per file.
 4. **Prose may abbreviate after the canonical reference.** Once `Location:` establishes the path, the Description and Recommendation may refer to the file by basename.
 
