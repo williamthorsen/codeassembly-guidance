@@ -13,7 +13,7 @@ The skill does not grade anything: The findings artifact is the input of `triage
 
 ## Inputs
 
-- **The unit**: a package or a subtree, as the developer names it. When the developer does not name one, propose one from the hotspot ranking at the checkpoint. Never assess the whole repository by default.
+- **The unit**: a package or a subtree, as the developer names it. When the developer does not name one, propose one from the hotspot ranking at the checkpoint. Never assess the whole repository by default. Plan an assessment of several units as [findings batches](../_data/spike-conventions.md#findings-batches) states, one ticket per unit.
 - **The window**: the number of days of history that the hotspots read, 180 by default.
 - **The ticket**, optional. Without one in session, {skill:save-artifact} saves the artifacts under the ticket ID that it generates.
 
@@ -51,7 +51,7 @@ Compose the brief with these sections:
 
 1. **Unit.** The unit, the window and its first commit date from the sense document, and the top ten hotspots.
 2. **Reference points.** The reuse-candidate directory and the library inventory. Take the directory from the implementation guidance spliced below when it names one. The inventory is the repository's declared dependencies plus any library that the guidance names.
-3. **Lenses.** Five, each with its name, its slug, its ID prefix, its subject, the rulebooks that it reads by path, and its proposal cap (10 by default):
+3. **Lenses.** Five, each with its name, its slug, its ID prefix, its subject, the rulebooks that it reads by path, and its proposal cap (2 by default). The default caps keep a unit's proposals within the ceiling of a [findings batch](../_data/spike-conventions.md#findings-batches); the groupings of step 5 only merge proposals, so they never raise the count:
 
    | Lens                                | Slug          | Prefix | Subject                                                                                                                                                                   |
    | ----------------------------------- | ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -68,7 +68,7 @@ Compose the brief with these sections:
 
 ### 3. Checkpoint
 
-Save the brief with {skill:save-artifact} as a ticket-level `code-health-brief` artifact, and show it to the developer. Ask in one action-items block for approval of the brief, the unit, and the caps. Do not dispatch any lens before approval.
+Save the brief with {skill:save-artifact} as a ticket-level `code-health-brief` artifact, and show it to the developer. Ask in one action-items block for approval of the brief, the unit, and the caps. Caps that sum above the batch ceiling produce findings that triage takes in several batches. Do not dispatch any lens before approval.
 
 <!-- include: ../_partials/action-items.md / -->
 

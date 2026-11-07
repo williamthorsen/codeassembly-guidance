@@ -93,6 +93,6 @@ Then publish it as an artifact page: Load the artifact-design skill, and render 
 
 ### 7. Report
 
-Give the developer the findings artifact's path, the page's URL, and one line of counts: use cases exercised, findings by effect, and ideas. Name `triage-spike-findings` as the next step, with the findings artifact's path as its input.
+Give the developer the findings artifact's path, the page's URL, and one line of counts: use cases exercised, findings by effect, and ideas. Name `triage-spike-findings` as the next step, with the findings artifact's path as its input. Findings above the ceiling of a [findings batch](../_data/spike-conventions.md#findings-batches) are triaged in several batches, each on its own ticket.
 
 In the same response's action-items block, offer the closing post on the ticket, whose contents, consent, and duplicate check are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the counts and the top findings by effect, and its groupings are the proposed groupings of step 5.

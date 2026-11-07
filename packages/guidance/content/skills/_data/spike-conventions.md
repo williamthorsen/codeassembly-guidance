@@ -99,6 +99,12 @@ Offer the post as an item in the closing action-items block, show its body, and 
 
 Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-body-file). Before posting, read the ticket's comments, and skip the post when a comment already opens with the post's first line, so that a rerun does not post it twice.
 
+## Findings batches
+
+A batch is the set of items that one triage round inventories: the proposals, findings, and ideas of a findings artifact, with a grouping counted as one item. A batch holds at most 10 items, so that the developer can review it in one sitting.
+
+Each batch has a ticket of its own, which covers the assessment that produced the batch and the triage round that disposes of it. An assessment that spans more than one unit is an umbrella with one child per unit, each child covering that unit's assessment and triage round and blocked by the child before it, so that each round runs after the earlier rounds have posted their dispositions and can read them. A findings artifact that holds more than 10 items is triaged in several batches, each on its own ticket, as `triage-spike-findings` states.
+
 ## Aligning a spike
 
 When `align-ticket-with-implementation` reconciles a spike, the branch's "implementation" is the findings: Reconcile whether the investigation answered its questions and reached a recommendation, not whether the branch met acceptance criteria. Align the ticket's questions and decisions to what the investigation actually concluded.
