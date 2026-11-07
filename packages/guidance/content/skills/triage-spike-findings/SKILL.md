@@ -25,8 +25,10 @@ GitHub alone is supported, through `gh`. When the session-context manifest's `sc
 Each item takes a disposition and two grades:
 
 - **Disposition**: `ticket` (a child of the umbrella), `comment` (a note on an existing issue, which must be open and must own the file or the behavior), `merge` (folded into another item's ticket; the target is a `ticket` item), or `drop`.
-- **Confidence** states advisability: `high` is clearly worth doing, `medium` is worth doing but arguable, `low` is not worth a ticket now. A borderline item takes the lower grade. Only an item graded `high` or `medium` gets a ticket; the helper refuses a record that gives a `low` item one.
-- **Value** states how much the item matters: `must-have`, `should-have`, `nice-to-have`, `questionable`. Value never decides whether an item gets a ticket; it is recorded on every item and labels every child.
+
+<!-- include: ../../_partials/finding-grades.md / -->
+
+The helper refuses a record that gives a `low` item a ticket. Value never decides whether an item gets a ticket; it is recorded on every item and labels every child.
 
 The labels come from the common preset of `release-kit sync-labels`: the `value:` family, and the `confidence:` family that williamthorsen/node-monorepo-tools#1017 added. A repository whose labels lack either family cannot take the children, because `gh issue create` fails on a label that the repository does not have.
 
@@ -70,7 +72,7 @@ root: {repository root}
 
 **A reply that lacks the `Phase: disposition-challenge` line is a challenger stopped by its turn limit.** Resume it once, asking only for its report; on Claude Code, send it a message with `SendMessage`, addressed by the agent ID that its dispatch returned. When the resumed challenger still does not return a report, do not dispatch again: Record the challenge as not returned, treat every item as unchallenged, and say so in the record's `challengeSummary`.
 
-Save the reply as `challenge.md`. Then take each item in turn: Defend the recommendation when the argument fails on the evidence, modify it when the argument stands in part, and abandon it when the argument stands. A defense answers the argument on the evidence that the argument names; a defense that rests on other grounds fails.
+Save the reply as `challenge.md`. Then take each item in turn: Defend the recommendation when the argument fails on the evidence, modify it when the argument stands in part, and abandon it when the argument stands. A defense answers the argument on the evidence that the argument names; a defense that rests on other grounds fails. An argument that lowers the grade of a code-health item on the one-time cost of the change fails under the grade definitions above, even when the challenger raises it.
 
 Decide the blockers of every `ticket` item under the threshold in the ticketing preferences rulebook: An item is blocked by another ticket when there is some probability that the other ticket affects it and should be merged first, and a ticket whose design takes another ticket's outcome as an input is blocked by it. A blocker is another `ticket` item, by id, or an open issue in this repository outside the triage, by number; check each issue with `gh issue view {issue} --json state`, and omit a closed one, which does not block. Record every such dependency in `blockedBy`, never in `notes`.
 
