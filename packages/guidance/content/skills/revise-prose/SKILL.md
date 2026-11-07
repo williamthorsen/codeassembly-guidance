@@ -14,12 +14,13 @@ Apply is the default. `--dry-run` produces the report alone.
 
 ## Arguments
 
-| Argument                 | Description                                                                     | Required |
-| ------------------------ | ------------------------------------------------------------------------------- | -------- |
-| `<path>`                 | One or more files or directories narrowing the sweep. Repeatable.               | No       |
-| `--batch-budget <bytes>` | Ceiling on a batch's combined file bytes. Passed to the helper unchanged.       | No       |
-| `--dry-run`              | Report and stop without dispatching a subagent, editing, or writing the record. | No       |
-| `--rule <id>`            | One rule that this document declares, narrowing the sweep. Repeatable.          | No       |
+| Argument                 | Description                                                                       | Required |
+| ------------------------ | --------------------------------------------------------------------------------- | -------- |
+| `<path>`                 | One or more files or directories narrowing the sweep. Repeatable.                 | No       |
+| `--batch-budget <bytes>` | Ceiling on a batch's combined file bytes. Passed to the helper unchanged.         | No       |
+| `--dry-run`              | Report and stop without dispatching a subagent, editing, or writing the record.   | No       |
+| `--resweep`              | Sweep every file again, whatever coverage the record lists. Passed to the helper. | No       |
+| `--rule <id>`            | One rule that this document declares, narrowing the sweep. Repeatable.            | No       |
 
 Without a path, the sweep covers the whole repository. That is this skill's default, because removing every violation from a repository requires a full sweep. It is how this skill differs from `{skill:revise-comments}`, whose default is the current branch's diff.
 
@@ -61,7 +62,7 @@ node {harness_home_dir}/skills/revise-prose/revise-prose.mjs detect {paths} \
   --rule {unversioned-rule-id}={slug}
 ```
 
-Pass one `--unit` per unit from step 1, and one `--rule` per rule that step 1 kept: `--rule plain-speech@{version}=plain-speech` for `plain-speech`, `--rule {id}@{rule-version}={unit}` for a rule whose marker declares a version, and `--rule {id}={unit}` for a rule whose marker declares none. Pass nothing for a rule that does not have a marker or whose block is not a unit, as step 1 directs. Add `--batch-budget {bytes}` if the invocation included one. Omit the paths for a whole-repository sweep.
+Pass one `--unit` per unit from step 1, and one `--rule` per rule that step 1 kept: `--rule plain-speech@{version}=plain-speech` for `plain-speech`, `--rule {id}@{rule-version}={unit}` for a rule whose marker declares a version, and `--rule {id}={unit}` for a rule whose marker declares none. Pass nothing for a rule that does not have a marker or whose block is not a unit, as step 1 directs. Add `--batch-budget {bytes}` if the invocation included one. Add `--resweep` if the invocation included it: The helper then lists every versioned rule as `unswept` in every batch, and recorded rejections still suppress their sites. Omit the paths for a whole-repository sweep.
 
 The helper prints one JSON object to stdout. On success it contains `ok: true`, the `root` that it swept, a `candidates` array, a `rejections` array containing the sites already adjudicated by an earlier sweep, a `batches` array in which each batch lists as `unswept` the versioned rules that its files still need, a `rules` object listing the named rules that it `detected` and those for which it does not have a detector as `undetected`, and a `summary`. On failure it contains `ok: false` with `invalid-args`, `invalid-record`, or `not-a-repository`, the last because the sweep reads what git tracks and has nothing to read outside a working tree. Report a failure and stop.
 
@@ -77,7 +78,7 @@ An empty `batches` array ends the run: Report the summary in one line and stop. 
 
 ### 3. Pilot the first batch
 
-Run the pilot if `.agents/revise-prose.yaml` is absent, or if it names none of this run's versioned rules under `rules:` and none of its units under `units:`. A rerun skips this step and goes to step 4.
+Run the pilot if `.agents/revise-prose.yaml` is absent, or if it names none of this run's versioned rules under `rules:` and none of its units under `units:`. A rerun, including a run under `--resweep`, skips this step and goes to step 4.
 
 Dispatch batch 0 alone, per step 4's dispatch shape, and run step 4's checks over it as a wave of one. Accumulate its `rejected` and `questionable` entries for step 5, as step 4 directs for every later wave, so that the pilot's questionables appear in the closing table. Then show the user its report and `git diff --stat`, and ask for a go-ahead before committing that batch and before dispatching anything else.
 

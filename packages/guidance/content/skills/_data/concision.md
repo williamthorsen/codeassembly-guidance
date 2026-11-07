@@ -12,7 +12,7 @@ A load-bearing decision is worth elaborating; a routine one is worth a clause. A
 
 ## What to cut
 
-Intros, hedging, restated context, exhaustive enumeration. Process narration (how the work or decision was reached) when only the conclusion serves the reader.
+Intros, hedging, restated context, exhaustive enumeration. Process narration (how the work was done or how the decision was made) when only the conclusion serves the reader.
 
 ## Self-test
 

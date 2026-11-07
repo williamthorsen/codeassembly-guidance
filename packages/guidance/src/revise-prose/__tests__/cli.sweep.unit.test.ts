@@ -181,6 +181,23 @@ describe(runDetect, () => {
       expect(summary.batchesPlanned).toBeGreaterThan(0);
     });
 
+    it('reports a covered batch under --resweep, listing every versioned rule as unswept', async () => {
+      await writeRecord(scratch, recordFor(await rejectedPhrase(scratch)));
+      const { batches, summary } = expectSuccess(await sweep(scratch, [...bothRules(), '--resweep']));
+
+      expect(summary.batchesSkipped).toBe(0);
+      expect(batches.map((batch) => batch.unswept)).toStrictEqual([[...BOTH_RULES]]);
+    });
+
+    it('still suppresses and reports a recorded rejection under --resweep', async () => {
+      const phrase = await rejectedPhrase(scratch);
+      await writeRecord(scratch, recordFor(phrase));
+      const { candidates, rejections } = expectSuccess(await sweep(scratch, [...bothRules(), '--resweep']));
+
+      expect(candidates.map((candidate) => candidate.rule)).toStrictEqual(['em-dash']);
+      expect(rejections.map((rejection) => rejection.phrase)).toStrictEqual([phrase]);
+    });
+
     it('skips nothing when the record covers a different version', async () => {
       await writeRecord(scratch, recordFor(await rejectedPhrase(scratch), '2'));
 

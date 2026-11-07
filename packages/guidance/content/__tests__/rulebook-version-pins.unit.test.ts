@@ -41,7 +41,7 @@ const PINS = new Map<string, RulebookPin>([
   ['cli-conventions', { bodyHash: '5b1f6c171be28b86b8f61d1ea798be8a232117ecec80ba7f5db83ca7844475e4', version: '6' }],
   [
     'codeassembly-content-specification',
-    { bodyHash: 'ed34faac9a78b88775ab8cbbccdba624d4f88361f90e783eeae25a669d3b2bc4', version: '32' },
+    { bodyHash: '3fe193b63127779ef8ae5b44e1a6057007194bb73621583fc6bfe076a76dcbe2', version: '33' },
   ],
   [
     'command-output-conventions',
@@ -82,7 +82,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-collaboration-preferences',
-    { bodyHash: '4b1c7f899a3d398e5dd3024a2925ab3cdc4d9b5fa9685ee3f0ce5f4638122b69', version: '16' },
+    { bodyHash: '1c5abdbfb7fd0574df89b08fbc37185f3dc06f4df2d23d4ce90ebef77ff7fe9f', version: '17' },
   ],
   [
     'williamthorsen-comment-preferences',
@@ -110,7 +110,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-writing-preferences',
-    { bodyHash: '1eaeb3b9351dc69211da6cfed74dbd89345466eaf94bdf35acf8375170903219', version: '11' },
+    { bodyHash: '778eecb88facbdd921f8f2a367e0bb99b9b1724d70a8d8bbb05665acbc17eeee', version: '12' },
   ],
 ]);
 
@@ -124,7 +124,7 @@ const PINS = new Map<string, RulebookPin>([
  * rulebook: `plain-speech-calibration.unit.test.ts` pins the calibration's whole text instead.
  */
 const RULE_PINS = new Map<string, RulePin>([
-  ['apostrophes', { sectionHash: '8da94cdfe74162b635312b726ab52976f9afde10f63b8c4bf8e41187c5f9e7f5', version: '1' }],
+  ['apostrophes', { sectionHash: '4345dcdb7b231d4f8ebd404d0a807a97b40bf96cd40387209bc6c2ed1af74f5f', version: '1' }],
   [
     'capitalization-after-colon',
     { sectionHash: '58ec61bdaea1ae6d2b092c93749893447830b2e09796e127cfcac17164a297d4', version: '1' },
@@ -141,7 +141,7 @@ const RULE_PINS = new Map<string, RulePin>([
   ['line-wrapping', { sectionHash: '6cb583e22c0a9310f995e204516a15b7a06b0dd3edf6c5f386b6498727434fff', version: '1' }],
   [
     'reduced-object-relative',
-    { sectionHash: 'b9bacdfc8ed42750f19bfae41dda9a07de29263b182e4e49d660876c886b780e', version: '1' },
+    { sectionHash: '4c431bf7a3aa72af3ff9e49b7d249bfe98cc3ce039f11f0c8d627a663b98b303', version: '1' },
   ],
   ['second-person', { sectionHash: '5b5fa597c03587feb40ba41386593007c04370bd01eb4e042bccf8e1b9e46427', version: '1' }],
   ['sentence-case', { sectionHash: 'e19ffdafdd6eb84f47e229d07871a70ab55114981c8052b365f4bd33330d9b18', version: '1' }],

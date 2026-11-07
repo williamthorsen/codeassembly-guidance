@@ -4,7 +4,7 @@ Standards for AI-generated artifact storage, naming, and lifecycle.
 
 ## Purpose
 
-The artifact directory is the developer's audit trail of development. Its plans, reviews, change summaries, pull-request and merge records, devlogs, and chat summaries record what an agent produced and when, each as it stood at the moment of writing (see [Mutability](#mutability)). The directory is not a source of truth, and it is not a home for durable content:
+The artifact directory is the developer's audit trail of development. Its plans, reviews, change summaries, pull-request and merge records, devlogs, and chat summaries record what an agent produced and when, each as it was at the moment of writing (see [Mutability](#mutability)). The directory is not a source of truth, and it is not a home for durable content:
 
 - **Durable content.** Put instructions, a procedure, or a reference that a later session must find in the repository (its docs, `AGENTS.md`, or a README), or in a skill or rulebook when they apply across repositories. A later session looks there, not in the artifact directory.
 - **Authority.** An artifact is not authority on the current state of code, design, or decisions. Treat what a search of artifacts turns up as history, and verify it against the repository, the tickets, and the pull requests.
@@ -400,7 +400,7 @@ The first `coder_change-summary` in a run does not have dispositions (nothing to
 - `dispositions`: The rendered dispositions of a triage of findings, the text that `triage-spike-findings` posts on the triage ticket: every item with its disposition, its confidence and value, where it went, and its reason, with the challenge's summary; the JSON record from which it is rendered stays in `triage/`
 - `devlog`: Development log entry (falls back to non-ticket path when a ticket is not in session)
 - `feedback-curation`: The record of a `curate-feedback` run: the count of events in each bin, the guidance commits against which the judges read, each mark with its result, and every event with its bin, reference, and reason; the run's working files stay in `{timestamp}_work/` beside it (falls back to non-ticket path when a ticket is not in session)
-- `feedback-triage`: The record of a `triage-feedback` run: each surfaced cluster of feedback events with its signals, priority, challenge, disposition, and result, and the remainder left in the pool. A deferred event's `addressed-by` names the artifact, whose filename timestamp dates the deferral; the run's working files stay in `{timestamp}_work/` beside it (falls back to non-ticket path when a ticket is not in session)
+- `feedback-triage`: The record of a `triage-feedback` run: each reported cluster of feedback events with its signals, priority, challenge, disposition, and result, and the remainder left in the pool. A deferred event's `addressed-by` names the artifact, whose filename timestamp dates the deferral; the run's working files stay in `{timestamp}_work/` beside it (falls back to non-ticket path when a ticket is not in session)
 - `idea-decisions`: The idea table of a round of prototypes with the decision on each idea filled; `prepare-prototype-brief` saves it after the developer decides each idea, and the end vision cites it
 - `merge`: Record of a merged pull request; `capture-lede-decision` reads its `## Body` as the merged side of a lede episode
 - `performance-findings`: The measured performance of a site and the improvements ranked by expected effect, with field and lab data reported separately, each improvement's evidence, metric, and effort, what was left unmeasured, and the method; `analyze-performance` saves it, and `triage-spike-findings` reads it
@@ -484,9 +484,9 @@ A finding therefore has one of exactly two shapes, and consumers may rely on the
 
 A named change still has to be worth making. Decide at this gate whether it is, having established at the [Proposed-change gate](#proposed-change-gate) that a change exists.
 
-A finding costs more than its line length: the reader's time, the tokens spent asking you to reconsider it, the author's triage, and every later reader who reads both the finding and its rejection. Treat emitting any finding as taking on a burden of proof, weighed against that full cost, never against its line length.
+A finding consumes more than its line length: the reader's time, the tokens spent asking you to reconsider it, the author's triage, and every later reader who reads both the finding and its rejection. Treat emitting any finding as taking on a burden of proof, weighed against everything that it consumes, never against its line length.
 
-This gate is the [concision principle](./concision.md) applied to findings: A finding, like any detail, costs every reader attention once that cost outweighs the decision that it enables.
+This gate is the [concision principle](./concision.md) applied to findings: A finding, like any detail, wastes every reader's attention once the attention that it takes outweighs the decision that it enables.
 
 **Hedging language is a delete trigger, not a softening device.** If a finding's own qualifiers make it irrelevant, it does not belong. Drop it. If the condition genuinely holds now, drop the qualifier instead and state the finding plainly. Disqualifying signs include:
 

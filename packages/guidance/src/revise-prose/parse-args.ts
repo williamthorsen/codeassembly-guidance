@@ -4,8 +4,9 @@ import { RULE_NAME_PATTERN, SWEEP_VERSION_PATTERN } from './parse-record.ts';
 import type { NamedRule, ParsedArgs } from './types.ts';
 
 /** The flags recognized by the sweep. Each of `rule` and `unit` may repeat; the scanner reports them in argv order. */
-const FLAG_SPECS: ReadonlyArray<FlagSpec<'batch-budget' | 'rule' | 'unit'>> = [
+const FLAG_SPECS: ReadonlyArray<FlagSpec<'batch-budget' | 'resweep' | 'rule' | 'unit'>> = [
   { name: 'batch-budget', takesValue: true },
+  { name: 'resweep', takesValue: false },
   { name: 'rule', takesValue: true },
   { name: 'unit', takesValue: true },
 ];
@@ -16,7 +17,8 @@ const FLAG_SPECS: ReadonlyArray<FlagSpec<'batch-budget' | 'rule' | 'unit'>> = [
  * `--rule <name>@<version>=<unit>` names a rule, its sweep version, and the unit owning it, whether or not the helper
  * has a detector for it; `--rule <name>=<unit>` names a rule that does not declare a sweep version, which is swept but
  * never recorded. `--unit <name>=<version>` names a unit in force and the version it is at. Both repeat.
- * `--batch-budget <bytes>` overrides the default ceiling.
+ * `--batch-budget <bytes>` overrides the default ceiling. `--resweep` reports every versioned rule as unswept for every
+ * scanned file, whatever coverage the record lists.
  *
  * @internal - Exported to allow testing.
  */
@@ -26,8 +28,13 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   const units = new Map<string, string>();
   const rules: NamedRule[] = [];
   let budget = DEFAULT_BATCH_BUDGET;
+  let resweep = false;
 
   for (const flag of scanned.flags) {
+    if (flag.name === 'resweep') {
+      resweep = true;
+      continue;
+    }
     const value = flag.value ?? '';
     if (flag.name === 'batch-budget') {
       budget = Number(value);
@@ -62,7 +69,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     }
   }
 
-  return { paths: scanned.positionals, rules, units, budget };
+  return { paths: scanned.positionals, rules, units, budget, resweep };
 }
 
 /** Drops a leading `detect` verb, so the command form and the bare path form parse alike. */

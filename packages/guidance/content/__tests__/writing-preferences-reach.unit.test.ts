@@ -17,7 +17,7 @@ const SLUG = 'williamthorsen-writing-preferences';
 
 /** Phrases from each rule that the rulebook states, so that a rule gutted to its heading does not pass. */
 const RULE_PHRASES: ReadonlyArray<string> = [
-  'A `by`-phrase names the actor in the same breath',
+  'A `by`-phrase names the actor in the same phrase',
   'A relative clause with an object gap takes an overt relativizer',
   'Capitalize a complete sentence, keep a fragment or list lowercase',
   'Capitalize what follows as though the label were absent',

@@ -15,6 +15,7 @@ describe(parseArgs, () => {
       rules: [],
       units: new Map(),
       budget: DEFAULT_BATCH_BUDGET,
+      resweep: false,
     });
   });
 
@@ -91,6 +92,10 @@ describe(parseArgs, () => {
 
   it('refuses a batch budget that a batch could not satisfy', () => {
     expect(() => parseArgs(['--batch-budget', '0'])).toThrow(/positive integer/);
+  });
+
+  it('reads --resweep as a flag that takes no value', () => {
+    expect(parseArgs(['--resweep', 'docs']).resweep).toBe(true);
   });
 
   it('reads a batch budget', () => {

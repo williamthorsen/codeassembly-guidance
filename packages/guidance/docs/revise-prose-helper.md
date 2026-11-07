@@ -7,7 +7,7 @@ One run covers one repository, resolved from the working directory through `git 
 ## Commands
 
 ```bash
-revise-prose.mjs [detect] [<path>...] [--rule <name>[@<version>]=<unit>] [--unit <name>=<version>] [--batch-budget <bytes>]
+revise-prose.mjs [detect] [<path>...] [--rule <name>[@<version>]=<unit>] [--unit <name>=<version>] [--batch-budget <bytes>] [--resweep]
 revise-prose.mjs record < fold.json
 ```
 
@@ -18,6 +18,8 @@ revise-prose.mjs record < fold.json
 A detector rule is one that the registry in `rules.ts` lists. A unit is a versioned document that contains rules: a rulebook, or `plain-speech`, which contains the rule `plain-speech` at the unit's version and each rule that a marker in its calibration declares. A rule need not have a detector. The helper does not read any rule document: The skill states which rules exist and what each says, and the registry defines what a rule finds. `detect` runs the detectors of the named rules that the registry lists, and its output lists the rules under `rules`, as `detected` and `undetected`. A name under `undetected` that was meant as a detector rule is misspelt.
 
 `--batch-budget` is the ceiling on a batch's combined file bytes, defaulting to 98304 (96 KiB), roughly 24k tokens of file content.
+
+`--resweep` lists every versioned rule as `unswept` in every batch, whatever coverage the record lists, so that a deliberate second sweep includes files that the record already covers. Recorded rejections still suppress their sites, and `record` records coverage as after any run.
 
 ## Detectors
 
