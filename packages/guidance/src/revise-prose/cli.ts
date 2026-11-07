@@ -145,7 +145,12 @@ export async function runDetect(
     // Plan from every candidate: A recurring sentence links its files before coverage decides which rules they need.
     const planned = planBatches({ files: scannedFiles, candidates: applied, budget: args.budget });
     const batches: ReportedBatch[] = planned
-      .map((batch) => ({ ...batch, unswept: listBatchUnsweptRules(record, ruleVersions, batch.files, hashes) }))
+      .map((batch) => ({
+        ...batch,
+        unswept: args.resweep
+          ? ruleVersions.keys().toArray().toSorted()
+          : listBatchUnsweptRules(record, ruleVersions, batch.files, hashes),
+      }))
       .filter((batch) => ruleVersions.size === 0 || batch.unswept.length > 0);
 
     const isInScope = buildBatchScope(batches, ruleVersions);
