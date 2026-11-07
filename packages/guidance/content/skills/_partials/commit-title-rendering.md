@@ -4,10 +4,11 @@ node {harness_home_dir}/scripts/describe-change.mjs render-titles \
   --scope "{scope}" \
   --type "{type}" \
   --ticket-ref "{ticket_ref}" \
+  --project-root "{project_root}" \
   | python3 -c "import sys,json; print(json.load(sys.stdin).get('commit_title',''))"
 ```
 
-Pass `--ticket-ref` from the bundled session-context deriver so that a project whose `commit.title_format` references `{ticket_ref}` renders the ref. Omit any flag whose value is empty or null, `--ticket-ref` included when session context reports it as `null`.
+Pass `--ticket-ref` from the bundled session-context deriver so that a project whose `commit.title_format` references `{ticket_ref}` renders the ref. Omit any flag whose value is empty or null, `--ticket-ref` included when session context reports it as `null`. Pass `--project-root` only when the invoking skill names the directory in which it works: The renderer reads `commit.title_format` from the project that contains the directory in which it runs, unless the flag names another.
 
 Parse the output with a JSON parser (`python3` above; `jq -r '.commit_title'` if `jq` is available) rather than `grep` or `cut`: A rendered title may contain backslash-escaped double quotes, which a regex extractor silently truncates.
 
