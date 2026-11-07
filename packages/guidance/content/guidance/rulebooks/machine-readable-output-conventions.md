@@ -78,7 +78,7 @@ An app that an agent or an end-to-end test must verify after a person's actions 
 
 ## TypeScript packages
 
-Three packages implement these rules, and an implementation in TypeScript starts from them. For another language, or for an app that cannot take the dependency, the rules above remain the contract. Each package's README states its API.
+Three packages implement these rules, and an implementation in TypeScript can start from them. The rules above remain the contract, whether or not an implementation uses them. Each package's README states its API.
 
 - **[`@williamthorsen/readout`](https://github.com/williamthorsen/showroom/tree/main/packages/readout#readme)** supplies the result type, which marks its sensitive fields, a JSON serializer that redacts them and names what it leaves out, the escaping that embedded data needs, and typed renderers over the result. It implements "Formats", "Sensitive fields", and the embedded data of "Results on a page".
 - **[`@williamthorsen/readout-journal`](https://github.com/williamthorsen/showroom/tree/main/packages/readout-journal#readme)** supplies a journal that a wrapped reducer derives from each state transition, its JSON form, and a renderer for each entry type. It implements "Journal".
