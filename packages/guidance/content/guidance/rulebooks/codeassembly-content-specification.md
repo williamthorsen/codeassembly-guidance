@@ -3,7 +3,7 @@ slug: codeassembly-content-specification
 description: The declaration contract and authoring doctrine for CodeAssembly skills, subagents, rulebooks, and collections -- frontmatter, dependencies, invocation tokens, how broad a guidance change goes, which kind of artifact it goes in, and when a procedure belongs in a helper.
 standalone: wanted by repositories that author CodeAssembly content, which declare it directly
 delivery: skill
-version: '32'
+version: '33'
 ---
 
 # CodeAssembly content specification
@@ -111,7 +111,7 @@ A `disposition:` states what membership in a collection that enumerates its memb
 - `personal`: Its members are fitted to one author. Its closure may include the members of personal and public collections.
 - `opt-in`: Its members are fitted to one vendor ecosystem. Its closure may include its own members and the members of public collections, and the closure of every other collection, other than an `'@library'` one, must not include its members, so that only a consumer declaring it deploys them.
 
-An artifact that is deliberately outside every collection declares `standalone:` in its own frontmatter, with the reason as the value. A collection must not enumerate it, and the closure of a collection, other than an `'@library'` one, must not include it. An artifact that several collections claim is within a closure's reach when any one of its claims is. `disposition:` on a collection whose members are computed, `standalone:` on a collection, and `disposition:` on any other type are errors.
+An artifact that is deliberately outside every collection declares `standalone:` in its own frontmatter, with the reason as the value. A collection must not enumerate it, and the closure of a collection, other than an `'@library'` one, must not include it. A closure may include an artifact that several collections claim when it may include the members of any one of those collections. `disposition:` on a collection whose members are computed, `standalone:` on a collection, and `disposition:` on any other type are errors.
 
 `validate` checks a root that declares a disposition, a standalone artifact, or an `'@unclaimed'` collection, and reports each of these as a `disposition` defect:
 

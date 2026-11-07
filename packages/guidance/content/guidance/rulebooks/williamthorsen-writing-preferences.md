@@ -2,7 +2,7 @@
 slug: williamthorsen-writing-preferences
 description: William Thorsen's personal writing preferences for agent-authored prose.
 delivery: [ambient, hook]
-version: '11'
+version: '12'
 ---
 
 # William Thorsen's writing preferences

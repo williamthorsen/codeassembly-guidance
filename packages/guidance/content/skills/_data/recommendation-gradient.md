@@ -51,7 +51,7 @@ Same surface phrasing, two correct renderings:
 > 1. ■■□ Close #412 as superseded by this change:
 >    - ➖ the alias request closes with it, and it is not tracked by any other ticket
 > 2. ■■□ Leave #412 open, retitled to the alias:
->    - ➖ its 30 comments about the shipped flag bury the one about the alias
+>    - ➖ its 30 comments about the flag that this change adds bury the one about the alias
 
 Both "yes" (close) and "no" (retitle) are concrete agent actions with their own tradeoffs. The decision edits a remote ticket, so it is in the gated class and is asked whatever the markers say.
 

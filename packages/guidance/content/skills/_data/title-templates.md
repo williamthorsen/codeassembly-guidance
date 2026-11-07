@@ -125,7 +125,7 @@ For a subject not matched by the template, the run reports `{"matched":false}` a
 
 **Under a template that does not name `{ticket_ref}`, the bundle strips one first.** The bundle removes three leading forms before the match: `## `, `#123 ` (with an optional `.1` or `-1` suffix), and `ABC-123 `. These are the forms that release-kit strips, which lets a commit template that does not name `{ticket_ref}` read a subject that contains one.
 
-**When a parse could read a group as present or absent, present wins.** This is release-kit's reading, and it makes `agents|feat: Add foo` parse as scoped and typed rather than as a bare title. See [What the grammar does not support](#what-the-grammar-does-not-support) for the cost.
+**When a parse could read a group as present or absent, present wins.** This is release-kit's reading, and it makes `agents|feat: Add foo` parse as scoped and typed rather than as a bare title. See [What the grammar does not support](#what-the-grammar-does-not-support) for the misreadings that this allows.
 
 The run refuses a surface whose template is empty, since there is nothing to read the subject through, and refuses if the taxonomy cannot be read.
 
@@ -614,7 +614,7 @@ A template that round-trips every well-formed record but loses a token for some 
 
 **Value-dependent ambiguity passes the check.** The check runs over well-formed values, so it accepts a template whose ambiguity depends on what a value happens to contain. Under `[{ticket_ref} ]{title}`, the title `#466 Add foo` reads back as ticket reference `#466` and title `Add foo`. Because that matches how release-kit reads it, the behavior is compatibility rather than a defect, but a caller that keeps both halves separately should not rely on a round trip to recover them.
 
-The same cost applies to the piped-scope convention, in which a present group wins. `Rename kb|docs: the shared layer` reads back as scope `Rename kb`, type `docs`, title `the shared layer`. The type check prevents the misreading when the type is nonsense, so `Support a|b: syntax` is unmatched, but not when the type is real.
+The same misreading affects the piped-scope convention, in which a present group wins. `Rename kb|docs: the shared layer` reads back as scope `Rename kb`, type `docs`, title `the shared layer`. The type check prevents the misreading when the type is nonsense, so `Support a|b: syntax` is unmatched, but not when the type is real.
 
 ## Scope values
 

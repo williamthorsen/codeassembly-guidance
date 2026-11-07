@@ -8,7 +8,7 @@ The render contract comes first; the doctrine behind it follows. Skills that clo
 
 ## Sweep before sending
 
-The failure prevented by this convention is not bad formatting. It is an ask that the agent never recognized as an ask. The formatting rules never applied to it. Before ending a turn, scan the draft for anything that invites a response and move every hit into the block.
+This convention prevents an ask that the agent never recognized as an ask, and to which the formatting rules therefore never applied. Before ending a turn, scan the draft for anything that invites a response and move every hit into the block.
 
 Soft offers are the hardest form to spot. Each phrases a question as a statement:
 
