@@ -176,3 +176,43 @@ const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 ```
 
 Under Jest, `jest.spyOn` takes the same form.
+
+## Time-driven behavior
+
+The `testing-conventions` skill states the rule: A test of time-driven behavior controls the clock. Under Vitest, call `vi.useFakeTimers()` in `beforeEach` and `vi.useRealTimers()` in `afterEach`, and move time with `vi.advanceTimersByTimeAsync`. Prefer it to `vi.advanceTimersByTime`, because it also settles the promises that the fired timers start, so that code that awaits between ticks keeps pace with the clock. Jest takes the same calls on `jest`.
+
+```typescript
+// ✅ Good: The test advances the clock past the next tick and asserts the count
+beforeEach(() => {
+  vi.useFakeTimers();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
+
+it('when stopped, does not poll again', async () => {
+  const fetchStatus = vi.fn();
+  const poller = startPolling(fetchStatus, { intervalMs: 20 });
+  await vi.advanceTimersByTimeAsync(20);
+  expect(fetchStatus).toHaveBeenCalledTimes(1);
+
+  poller.stop();
+  await vi.advanceTimersByTimeAsync(40);
+  expect(fetchStatus).toHaveBeenCalledTimes(1);
+});
+
+// ❌ Avoid: The test sleeps on real time, and fails when load delays a tick past the sleep
+it('when stopped, does not poll again', async () => {
+  const fetchStatus = vi.fn();
+  const poller = startPolling(fetchStatus, { intervalMs: 20 });
+  await new Promise((resolve) => setTimeout(resolve, 30));
+  expect(fetchStatus).toHaveBeenCalledTimes(1);
+
+  poller.stop();
+  await new Promise((resolve) => setTimeout(resolve, 60));
+  expect(fetchStatus).toHaveBeenCalledTimes(1);
+});
+```
+
+To run a changed test under load, start several copies of `vitest run <file> --repeats <n>` at once, so that they compete for the CPU. Run Vitest directly: A wrapper that runs one heavy command at a time on the machine, such as nmr's machine lock, makes the copies wait for each other, and the machine never comes under load. A project whose tests run against a repo-root config passes the same `--config` that its test script passes.
