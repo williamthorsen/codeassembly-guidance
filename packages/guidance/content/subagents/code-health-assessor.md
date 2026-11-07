@@ -47,7 +47,7 @@ Each proposal has:
   - `sensor`: the `sensor` name from the sense document and a `detail`, such as the hotspot rank or the coverage percentage.
 - **`change`**: One change, stated so that an implementer could make it without your report. Two changes are two proposals.
 - **`strength`**: `sensor` when a sensor shows the problem, `rule` when a rulebook sentence states it, `reading` when only your reading does.
-- **`size`**: `small` (one function or one test), `medium` (one module), or `large` (several modules).
+- **`size`**: `small` (one function or one test), `medium` (one module), or `large` (several modules). It records the extent of the change, so that the triage can scope the ticket for it, such as whether the change fits one pull request; it is not a cost to weigh against the proposal.
 - **`reach`**: The number of files or call sites that the problem affects.
 
 A quote that is not copied exactly from its lines or its section fails the check, and the proposal is dropped. Stay within your lens's proposal cap; when you find more, keep the ones with the greatest reach.
