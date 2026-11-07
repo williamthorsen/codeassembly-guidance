@@ -99,4 +99,4 @@ Save the document with {skill:save-artifact} as a ticket-level `performance-find
 
 ### 7. Report
 
-Once the developer approves the findings, give the artifact's path and one line of counts: pages measured, metrics failing by class, and improvements by effort. Name {skill:triage-spike-findings} as the next step, with the artifact's path as its input.
+Once the developer approves the findings, give the artifact's path and one line of counts: pages measured, metrics failing by class, and improvements by effort. Name {skill:triage-spike-findings} as the next step, with the artifact's path as its input. Improvements above the ceiling of a [findings batch](../_data/spike-conventions.md#findings-batches) are triaged in several batches, each on its own ticket.
