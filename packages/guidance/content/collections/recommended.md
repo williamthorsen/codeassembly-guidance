@@ -27,7 +27,7 @@ The skills belong here on different grounds. A rulebook of the personal collecti
 
 `generated-content-policy` qualifies on its own terms too: What it states is a mechanism that every consumer meets, not a preference, and the guidance that a reader needs beyond the trigger is in the linked reference rather than in the ambient body loaded by every session.
 
-`accessibility-conventions` also qualifies on its own terms. It states an external standard, WCAG 2.2 AA, floors, and rules for placing controls that do not name any author, repository, or tool. Its body does not contain any invocation token, so its closure is empty.
+`accessibility-conventions` also qualifies on its own terms. It states WCAG 2.2 AA, an external standard, and adds floors and rules for interactive controls that do not name any author, repository, or tool. Its body does not contain any invocation token, so its closure is empty.
 
 `cli-conventions` qualifies on its own terms as well. What it asks of a CLI's options, configuration, help, exit codes, errors, JSON output, progress reports, and check results, and of the split between its logic and its presentation, follows from who reads them, a person at a terminal that cannot follow a link and a script or an agent that reads the exit code and the streams, rather than from a preference. It does not name any author, repository, language, or tool. Its body does not contain any invocation token, so its closure is empty.
 

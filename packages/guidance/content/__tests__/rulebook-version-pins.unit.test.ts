@@ -36,7 +36,7 @@ interface RulePin {
 const PINS = new Map<string, RulebookPin>([
   [
     'accessibility-conventions',
-    { bodyHash: 'be7a54d6b674208536250981d10f709a9f0f40dc10e34eb858706437047b0e26', version: '3' },
+    { bodyHash: 'e27512b99147755b38d58a7b16c1db8bb95eafe9aa978c2fb29e1e318fe79c7a', version: '4' },
   ],
   ['cli-conventions', { bodyHash: '5b1f6c171be28b86b8f61d1ea798be8a232117ecec80ba7f5db83ca7844475e4', version: '6' }],
   [

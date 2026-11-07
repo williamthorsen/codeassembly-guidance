@@ -2,7 +2,7 @@
 slug: accessibility-conventions
 description: 'Accessibility of interfaces: usability before style, contrast and size floors for text, the placement, model, and states of interactive controls, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before designing or placing a control that opens a region or toggles a setting, before defining or changing colour tokens, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
 delivery: [skill]
-version: '3'
+version: '4'
 ---
 
 # Accessibility conventions
@@ -19,7 +19,7 @@ The standard is WCAG 2.2 AA. This rulebook restates only the values that an agen
 
 Check contrast whenever colour tokens are defined or changed. Compute the WCAG contrast ratio of each text token against each surface token on which it is used, in each theme, compositing any translucent colour or `opacity` over its surface first. Report every failing pair with its ratio, and fix it before presenting the page.
 
-## Controls that reveal or toggle
+## Designing controls
 
 - **Named model.** Before designing an affordance, name the established model that the feature most resembles, such as a browser's developer tools, an editor's side panel, or a panel that the product already has, and follow it. Depart from the model only for a reason, and record the reason wherever the design is recorded. Example: An activity drawer follows the editor side-panel model.
 - **Placement.** A control that opens or closes a region sits at that region's edge or in a persistent toolbar, never in an unrelated group of actions. Example: ❌ An "Activity" button among the page header's actions opens a drawer on the right. ✅ The toggle sits at the right end of the toolbar, on the drawer's side.
