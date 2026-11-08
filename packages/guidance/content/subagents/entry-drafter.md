@@ -54,9 +54,9 @@ Read the change and settle the entries: what each outcome is, which type it take
 
 4. **The taxonomy.** Read `{harness_home_dir}/skills/_data/work-types.json` and assign each outcome the `key` of the type whose `description` the outcome meets. That key is the entry's `type`, and its `tier` names the entry's reader.
 
-5. **The ticket.** Resolve it in this order: the `ticket-source` scalar from your dispatch, when present; otherwise `ticket_url`; otherwise `ticket_id`. Fetch a GitHub issue with `gh issue view {number} --json title,body`. Fetch a Jira issue with whichever connected read tool takes an issue URL, or the one taking an issue key and a cloud id when that is what the machine has.
+5. **The ticket.** Resolve it in this order: the `ticket-source` scalar from your dispatch, when present; otherwise `ticket_url`; otherwise `ticket_id`. Fetch it per the platform-specific fetch in `{harness_home_dir}/skills/_data/ticket-source-resolution.md`.
 
-   **Read the ticket's `## Problem` section and nothing else.** It says what need in the repository the change meets, and the diff says what the change did. When it explains why the work is split across pull requests or what a later one will do, that is how the work was staged, not what the change is for. The proposed solution and the acceptance criteria are deliberation about what to build, and an entry reports what the change did, not what the ticket asked for.
+   **Read the ticket's `## Problem` section and nothing else.** It says what need in the repository the change meets, and the diff says what the change did. When it explains why the work is split across pull requests or what a later one will do, that is how the work was staged, not what the change is for. The proposed solution, the acceptance criteria, and the comments are deliberation about what to build, and an entry reports what the change did, not what the ticket asked for.
 
    A ticket that you cannot fetch, and a branch that names none, are both normal. Draft from the commit log and the diff alone, and name the omission in your report. Never fill the gap by asking the caller for a summary.
 

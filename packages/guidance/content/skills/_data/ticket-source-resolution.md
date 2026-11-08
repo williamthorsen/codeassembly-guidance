@@ -9,7 +9,7 @@ Resolve a ticket source argument into ticket content and metadata. Skills that a
 | URL to a known platform (GitHub, Jira, etc.)                | Use the platform CLI or a connected read tool if available; otherwise, fetch the URL content     |
 | Other URL                                                   | Fetch the URL content                                                                            |
 | Shorthand reference (`#99`, `issue 99`, `GitHub issue #99`) | Resolve platform (see below), then fetch per [platform-specific fetch](#platform-specific-fetch) |
-| File path                                                   | Read the file                                                                                    |
+| File path                                                   | Read the file, then read its remote comments per [Comments](#comments)                           |
 | Plain text                                                  | Use as-is                                                                                        |
 | _(no source provided)_                                      | Auto-resolve from environment (see [auto-resolve](#auto-resolve))                                |
 
@@ -66,10 +66,10 @@ Determine which platform `#99` refers to using the [platform resolution cascade]
 ### GitHub
 
 ```
-gh issue view --json number,title,body,labels,updatedAt {number}
+gh issue view --json number,title,body,comments,labels,updatedAt {number}
 ```
 
-Skills may request a subset of these fields. The `updatedAt` field is needed by skills that perform temporal analysis (e.g., staleness checks) and may be omitted by skills that only need the ticket content.
+Skills may request a subset of these fields, and a subset that includes `body` also includes `comments`. The `updatedAt` field is needed by skills that perform temporal analysis (e.g., staleness checks) and may be omitted by skills that only need the ticket content.
 
 ### Jira
 
@@ -89,6 +89,12 @@ Read the ticket body with the default view, which renders the description as tex
 acli jira workitem view {key}
 ```
 
+The view does not include the comments. Read them with a second call, which also renders as text, and treat its non-zero exit as the view's:
+
+```
+acli jira workitem comment list --key {key} --paginate
+```
+
 When the source is a Jira URL rather than a key, the key is its `PROJECT-NUMBER` segment, which is the final segment of a `/browse/` URL.
 
 When a skill needs structured metadata, such as the `updated` timestamp for a staleness check, add `--json --fields '*navigable,-description'`. The `--json` flag returns the raw REST v3 response, in which the description is Atlassian Document Format rather than Markdown, so exclude it there and take the body from the default view. First-time setup is `acli jira auth login --web`, a browser flow that does not mint an API token.
@@ -98,11 +104,21 @@ When a skill needs structured metadata, such as the `updated` timestamp for a st
 - **Takes an issue URL**: Pass the ticket URL. Prefer this shape when both are connected, since it does not need site resolution.
 - **Takes an issue key and a cloud ID**: Resolve the cloud ID first, from the same server's tool listing accessible Atlassian sites. It is the `id` of the site whose URL matches the ticket URL's host, or of the sole site listed when the ticket URL is not known. If neither settles it, ask the user which site hosts the ticket. Resolve it once and reuse it for the rest of the session.
 
+A tool of either shape that takes a field list is asked for the `comment` field with the issue; one that returns every field does not need it.
+
 **A client that the machine adds.** {skill?:update-jira-ticket} lists any Jira client that this machine adds to the cascade, with the sites that it can access and its rank. Read through it as its entry states.
 
 **Last resort.** When no client can read the ticket and `check-site` reported a mismatch, report the wrong site rather than a missing ticket: Repeat the helper's stderr line, which names both sites and the `acli jira auth switch` command. Never run that command, because the active site is shared by every session on the machine. When no client is available, present the Jira key and ask the user for the ticket content. When `ticket.base_url` is configured, the ticket URL is reconstructed from the base and `ticket_id` (per [auto-resolve](#auto-resolve) step 4d), so it does not have to be supplied or re-pasted. A caller with a sound default source may substitute it for that prompt, as [When auto-resolve fails](#when-auto-resolve-fails) allows.
 
 The stored URL applies throughout: A Jira ticket URL resolved once is reused on later sessions, and it is invalidated like any other stored URL when it does not yield the expected ticket (see [Stored ticket URL](#stored-ticket-url)). A site mismatch does not invalidate the stored URL, because it does not show that the ticket is missing.
+
+## Comments
+
+A ticket's comments are part of its content: A comment can record an assessment, a decision, a scope change, or a correction that the body does not contain. Both platform fetches above return them oldest first.
+
+**The body stays the ticket of record.** A comment that extends or contradicts the body is a divergence. Report it through the divergence report that the reading skill already makes, and when the skill does not make one, name the comment and how it diverges in the skill's own output. Never apply such a comment silently, and never ignore it.
+
+**A file.** A ticket artifact copies the body at one moment, so a comment posted after the copy is missing from it. When the file's frontmatter names a `ticket_ref`, read that remote ticket's comments per [platform-specific fetch](#platform-specific-fetch), as [Open blockers](#open-blockers) reads its blockers. A file without a `ticket_ref` does not have any comments to read.
 
 ## Open blockers
 
@@ -118,7 +134,7 @@ Name a blocker `#N` when its URL has the same `owner/repo` as the ticket's, and 
 
 **Jira.** Read the links through the Jira clients that [platform-specific fetch](#platform-specific-fetch) ranks, after the same site check: `acli jira workitem view {key} --json --fields issuelinks`, or a connected read tool asked for the `issuelinks` field. A blocker is a link whose `type.name` is `Blocks`, or whose `type.inward` reads `is blocked by`, and that has an `inwardIssue`. It is open while `inwardIssue.fields.status.statusCategory.key` is not `done`. Name it by its key and `fields.summary`.
 
-**A file.** A ticket artifact copies a remote ticket, so a ticket that resolved from a file is checked against the remote ticket that its frontmatter `ticket_ref` names, resolved per [shorthand reference resolution](#shorthand-reference-resolution). A file without a `ticket_ref` is not checked.
+**A file.** A ticket artifact copies a remote ticket, so a ticket that resolved from a file is checked against the remote ticket that its frontmatter `ticket_ref` names, resolved per [shorthand reference resolution](#shorthand-reference-resolution). A file without a `ticket_ref` is not checked. [Comments](#comments) reads the same remote ticket's comments.
 
 **Other sources.** A ticket that resolved from plain text or from another platform is not checked, and the skill says nothing about blockers. Because a project hosted on Bitbucket keeps its tickets in Jira, its tickets are checked as Jira tickets.
 
@@ -174,6 +190,7 @@ After resolution, store the following metadata for use by the calling skill:
 - **Issue number**: The numeric identifier, if applicable
 - **Last-updated date**: The ticket's last-modified timestamp, if available from the platform
 - **Ticket content**: The title, body, labels, and any other retrieved fields
+- **Comments**: Each comment's author, date, and body, oldest first, read per [Comments](#comments)
 - **Open blockers**: For a skill that checks them, each open blocker's reference and title, read per [Open blockers](#open-blockers)
 - **Ticket URL**: Persisted across sessions in the branch manifest's `ticket_url` field, written through the deriver's mutation flags; see [Stored ticket URL](#stored-ticket-url)
 
