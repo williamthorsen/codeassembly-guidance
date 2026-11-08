@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const FIXED_CONFIG = [
   '-c',
@@ -20,8 +20,6 @@ export interface RemoteFixture {
   root: string;
   upstream: string;
   work: string;
-  /** Removes every directory of the fixture. */
-  remove(): void;
 }
 
 /**
@@ -38,7 +36,7 @@ export function git(cwd: string, ...args: string[]): string {
 
 /** Creates a bare remote whose `main` has one commit, and two clones of it, in a fresh temporary directory. */
 export function makeRemoteFixture(): RemoteFixture {
-  const root = realpathSync(mkdtempSync(path.join(tmpdir(), 'check-branch-currency-')));
+  const root = makeScratchDir('check-branch-currency-');
   const remote = path.join(root, 'remote.git');
   const upstream = path.join(root, 'upstream');
   const work = path.join(root, 'work');
@@ -56,8 +54,5 @@ export function makeRemoteFixture(): RemoteFixture {
     root,
     upstream,
     work,
-    remove: () => {
-      rmSync(root, { force: true, recursive: true });
-    },
   };
 }

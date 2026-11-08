@@ -1,11 +1,9 @@
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { compileTemplate, render, type Taxonomy, verify } from '@williamthorsen/change-grammar';
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { loadPreferences } from '../load-preferences.ts';
 import { SURFACES } from '../types.ts';
 
@@ -74,7 +72,7 @@ describe('this repository’s title templates', () => {
  * none.
  */
 async function loadRepositoryTemplates(): Promise<Record<(typeof SURFACES)[number], string>> {
-  const home = await mkdtemp(join(tmpdir(), 'repository-templates-home-'));
+  const home = makeScratchDir('repository-templates-home-');
   const { templates } = await loadPreferences({ home, projectRoot: REPO_ROOT });
   return templates;
 }

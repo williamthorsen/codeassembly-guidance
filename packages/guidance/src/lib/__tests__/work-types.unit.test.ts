@@ -1,5 +1,4 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,6 +6,7 @@ import type { Taxonomy } from '@williamthorsen/change-grammar';
 import { describe, expect, it } from 'vitest';
 
 import embeddedTaxonomy from '../../../content/skills/_data/work-types.json' with { type: 'json' };
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import {
   describeTaxonomyLocation,
   loadTaxonomy,
@@ -112,7 +112,7 @@ describe(loadTaxonomy, () => {
   });
 
   it("yields null when the directory doesn't contain a taxonomy", async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'work-types-'));
+    const dataDir = makeScratchDir('work-types-');
 
     await expect(loadTaxonomy(dataDir)).resolves.toBeNull();
   });
@@ -153,7 +153,7 @@ describe(loadWorkTypeHeadings, () => {
   });
 
   it("yields null when the directory doesn't contain a taxonomy", async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'work-types-'));
+    const dataDir = makeScratchDir('work-types-');
 
     await expect(loadWorkTypeHeadings(dataDir)).resolves.toBeNull();
   });
@@ -212,13 +212,13 @@ describe(loadWorkTypes, () => {
   });
 
   it("yields null when the directory doesn't contain a taxonomy", async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'work-types-'));
+    const dataDir = makeScratchDir('work-types-');
 
     await expect(loadWorkTypes(dataDir)).resolves.toBeNull();
   });
 
   it('yields null for a taxonomy that is not valid JSON', async () => {
-    const dataDir = await mkdtemp(join(tmpdir(), 'work-types-'));
+    const dataDir = makeScratchDir('work-types-');
     await writeFile(join(dataDir, 'work-types.json'), '{ types: ', 'utf8');
 
     await expect(loadWorkTypes(dataDir)).resolves.toBeNull();
@@ -294,7 +294,7 @@ async function readTaxonomy(taxonomy: unknown): Promise<Taxonomy> {
 
 /** Writes a taxonomy document to a fresh temporary directory and yields that directory. */
 async function writeTaxonomy(taxonomy: unknown): Promise<string> {
-  const dataDir = await mkdtemp(join(tmpdir(), 'work-types-'));
+  const dataDir = makeScratchDir('work-types-');
   await writeFile(join(dataDir, 'work-types.json'), JSON.stringify(taxonomy), 'utf8');
   return dataDir;
 }

@@ -1,9 +1,6 @@
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { collect } from '../collect.ts';
 import { summarize } from '../summarize.ts';
 import { buildFakeDependencies, type FakeHandlers } from '../test-utils/fake-dependencies.ts';
@@ -13,11 +10,7 @@ describe('summarize', () => {
   let out: string;
 
   beforeEach(() => {
-    out = mkdtempSync(path.join(tmpdir(), 'analyze-performance-summarize-'));
-  });
-
-  afterEach(() => {
-    rmSync(out, { recursive: true, force: true });
+    out = makeScratchDir('analyze-performance-summarize-');
   });
 
   it('takes the median of each lab metric across runs, keeps each run value, and classes the median', async () => {

@@ -1,11 +1,11 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -14,7 +14,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * field is rewritten to the current instant on every invocation.
  */
 export function makeKbEditSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'kb-edit-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('kb-edit-smoke-');
   mkdirSync(resolveKbDir(fixtureDir), { recursive: true });
   const notePath = path.join(fixtureDir, 'Smoke.md');
   writeFileSync(

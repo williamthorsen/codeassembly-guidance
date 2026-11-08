@@ -1,8 +1,8 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * renders its index page. Exercises the manifest read → page render → write pipeline.
  */
 export function makeIndexPrototypesSmokeTest(): SmokeTestInvocation {
-  const setDir = mkdtempSync(path.join(tmpdir(), 'index-prototypes-smoke-'));
+  const setDir = makeSmokeScratchDir('index-prototypes-smoke-');
   writeFileSync(
     path.join(setDir, 'manifest.json'),
     JSON.stringify({

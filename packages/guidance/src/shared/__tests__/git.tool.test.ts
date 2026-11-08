@@ -1,23 +1,21 @@
 import { execFileSync } from 'node:child_process';
-import { realpathSync } from 'node:fs';
-import { mkdir, mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { realGit } from '../git.ts';
 
 describe('realGit', () => {
   let scratch: string;
 
-  beforeEach(async () => {
-    scratch = realpathSync(await mkdtemp(path.join(tmpdir(), 'shared-git-')));
+  beforeEach(() => {
+    scratch = makeScratchDir('shared-git-');
   });
 
-  afterEach(async () => {
+  afterEach(() => {
     vi.unstubAllEnvs();
-    await rm(scratch, { recursive: true, force: true });
   });
 
   describe('findCurrentBranch', () => {

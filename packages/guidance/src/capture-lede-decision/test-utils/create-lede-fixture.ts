@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 /** The lede that the fixture's pull-request artifact contains. */
 export const FIXTURE_AGENT_LEDE = 'Rulebooks can now address a file by linking to it.';
@@ -42,7 +43,7 @@ export async function createLedeFixture(
     ticketId?: string;
   } = {},
 ): Promise<LedeFixture> {
-  const root = await mkdtemp(join(tmpdir(), 'lede-decision-'));
+  const root = makeScratchDir('lede-decision-');
   const artifactDir = join(root, 'tickets', '1107');
   const dataDir = join(root, '_data');
   const subagentsDir = join(root, 'agents');

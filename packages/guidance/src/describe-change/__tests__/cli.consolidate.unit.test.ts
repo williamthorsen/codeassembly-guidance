@@ -1,9 +1,8 @@
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runDescribe } from '../cli.ts';
 import { parseArgs } from '../parse-args.ts';
 import { DATA_DIR, ENTRIES_YAML, HOUSE_TEMPLATES, makeRepo, writeEntries } from '../test-utils/cli-fixtures.ts';
@@ -136,7 +135,7 @@ describe('consolidate-branch', () => {
 
   it('refuses when the data directory does not contain a readable taxonomy', async () => {
     const { cwd, git, home } = await makeCommittedRepo(['agents|feat: Add the parser']);
-    const dataDir = await mkdtemp(join(tmpdir(), 'describe-change-data-'));
+    const dataDir = makeScratchDir('describe-change-data-');
 
     await expect(runDescribe({ argv: CONSOLIDATE_BASE, cwd, git, dataDir, home })).rejects.toThrow(
       /consolidate-branch ranks types against the taxonomy/,

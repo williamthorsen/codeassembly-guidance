@@ -1,8 +1,8 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * span, and asserts that the bundle ran the overused-word detector and reported nothing.
  */
 export function makeCheckProseSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'check-prose-'));
+  const dir = makeSmokeScratchDir('check-prose-');
   const filePath = path.join(dir, 'prose-check.md');
   writeFileSync(filePath, 'The helper reads the file and calls `route` once.\n', 'utf8');
   return { args: ['--file', filePath, '--json'], cwd: dir, assertResult: assertCleanCheck };

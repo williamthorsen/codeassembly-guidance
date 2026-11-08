@@ -1,10 +1,8 @@
-import { mkdtempSync, realpathSync } from 'node:fs';
-import { rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { realGit } from '../git.ts';
 import { git, makeGitFixture } from '../test-utils/make-git-fixture.ts';
 
@@ -14,12 +12,7 @@ describe('realGit', () => {
 
   beforeEach(() => {
     root = makeGitFixture('groom-git-');
-    linked = `${root}-linked`;
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
-    await rm(linked, { recursive: true, force: true });
+    linked = path.join(makeScratchDir('groom-git-linked-'), 'linked');
   });
 
   describe('findCommonDir', () => {
@@ -110,20 +103,15 @@ describe('realGit', () => {
   describe('listWorktrees', () => {
     it('lists each worktree with its full branch ref, and a detached one without a branch', async () => {
       git(root, 'worktree', 'add', '--quiet', '-b', '11-feature', linked);
-      const detached = realpathSync(mkdtempSync(path.join(tmpdir(), 'groom-git-detached-')));
-      await rm(detached, { recursive: true, force: true });
+      const detached = path.join(makeScratchDir('groom-git-detached-'), 'detached');
       git(root, 'worktree', 'add', '--quiet', '--detach', detached);
-      try {
-        const worktrees = await realGit.listWorktrees(root);
+      const worktrees = await realGit.listWorktrees(root);
 
-        // Git orders linked worktrees by path, and the temporary paths are random.
-        expect(worktrees[0]).toStrictEqual({ branchRef: 'refs/heads/main', path: root });
-        expect(worktrees.slice(1)).toHaveLength(2);
-        expect(worktrees).toContainEqual({ branchRef: 'refs/heads/11-feature', path: linked });
-        expect(worktrees).toContainEqual({ branchRef: undefined, path: detached });
-      } finally {
-        await rm(detached, { recursive: true, force: true });
-      }
+      // Git orders linked worktrees by path, and the temporary paths are random.
+      expect(worktrees[0]).toStrictEqual({ branchRef: 'refs/heads/main', path: root });
+      expect(worktrees.slice(1)).toHaveLength(2);
+      expect(worktrees).toContainEqual({ branchRef: 'refs/heads/11-feature', path: linked });
+      expect(worktrees).toContainEqual({ branchRef: undefined, path: detached });
     });
   });
 });

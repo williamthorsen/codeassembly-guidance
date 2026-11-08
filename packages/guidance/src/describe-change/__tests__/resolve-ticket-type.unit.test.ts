@@ -1,9 +1,9 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { resolveTicketType } from '../resolve-ticket-type.ts';
 
 const TYPES = { deprecate: 'deprecation', drop: 'removal', feat: 'feature', fix: 'fix' };
@@ -40,13 +40,13 @@ describe(resolveTicketType, () => {
   });
 
   it('yields nothing when the repository does not configure a label map', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'resolve-ticket-type-'));
+    const dir = makeScratchDir('resolve-ticket-type-');
 
     expect(await resolveTicketType({ labelMapPath: join(dir, 'absent.json'), labels: ['feature'] })).toBeUndefined();
   });
 
   it('yields nothing when the label map is not valid JSON', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'resolve-ticket-type-'));
+    const dir = makeScratchDir('resolve-ticket-type-');
     const labelMapPath = join(dir, 'label-map.json');
     await writeFile(labelMapPath, '{ not json', 'utf8');
 
@@ -64,7 +64,7 @@ describe(resolveTicketType, () => {
 
 /** Writes a label map under a scratch directory and returns its path. */
 async function writeLabelMap(content: unknown): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'resolve-ticket-type-'));
+  const dir = makeScratchDir('resolve-ticket-type-');
   const labelMapPath = join(dir, 'label-map.json');
   await writeFile(labelMapPath, JSON.stringify(content), 'utf8');
   return labelMapPath;

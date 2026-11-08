@@ -1,8 +1,8 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * read → schema → render → write pipeline through the bundle.
  */
 export function makeCurateFeedbackSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'curate-feedback-'));
+  const dir = makeSmokeScratchDir('curate-feedback-');
   const file = path.join(dir, 'record.json');
   const out = path.join(dir, 'artifact.md');
   const record = {

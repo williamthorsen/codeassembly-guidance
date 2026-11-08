@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCapture } from '../cli.ts';
 import { makeStore, makeStoreDir } from '../test-utils/make-store.ts';
 import { NO_REMOTE_GIT } from '../test-utils/no-remote-git.ts';
@@ -13,7 +13,7 @@ import { NOW } from '../test-utils/now.ts';
 describe(runCapture, () => {
   it('writes to the registered store, not a .kb in cwd, when capturing from a directory containing one', async () => {
     const { storePath, home } = await makeStore('codeassembly');
-    const cwdWithKb = await mkdtemp(join(tmpdir(), 'capture-cli-cwdkb-'));
+    const cwdWithKb = makeScratchDir('capture-cli-cwdkb-');
     await mkdir(join(cwdWithKb, '.kb'), { recursive: true });
 
     const result = await runCapture({
@@ -35,7 +35,7 @@ describe(runCapture, () => {
   });
 
   it('fails when the named store is not registered', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-empty-'));
+    const home = makeScratchDir('capture-cli-empty-');
 
     const result = await runCapture({
       git: NO_REMOTE_GIT,
@@ -56,7 +56,7 @@ describe(runCapture, () => {
   it('writes to the --store override, not the configured default_kb', async () => {
     const defaultStore = await makeStoreDir();
     const namedStore = await makeStoreDir();
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-twostore-'));
+    const home = makeScratchDir('capture-cli-twostore-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
@@ -86,7 +86,7 @@ describe(runCapture, () => {
   it('fails with missing-store, listing the non-default store and marking the registry default', async () => {
     const defaultStore = await makeStoreDir();
     const otherStore = await makeStoreDir();
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-missingstore-'));
+    const home = makeScratchDir('capture-cli-missingstore-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
@@ -116,7 +116,7 @@ describe(runCapture, () => {
   });
 
   it('fails with no-default-store when --store @default is given but default_kb is not configured', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-nodefault-'));
+    const home = makeScratchDir('capture-cli-nodefault-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(join(home, '.agents', 'kb.yaml'), 'kbs:\n  codeassembly:\n    path: /tmp/whatever\n', 'utf8');
 
@@ -139,7 +139,7 @@ describe(runCapture, () => {
   it('writes to the feedback_kb, not the default_kb, when --store @feedback is given', async () => {
     const defaultStore = await makeStoreDir();
     const feedbackStore = await makeStoreDir();
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-feedback-'));
+    const home = makeScratchDir('capture-cli-feedback-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
@@ -191,7 +191,7 @@ describe(runCapture, () => {
   it('fails with missing-store, naming both role sentinels when both roles are configured', async () => {
     const defaultStore = await makeStoreDir();
     const feedbackStore = await makeStoreDir();
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-missingroles-'));
+    const home = makeScratchDir('capture-cli-missingroles-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
@@ -220,7 +220,7 @@ describe(runCapture, () => {
 
   it('names the registry-load cause when --store names a registered store but default_kb is unresolvable', async () => {
     const storePath = await makeStoreDir();
-    const home = await mkdtemp(join(tmpdir(), 'capture-cli-poisoned-'));
+    const home = makeScratchDir('capture-cli-poisoned-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),

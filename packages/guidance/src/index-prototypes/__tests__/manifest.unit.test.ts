@@ -1,9 +1,9 @@
-import { mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import {
   formatId,
   isValidSlug,
@@ -89,20 +89,20 @@ describe(listLatestEntries, () => {
 
 describe(readManifest, () => {
   it('reports a missing manifest', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
 
     await expect(readManifest(setDir)).resolves.toEqual({ kind: 'missing' });
   });
 
   it('reports a manifest that is not JSON', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     await writeFile(path.join(setDir, 'manifest.json'), '{', 'utf8');
 
     await expect(readManifest(setDir)).resolves.toMatchObject({ kind: 'invalid' });
   });
 
   it('reports a manifest whose entry lacks a field', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const { shot: _omitted, ...partial } = buildEntry('a', 1);
     await writeFile(
       path.join(setDir, 'manifest.json'),
@@ -114,7 +114,7 @@ describe(readManifest, () => {
   });
 
   it('numbers a manifest without numbers in first-registration order', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const entries = [buildEntry('b', 1), buildEntry('a', 1), buildEntry('b', 2)].map(stripNumber);
     await writeFile(
       path.join(setDir, 'manifest.json'),
@@ -132,7 +132,7 @@ describe(readManifest, () => {
   });
 
   it("numbers unnumbered slugs past the highest number and takes each slug's highest numbered version", async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const entries = [buildEntry('a', 1, 3), stripNumber(buildEntry('b', 1)), buildEntry('a', 2, 5)];
     await writeFile(
       path.join(setDir, 'manifest.json'),
@@ -150,7 +150,7 @@ describe(readManifest, () => {
   });
 
   it.each([0, -1, 1.5, '1'])('reports an entry whose number is %j', async (number) => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const entries = [{ ...buildEntry('a', 1), number }];
     await writeFile(
       path.join(setDir, 'manifest.json'),
@@ -162,7 +162,7 @@ describe(readManifest, () => {
   });
 
   it('reads a manifest without a summary or notes as having none', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const { notes: _omitted, ...entry } = buildEntry('a', 1);
     await writeFile(
       path.join(setDir, 'manifest.json'),
@@ -181,7 +181,7 @@ describe(readManifest, () => {
     ['a note without a value', null, [{ label: 'Search' }]],
     ['notes that are not a list', null, 'Search: top'],
   ])('reports %s', async (_case, summary, notes) => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     await writeFile(
       path.join(setDir, 'manifest.json'),
       JSON.stringify({ title: 'T', indexUrl: null, summary, entries: [{ ...buildEntry('a', 1), notes }] }),
@@ -192,7 +192,7 @@ describe(readManifest, () => {
   });
 
   it('round-trips a written manifest without leaving a temporary file', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-manifest-'));
+    const setDir = makeScratchDir('index-prototypes-manifest-');
     const manifest: Manifest = {
       ...buildManifest([{ ...buildEntry('a', 1), notes: [{ label: 'Search', value: 'Top bar' }] }]),
       summary: { shared: 'Same data.', changes: null, try: ['Search for a title.'] },

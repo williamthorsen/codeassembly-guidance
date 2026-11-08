@@ -1,10 +1,8 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -14,7 +12,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * adapter needs a real repository to read.
  */
 export function makeGroomBacklogSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'groom-backlog-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('groom-backlog-smoke-');
   execFileSync('git', ['-C', fixtureDir, 'init', '--quiet']);
 
   return {

@@ -1,10 +1,10 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { CANONICAL_TAXONOMY } from '@williamthorsen/change-grammar';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import {
   buildWorkTypesDocument,
   checkWorkTypesFile,
@@ -34,13 +34,9 @@ describe(checkWorkTypesFile, () => {
   let scratch: string;
   let filePath: string;
 
-  beforeEach(async () => {
-    scratch = await mkdtemp(path.join(tmpdir(), 'work-types-document-'));
+  beforeEach(() => {
+    scratch = makeScratchDir('work-types-document-');
     filePath = path.join(scratch, 'work-types.json');
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { force: true, recursive: true });
   });
 
   it('reports a file that matches the serialized document as current', async () => {

@@ -1,10 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 const PARTIAL = 'skills/_partials/shared.md';
@@ -17,7 +17,7 @@ const TARGET = 'skills/demo/SKILL.md';
  * so the bundle's real adapter needs a real repository to read.
  */
 export function makeStreamlineGuidanceSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'streamline-guidance-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('streamline-guidance-smoke-');
   execFileSync('git', ['-C', fixtureDir, 'init', '--quiet']);
   writeFixtureFile(fixtureDir, 'codeassembly-content.yaml', 'format: 2\n');
   writeFixtureFile(fixtureDir, PARTIAL, 'Shared text.\n');

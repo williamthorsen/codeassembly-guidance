@@ -1,8 +1,8 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * Exercises the record read → schema → rules pipeline through the bundle.
  */
 export function makeTriageFeedbackSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'triage-feedback-'));
+  const dir = makeSmokeScratchDir('triage-feedback-');
   const file = path.join(dir, 'record.json');
   const record = {
     store: 'codeassembly',

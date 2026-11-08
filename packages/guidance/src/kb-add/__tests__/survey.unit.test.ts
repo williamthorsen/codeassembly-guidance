@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { surveyKb } from '../survey.ts';
 
 /** Every path with which `readFile` was called, so that the survey can be shown not to open any note. */
@@ -143,7 +143,7 @@ describe(surveyKb, () => {
 
 /** Creates a temp store with an initialized `.kb/` and the given store-root-relative files; returns its path. */
 async function makeStore(files: Record<string, string>): Promise<string> {
-  const kbPath = await mkdtemp(join(tmpdir(), 'kb-add-survey-'));
+  const kbPath = makeScratchDir('kb-add-survey-');
   await mkdir(join(kbPath, '.kb'), { recursive: true });
   for (const [relativePath, content] of Object.entries(files)) {
     const full = join(kbPath, relativePath);

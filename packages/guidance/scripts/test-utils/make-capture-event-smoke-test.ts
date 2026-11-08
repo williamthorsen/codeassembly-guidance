@@ -1,12 +1,12 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -15,10 +15,10 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * @default`. Exercises the `@default` sentinel resolution → `parseEvent` spine validation → write pipeline.
  */
 export function makeCaptureEventSmokeTest(): SmokeTestInvocation {
-  const storePath = mkdtempSync(path.join(tmpdir(), 'capture-event-store-'));
+  const storePath = makeSmokeScratchDir('capture-event-store-');
   mkdirSync(resolveKbDir(storePath), { recursive: true });
 
-  const home = mkdtempSync(path.join(tmpdir(), 'capture-event-home-'));
+  const home = makeSmokeScratchDir('capture-event-home-');
   mkdirSync(path.join(home, '.agents'), { recursive: true });
   writeFileSync(
     path.join(home, '.agents', 'kb.yaml'),
@@ -26,7 +26,7 @@ export function makeCaptureEventSmokeTest(): SmokeTestInvocation {
     'utf8',
   );
 
-  const repo = mkdtempSync(path.join(tmpdir(), 'capture-event-repo-'));
+  const repo = makeSmokeScratchDir('capture-event-repo-');
   execFileSync('git', ['-C', repo, 'init', '--quiet']);
   execFileSync('git', ['-C', repo, 'remote', 'add', 'origin', 'git@github.com:williamthorsen/codeassembly.git']);
 

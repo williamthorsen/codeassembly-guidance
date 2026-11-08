@@ -1,9 +1,9 @@
-import { chmod, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { declareDomain } from '../declare-domain.ts';
 
 const NOTE =
@@ -120,7 +120,7 @@ describe(declareDomain, () => {
 
 /** Creates a temp store with an initialized `.kb/` and the given store-root-relative files; returns its path. */
 async function makeStore(files: Record<string, string>): Promise<string> {
-  const kbPath = await mkdtemp(join(tmpdir(), 'kb-add-declare-'));
+  const kbPath = makeScratchDir('kb-add-declare-');
   await mkdir(join(kbPath, '.kb'), { recursive: true });
   for (const [relativePath, content] of Object.entries(files)) {
     await writeFile(join(kbPath, relativePath), content, 'utf8');

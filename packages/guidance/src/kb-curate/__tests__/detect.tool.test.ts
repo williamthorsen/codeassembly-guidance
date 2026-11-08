@@ -1,18 +1,18 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { enumerateNotes } from '@williamthorsen/kb/check';
 import { defaultKbConfig } from '@williamthorsen/kb/config';
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { detectCurateFindings, sortFindings } from '../detect.ts';
 
 const NOW = new Date('2026-05-29T00:00:00Z');
 
 /** Creates a temp vault, writing each file under `content/` so that the default targets enumerate it. */
 async function makeVault(files: Record<string, string>): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'kb-curate-detect-'));
+  const root = makeScratchDir('kb-curate-detect-');
   await mkdir(join(root, '.kb'), { recursive: true });
   for (const [relativePath, content] of Object.entries(files)) {
     const full = join(root, 'content', relativePath);

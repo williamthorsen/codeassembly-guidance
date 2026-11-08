@@ -1,15 +1,15 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { loadPreferences } from '../load-preferences.ts';
 
 describe(loadPreferences, () => {
   it('resolves each surface from the global file when the project file is absent', async () => {
     const home = await makePreferences('home', "commit:\n  title_format: '{type}: {title}'\n");
-    const projectRoot = await mkdtemp(join(tmpdir(), 'describe-change-project-'));
+    const projectRoot = makeScratchDir('describe-change-project-');
 
     const { templates, warnings } = await loadPreferences({ home, projectRoot });
 
@@ -57,8 +57,8 @@ describe(loadPreferences, () => {
   });
 
   it('yields four empty templates when neither file exists', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
-    const projectRoot = await mkdtemp(join(tmpdir(), 'describe-change-project-'));
+    const home = makeScratchDir('describe-change-home-');
+    const projectRoot = makeScratchDir('describe-change-project-');
 
     const { templates, warnings } = await loadPreferences({ home, projectRoot });
 
@@ -67,7 +67,7 @@ describe(loadPreferences, () => {
   });
 
   it('preserves a template whose YAML quoting would otherwise truncate it', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
+    const home = makeScratchDir('describe-change-home-');
     const projectRoot = await makePreferences(
       'project',
       "merge:\n  title_format: '[{ticket_ref} ]{title}[ (#{pr_number})]' # the squash subject\n",
@@ -89,7 +89,7 @@ describe(loadPreferences, () => {
   });
 
   it('throws naming the file when its YAML is malformed', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
+    const home = makeScratchDir('describe-change-home-');
     const projectRoot = await makePreferences('project', 'commit:\n  title_format: "unterminated\n');
 
     await expect(loadPreferences({ home, projectRoot })).rejects.toThrow(/preferences\.yaml: malformed YAML/);
@@ -100,7 +100,7 @@ describe(loadPreferences, () => {
 
 /** Creates a temp directory containing `.agents/preferences.yaml` with `content`, and returns the directory. */
 async function makePreferences(label: string, content: string): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), `describe-change-${label}-`));
+  const root = makeScratchDir(`describe-change-${label}-`);
   await mkdir(join(root, '.agents'), { recursive: true });
   await writeFile(join(root, '.agents', 'preferences.yaml'), content, 'utf8');
   return root;

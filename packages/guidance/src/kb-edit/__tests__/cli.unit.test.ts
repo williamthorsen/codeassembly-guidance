@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runEdit } from '../cli.ts';
 
 const NOW = new Date('2026-05-24T14:35:00Z');
@@ -169,7 +169,7 @@ describe(runEdit, () => {
   });
 
   it('returns missing-destination when the note path is not inside any .kb/', async () => {
-    const wd = await mkdtemp(join(tmpdir(), 'kb-edit-orphan-'));
+    const wd = makeScratchDir('kb-edit-orphan-');
     const path = join(wd, 'note.md');
     await writeFile(path, SAMPLE_NOTE, 'utf8');
 
@@ -189,7 +189,7 @@ describe(runEdit, () => {
 
   it('returns readonly-kb when the note resolves into a readonly registry entry', async () => {
     const { kbPath, notePath } = await makeKbWithNote();
-    const homeDir = await mkdtemp(join(tmpdir(), 'kb-edit-readonly-home-'));
+    const homeDir = makeScratchDir('kb-edit-readonly-home-');
     await mkdir(join(homeDir, '.agents'), { recursive: true });
     await writeFile(
       join(homeDir, '.agents', 'kb.yaml'),
@@ -385,7 +385,7 @@ describe(runEdit, () => {
   });
 
   it('is idempotent on the deprecated tag when it is already present', async () => {
-    const kbPath = await mkdtemp(join(tmpdir(), 'kb-edit-cli-dep-'));
+    const kbPath = makeScratchDir('kb-edit-cli-dep-');
     await mkdir(join(kbPath, '.kb'), { recursive: true });
     const oldPath = join(kbPath, 'Old.md');
     const newPath = join(kbPath, 'New.md');
@@ -538,7 +538,7 @@ describe(runEdit, () => {
 
   it('reports a per-record missing-destination failure for a target outside any KB', async () => {
     const { kbPath, notePath } = await makeKbWithNote();
-    const orphanDir = await mkdtemp(join(tmpdir(), 'kb-edit-orphan-batch-'));
+    const orphanDir = makeScratchDir('kb-edit-orphan-batch-');
     const orphan = join(orphanDir, 'orphan.md');
     await writeFile(orphan, SAMPLE_NOTE.replace('Sample', 'Orphan'), 'utf8');
 
@@ -567,7 +567,7 @@ describe(runEdit, () => {
 
 /** Creates a temporary KB containing one seed note, and returns both paths. */
 async function makeKbWithNote(): Promise<{ kbPath: string; notePath: string }> {
-  const kbPath = await mkdtemp(join(tmpdir(), 'kb-edit-cli-'));
+  const kbPath = makeScratchDir('kb-edit-cli-');
   await mkdir(join(kbPath, '.kb'), { recursive: true });
   const notePath = join(kbPath, 'Sample.md');
   await writeFile(notePath, SAMPLE_NOTE, 'utf8');

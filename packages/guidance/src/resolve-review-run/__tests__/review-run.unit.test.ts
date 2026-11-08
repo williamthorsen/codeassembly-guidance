@@ -1,20 +1,16 @@
-import { mkdir, mkdtemp, readdir, rm, stat, utimes, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readdir, stat, utimes, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { findActiveRun, findLatestReview, openRun } from '../review-run.ts';
 
 describe('findActiveRun', () => {
   let ticketDir: string;
 
-  beforeEach(async () => {
-    ticketDir = await mkdtemp(path.join(tmpdir(), 'review-run-'));
-  });
-
-  afterEach(async () => {
-    await rm(ticketDir, { force: true, recursive: true });
+  beforeEach(() => {
+    ticketDir = makeScratchDir('review-run-');
   });
 
   it('selects the newest interactive run, skipping a newer orchestrated run', async () => {
@@ -39,12 +35,8 @@ describe('findActiveRun', () => {
 describe('findLatestReview', () => {
   let ticketDir: string;
 
-  beforeEach(async () => {
-    ticketDir = await mkdtemp(path.join(tmpdir(), 'review-run-'));
-  });
-
-  afterEach(async () => {
-    await rm(ticketDir, { force: true, recursive: true });
+  beforeEach(() => {
+    ticketDir = makeScratchDir('review-run-');
   });
 
   it('selects the newest review among reviewer and overseer files in the active run', async () => {
@@ -145,12 +137,8 @@ describe('findLatestReview', () => {
 describe('openRun', () => {
   let ticketDir: string;
 
-  beforeEach(async () => {
-    ticketDir = await mkdtemp(path.join(tmpdir(), 'review-run-'));
-  });
-
-  afterEach(async () => {
-    await rm(ticketDir, { force: true, recursive: true });
+  beforeEach(() => {
+    ticketDir = makeScratchDir('review-run-');
   });
 
   it('creates the interactive run directory named for the timestamp when the ticket directory does not contain an active run', async () => {

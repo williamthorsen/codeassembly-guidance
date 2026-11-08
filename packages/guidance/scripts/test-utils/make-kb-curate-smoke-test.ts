@@ -1,11 +1,11 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { CONTENT_DIR, resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -13,7 +13,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * it. Exercises the resolve → enumerate → detect pipeline.
  */
 export function makeKbCurateSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'kb-curate-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('kb-curate-smoke-');
   mkdirSync(resolveKbDir(fixtureDir), { recursive: true });
   // The seed note is under `content/` so that the store's default `targets: ['content/**/*.md']` enumerates it; a
   // note at the store root would not match and the smoke test would silently report zero notes. The note links to a

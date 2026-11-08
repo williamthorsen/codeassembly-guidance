@@ -1,9 +1,9 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { buildHelp, DEFAULT_DEFER_DAYS, runCli } from '../cli.ts';
 import type { CommandResult } from '../command-support.ts';
 import { makeStore, seedEvents } from '../test-utils/seed-store.ts';
@@ -23,7 +23,7 @@ interface Fixture {
 /** Creates the fixture store, its home, and a work directory, and writes the inventory when asked. */
 async function setUp(options: { inventory?: boolean } = {}): Promise<Fixture> {
   const { storePath, home } = await makeStore('fixture');
-  const work = await mkdtemp(join(tmpdir(), 'lesson-clusters-work-'));
+  const work = makeScratchDir('lesson-clusters-work-');
   await seedEvents(storePath, [
     { id: '01A', capturedAt: '2026-10-01T00:00:00Z' },
     { id: '01B', capturedAt: '2026-10-05T00:00:00Z', impact: 'high' },

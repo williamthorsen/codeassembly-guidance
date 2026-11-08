@@ -1,10 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCli } from '../cli.ts';
 import { realGit } from '../git.ts';
 import { pinSources } from '../pin.ts';
@@ -18,12 +18,8 @@ describe(pinSources, () => {
   let sha: string;
 
   beforeEach(async () => {
-    base = await realpath(await mkdtemp(path.join(tmpdir(), 'curate-pin-')));
+    base = makeScratchDir('curate-pin-');
     ({ guide, sha } = await makeGuideClone(base));
-  });
-
-  afterEach(async () => {
-    await rm(base, { recursive: true, force: true });
   });
 
   it('pins two source directories of one GitHub repository at its default branch, sharing one pin', async () => {
@@ -79,60 +75,56 @@ describe(pinSources, () => {
 
 describe('validate against a pinned repository', () => {
   it('accepts a covered quote that the file contains at the pin, and rejects an absent path or quote', async () => {
-    const base = await realpath(await mkdtemp(path.join(tmpdir(), 'curate-validate-')));
-    try {
-      const { guide, sha } = await makeGuideClone(base);
-      const work = path.join(base, 'work');
-      await mkdir(work);
-      const pin = { repo: 'acme/guide', root: guide, branch: 'main', sha, sources: [guide] };
-      const assignment = {
-        store: 'fixture',
-        clusters: [
-          {
-            id: 'one',
-            lesson: 'One.',
-            events: [
-              { id: '01A', summary: 'A', excerpt: '' },
-              { id: '01B', summary: 'B', excerpt: '' },
-              { id: '01C', summary: 'C', excerpt: '' },
-            ],
-          },
-        ],
-        references: [],
-        pins: [pin],
-      };
-      await writeFile(path.join(work, 'assignment-01.json'), JSON.stringify(assignment), 'utf8');
-      const bins = {
-        events: [
-          { id: '01A', bin: 'covered', source: 'acme/guide', path: 'rules/headings.md', quote: QUOTE, reason: 'It.' },
-          { id: '01B', bin: 'covered', source: 'acme/guide', path: 'rules/missing.md', quote: QUOTE, reason: 'It.' },
-          {
-            id: '01C',
-            bin: 'covered',
-            source: 'acme/guide',
-            path: 'rules/headings.md',
-            quote: 'Use title case.',
-            reason: 'It.',
-          },
-        ],
-      };
-      await writeFile(path.join(work, 'bins-01.json'), JSON.stringify(bins), 'utf8');
+    const base = makeScratchDir('curate-validate-');
+    const { guide, sha } = await makeGuideClone(base);
+    const work = path.join(base, 'work');
+    await mkdir(work);
+    const pin = { repo: 'acme/guide', root: guide, branch: 'main', sha, sources: [guide] };
+    const assignment = {
+      store: 'fixture',
+      clusters: [
+        {
+          id: 'one',
+          lesson: 'One.',
+          events: [
+            { id: '01A', summary: 'A', excerpt: '' },
+            { id: '01B', summary: 'B', excerpt: '' },
+            { id: '01C', summary: 'C', excerpt: '' },
+          ],
+        },
+      ],
+      references: [],
+      pins: [pin],
+    };
+    await writeFile(path.join(work, 'assignment-01.json'), JSON.stringify(assignment), 'utf8');
+    const bins = {
+      events: [
+        { id: '01A', bin: 'covered', source: 'acme/guide', path: 'rules/headings.md', quote: QUOTE, reason: 'It.' },
+        { id: '01B', bin: 'covered', source: 'acme/guide', path: 'rules/missing.md', quote: QUOTE, reason: 'It.' },
+        {
+          id: '01C',
+          bin: 'covered',
+          source: 'acme/guide',
+          path: 'rules/headings.md',
+          quote: 'Use title case.',
+          reason: 'It.',
+        },
+      ],
+    };
+    await writeFile(path.join(work, 'bins-01.json'), JSON.stringify(bins), 'utf8');
 
-      const result = await runCli(['validate', '--assignments', work, '--out', path.join(work, 'record.json')], {
-        cwd: work,
-      });
+    const result = await runCli(['validate', '--assignments', work, '--out', path.join(work, 'record.json')], {
+      cwd: work,
+    });
 
-      expect(result).toMatchObject({
-        ok: false,
-        error: 'invalid-bins',
-        violations: [
-          { event: '01B', message: `rules/missing.md does not exist in acme/guide at ${sha}` },
-          { event: '01C', message: `the quote does not appear in rules/headings.md in acme/guide at ${sha}` },
-        ],
-      });
-    } finally {
-      await rm(base, { recursive: true, force: true });
-    }
+    expect(result).toMatchObject({
+      ok: false,
+      error: 'invalid-bins',
+      violations: [
+        { event: '01B', message: `rules/missing.md does not exist in acme/guide at ${sha}` },
+        { event: '01C', message: `the quote does not appear in rules/headings.md in acme/guide at ${sha}` },
+      ],
+    });
   });
 });
 

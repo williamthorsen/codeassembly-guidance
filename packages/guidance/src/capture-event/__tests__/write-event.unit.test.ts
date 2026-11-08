@@ -1,9 +1,9 @@
-import { mkdtemp, readdir, readFile, stat } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readdir, readFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { writeEvent } from '../write-event.ts';
 
 const ID = '01HZZZZZZZZZZZZZZZZZZZZZZZZ';
@@ -11,7 +11,7 @@ const CONTENT = '---\nrecordType: event\nid: 01HZ\n---\n\nBody.\n';
 
 describe(writeEvent, () => {
   it('writes the record to content/events/{id}.md under the store root', async () => {
-    const storePath = await mkdtemp(join(tmpdir(), 'capture-write-'));
+    const storePath = makeScratchDir('capture-write-');
 
     const path = await writeEvent({ storePath, id: ID, content: CONTENT });
 
@@ -20,7 +20,7 @@ describe(writeEvent, () => {
   });
 
   it('creates the content/events directory when it does not exist', async () => {
-    const storePath = await mkdtemp(join(tmpdir(), 'capture-write-'));
+    const storePath = makeScratchDir('capture-write-');
 
     await writeEvent({ storePath, id: ID, content: CONTENT });
 
@@ -29,7 +29,7 @@ describe(writeEvent, () => {
   });
 
   it('refuses to overwrite an existing record with the same id', async () => {
-    const storePath = await mkdtemp(join(tmpdir(), 'capture-write-'));
+    const storePath = makeScratchDir('capture-write-');
 
     await writeEvent({ storePath, id: ID, content: CONTENT });
 
@@ -38,7 +38,7 @@ describe(writeEvent, () => {
   });
 
   it('does not leave any temp file in the content/events directory after a successful write', async () => {
-    const storePath = await mkdtemp(join(tmpdir(), 'capture-write-'));
+    const storePath = makeScratchDir('capture-write-');
 
     await writeEvent({ storePath, id: ID, content: CONTENT });
 

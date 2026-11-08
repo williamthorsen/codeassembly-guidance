@@ -1,10 +1,9 @@
-import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import type { SensorResult } from '../schemas.ts';
 import type { SenseDependencies, ToolOutcome } from '../sense.ts';
 import {
@@ -22,13 +21,9 @@ describe('runStructuralSensors', () => {
   let root: string;
   let calls: Array<{ command: string; args: readonly string[] }>;
 
-  beforeEach(async () => {
-    root = realpathSync(await mkdtemp(path.join(tmpdir(), 'code-health-structural-')));
+  beforeEach(() => {
+    root = makeScratchDir('code-health-structural-');
     calls = [];
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
   });
 
   it('records every sensor as not applicable when the unit has no files', () => {

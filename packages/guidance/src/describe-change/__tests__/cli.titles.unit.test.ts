@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { renderChangeRecordBlock } from '../change-record-block.ts';
 import { runDescribe } from '../cli.ts';
 import { parseArgs } from '../parse-args.ts';
@@ -203,7 +203,7 @@ describe('render-titles', () => {
 
   it('warns rather than failing outside a repository', async () => {
     const home = await makeHome(HOUSE_TEMPLATES);
-    const cwd = await mkdtemp(join(tmpdir(), 'describe-change-loose-'));
+    const cwd = makeScratchDir('describe-change-loose-');
     const git = makeFakeGit();
 
     const { output, warnings } = await runDescribe({
@@ -220,7 +220,7 @@ describe('render-titles', () => {
 
   it('warns and skips verification when the data directory does not contain a readable taxonomy', async () => {
     const { cwd, git, home } = await makeRepo(HOUSE_TEMPLATES);
-    const dataDir = await mkdtemp(join(tmpdir(), 'describe-change-data-'));
+    const dataDir = makeScratchDir('describe-change-data-');
 
     const { output, warnings } = await runDescribe({
       argv: ['render-titles', '--title', 'Add foo'],
@@ -316,7 +316,7 @@ describe('parse-title', () => {
 
   it('refuses when the data directory does not contain a readable taxonomy', async () => {
     const { cwd, git, home } = await makeRepo(HOUSE_TEMPLATES);
-    const dataDir = await mkdtemp(join(tmpdir(), 'describe-change-data-'));
+    const dataDir = makeScratchDir('describe-change-data-');
 
     await expect(
       runDescribe({ argv: ['parse-title', 'commit', 'agents|feat: Add foo'], cwd, git, dataDir, home }),
@@ -422,7 +422,7 @@ describe('render-block', () => {
 
 /** Creates a temp home directory containing `.agents/preferences.yaml` with `content`. */
 async function makeHome(content: string): Promise<string> {
-  const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
+  const home = makeScratchDir('describe-change-home-');
   await writeAgentsPreferences(home, content);
   return home;
 }

@@ -1,5 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -7,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import type { SharedGit } from '../../shared/git.ts';
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { parseArgs, runCapture } from '../cli.ts';
 import { makeStore } from '../test-utils/make-store.ts';
 import { NO_REMOTE_GIT } from '../test-utils/no-remote-git.ts';
@@ -274,7 +274,7 @@ describe(runCapture, () => {
 
   it('writes an event with repo absent when cwd does not have a git remote', async () => {
     const { home } = await makeStore('codeassembly');
-    const bareDir = await mkdtemp(join(tmpdir(), 'capture-cli-norepo-'));
+    const bareDir = makeScratchDir('capture-cli-norepo-');
 
     const result = await runCapture({
       git: NO_REMOTE_GIT,

@@ -1,22 +1,19 @@
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { makeScratchDir } from '../../src/test-utils/make-scratch-dir.ts';
 
 const binPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../codeassembly-validate-preferences.js');
 
 describe('codeassembly-validate-preferences', () => {
   let workDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'validate-preferences-bin-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('validate-preferences-bin-');
   });
 
   it('exits 0 and reports the file valid when it conforms', async () => {

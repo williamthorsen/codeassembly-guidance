@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 /** The frontmatter of a fixture event; any field left out takes a fixed default. */
 export interface SeedEvent {
@@ -17,9 +18,9 @@ export interface SeedEvent {
 
 /** Creates a temp store and an isolated home whose `kb.yaml` registers it under `name` and as `feedback_kb`. */
 export async function makeStore(name = 'fixture'): Promise<{ storePath: string; home: string }> {
-  const storePath = await mkdtemp(join(tmpdir(), 'lesson-clusters-store-'));
+  const storePath = makeScratchDir('lesson-clusters-store-');
   await mkdir(join(storePath, '.kb'), { recursive: true });
-  const home = await mkdtemp(join(tmpdir(), 'lesson-clusters-home-'));
+  const home = makeScratchDir('lesson-clusters-home-');
   await mkdir(join(home, '.agents'), { recursive: true });
   await writeFile(
     join(home, '.agents', 'kb.yaml'),

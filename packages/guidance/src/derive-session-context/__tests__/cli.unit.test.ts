@@ -1,11 +1,11 @@
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { chmod, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { deriveSessionContext } from '../cli.ts';
 
 /** A git adapter for a working directory without any remote. */
@@ -25,12 +25,8 @@ const WORKING_BRANCH = 'add-cache';
 describe(deriveSessionContext, () => {
   let workDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'derive-session-context-cli-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('derive-session-context-cli-');
   });
 
   it('derives and writes a manifest when none exists', async () => {
@@ -184,7 +180,7 @@ describe(deriveSessionContext, () => {
         deriveSessionContext({ git: NO_REMOTE_GIT, cwd: workDir, branch: 'main', now: NOW, home: workDir }),
       ).rejects.toThrow();
     } finally {
-      // Restore permissions so that afterEach cleanup can remove the directory tree.
+      // Restore permissions so that cleanup can remove the directory tree.
       await chmod(agentsDir, 0o755);
     }
   });

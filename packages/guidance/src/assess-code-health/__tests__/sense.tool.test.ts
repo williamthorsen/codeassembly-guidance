@@ -1,11 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCli } from '../cli.ts';
 import { SenseDocumentSchema } from '../schemas.ts';
 import { buildContext } from '../test-utils/build-context.ts';
@@ -13,8 +12,8 @@ import { buildContext } from '../test-utils/build-context.ts';
 describe('sense', () => {
   let scratch: string;
 
-  beforeEach(async () => {
-    scratch = realpathSync(await mkdtemp(path.join(tmpdir(), 'code-health-sense-')));
+  beforeEach(() => {
+    scratch = makeScratchDir('code-health-sense-');
     git('init', '--quiet', '--initial-branch=main');
     writeFileSync(path.join(scratch, '.gitattributes'), 'pkg/gen.ts linguist-generated\n');
     for (let round = 0; round < 3; round += 1) {
@@ -25,10 +24,6 @@ describe('sense', () => {
       writeFile('outside.ts', `outside ${round}\n`);
       commit(`round ${round}`);
     }
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   it('writes hotspots and co-change for the unit, excluding generated files and lockfiles', async () => {

@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runRecord, runResolve } from '../cli.ts';
 import type { StreamlineGit } from '../git.ts';
 import { RECORD_PATH } from '../record.ts';
@@ -24,17 +24,13 @@ describe(runRecord, () => {
   let repository: string;
 
   beforeEach(async () => {
-    repository = await realpath(await mkdtemp(path.join(tmpdir(), 'streamline-record-')));
+    repository = makeScratchDir('streamline-record-');
     for (const [file, content] of Object.entries(REPOSITORY_FILES)) {
       await mkdir(path.dirname(path.join(repository, file)), { recursive: true });
       await writeFile(path.join(repository, file), content, 'utf8');
     }
     const files = Object.keys(REPOSITORY_FILES);
     git = makeFakeGit({ topLevel: repository, files, changed: files });
-  });
-
-  afterEach(async () => {
-    await rm(repository, { recursive: true, force: true });
   });
 
   it('writes the record that a later resolve reads its declined cuts from', async () => {

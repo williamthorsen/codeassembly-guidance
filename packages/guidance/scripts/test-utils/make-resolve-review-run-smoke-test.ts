@@ -1,8 +1,8 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 const RUN_DIR_NAME = '20261004-101500Z-interactive';
@@ -11,7 +11,7 @@ const REVIEW_FILE_NAME = '20261004-101500Z_reviewer_review.md';
 
 /** Builds a ticket directory containing one run and its review, then returns an invocation that looks the review up. */
 export function makeResolveReviewRunSmokeTest(): SmokeTestInvocation {
-  const ticketDir = mkdtempSync(path.join(tmpdir(), 'resolve-review-run-'));
+  const ticketDir = makeSmokeScratchDir('resolve-review-run-');
   const runDir = path.join(ticketDir, RUN_DIR_NAME);
   mkdirSync(runDir);
   writeFileSync(path.join(runDir, REVIEW_FILE_NAME), '', 'utf8');

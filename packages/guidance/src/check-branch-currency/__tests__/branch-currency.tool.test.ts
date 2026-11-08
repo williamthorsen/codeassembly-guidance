@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { checkBranchCurrency } from '../branch-currency.ts';
 import { git, makeRemoteFixture, type RemoteFixture } from '../test-utils/make-remote-fixture.ts';
@@ -11,10 +11,6 @@ describe(checkBranchCurrency, () => {
 
   beforeEach(() => {
     fixture = makeRemoteFixture();
-  });
-
-  afterEach(() => {
-    fixture.remove();
   });
 
   it('reports a branch level with the base as current', () => {

@@ -3,7 +3,7 @@ import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { isRecord } from '../../lib/type-guards.ts';
 import { git, makeRemoteFixture, type RemoteFixture } from '../test-utils/make-remote-fixture.ts';
@@ -17,10 +17,6 @@ describe('check-branch-currency CLI', () => {
 
   beforeEach(() => {
     fixture = makeRemoteFixture();
-  });
-
-  afterEach(() => {
-    fixture.remove();
   });
 
   it('prints the result as JSON, passing each --path to the check', async () => {

@@ -1,11 +1,11 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { enumerateNotes } from '@williamthorsen/kb/check';
 import { defaultKbConfig } from '@williamthorsen/kb/config';
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { applyFixes } from '../apply.ts';
 
 const ORIGINAL_FRONTMATTER =
@@ -16,7 +16,7 @@ const TARGET = '---\ntitle: Foo\ntype: howto\ncreated: 2026-05-01\nupdated: 2026
 
 /** Creates a temp vault with a `.kb/`, writing each note under `content/` so that the default targets enumerate it. */
 async function makeVault(files: Record<string, string>): Promise<string> {
-  const kbPath = await mkdtemp(join(tmpdir(), 'kb-curate-apply-'));
+  const kbPath = makeScratchDir('kb-curate-apply-');
   await mkdir(join(kbPath, '.kb'), { recursive: true });
   for (const [relativePath, content] of Object.entries(files)) {
     const full = join(kbPath, 'content', relativePath);

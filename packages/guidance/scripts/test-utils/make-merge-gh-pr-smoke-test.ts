@@ -1,9 +1,9 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -12,7 +12,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * check, and the deletion without contacting GitHub.
  */
 export function makeMergeGhPrSmokeTest(): SmokeTestInvocation {
-  const binDir = mkdtempSync(path.join(tmpdir(), 'merge-gh-pr-bin-'));
+  const binDir = makeSmokeScratchDir('merge-gh-pr-bin-');
   const view = JSON.stringify({
     state: 'MERGED',
     mergeCommit: { oid: 'abc123' },

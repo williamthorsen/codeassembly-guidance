@@ -1,18 +1,20 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
  * Puts a `gh` stand-in first on `PATH`, then returns an invocation that resolves `acme/widgets` through it. The stand-in
  * reports the repository, serves its label map, and returns 404 for its preferences file, so the run exercises a fetch
- * and a missing file without contacting GitHub.
+ * and a missing file without contacting GitHub. `TMPDIR` names a fixture directory, because the helper leaves its
+ * `ticket-target-*` directory under the temp directory for the calling skill to read.
  */
 export function makeResolveTicketTargetSmokeTest(): SmokeTestInvocation {
-  const binDir = mkdtempSync(path.join(tmpdir(), 'resolve-ticket-target-bin-'));
+  const binDir = makeSmokeScratchDir('resolve-ticket-target-bin-');
+  const tempRoot = makeSmokeScratchDir('resolve-ticket-target-tmp-');
   const ghPath = path.join(binDir, 'gh');
   const script = [
     `#!${process.execPath}`,
@@ -26,7 +28,7 @@ export function makeResolveTicketTargetSmokeTest(): SmokeTestInvocation {
 
   return {
     args: ['--repo', 'acme/widgets'],
-    env: { ...process.env, PATH: `${binDir}${path.delimiter}${process.env['PATH'] ?? ''}` },
+    env: { ...process.env, PATH: `${binDir}${path.delimiter}${process.env['PATH'] ?? ''}`, TMPDIR: tempRoot },
     assertResult: assertPreferencesMissing,
   };
 }

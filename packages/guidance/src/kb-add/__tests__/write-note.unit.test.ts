@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import type { KbAssertion } from '@williamthorsen/kb/records';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { composeFilename, writeNote } from '../write-note.ts';
 
 /** Builds a baseline assertion record for the writer under test, with overrides merged in. */
@@ -63,9 +63,8 @@ describe(composeFilename, () => {
 describe(writeNote, () => {
   let kbPath: string;
 
-  // No cleanup: A failed test's temp directory stays in `tmpdir` for inspection.
-  beforeEach(async () => {
-    kbPath = await mkdtemp(join(tmpdir(), 'kb-add-write-'));
+  beforeEach(() => {
+    kbPath = makeScratchDir('kb-add-write-');
   });
 
   it('writes a note directly under content/assertions when a folder is not given', async () => {

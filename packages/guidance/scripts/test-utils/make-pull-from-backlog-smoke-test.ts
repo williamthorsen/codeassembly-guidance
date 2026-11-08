@@ -1,10 +1,8 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -15,7 +13,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * outlive the fixture's directory.
  */
 export function makePullFromBacklogSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'pull-from-backlog-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('pull-from-backlog-smoke-');
   execFileSync('git', ['-C', fixtureDir, 'init', '--quiet']);
   execFileSync('git', [
     '-C',

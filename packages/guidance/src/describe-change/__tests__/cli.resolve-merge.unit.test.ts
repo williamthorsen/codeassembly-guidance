@@ -1,9 +1,8 @@
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import type { ChangeEntry } from '../change-entries.ts';
 import { renderChangeRecordBlock } from '../change-record-block.ts';
 import { runDescribe } from '../cli.ts';
@@ -281,7 +280,7 @@ describe('resolve-merge', () => {
 
   it('refuses when the data directory does not contain a readable taxonomy', async () => {
     const { cwd, git, headCommit, home } = await makePullRequestRepo([]);
-    const dataDir = await mkdtemp(join(tmpdir(), 'describe-change-data-'));
+    const dataDir = makeScratchDir('describe-change-data-');
     const bodyFile = await writeBody('## What\n\n- Adds the parser.\n');
 
     await expect(

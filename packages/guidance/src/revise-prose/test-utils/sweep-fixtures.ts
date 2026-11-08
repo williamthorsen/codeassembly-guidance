@@ -1,7 +1,7 @@
-import { mkdir, mkdtemp, readdir, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runDetect, runRecord } from '../cli.ts';
 import { RECORD_PATH } from '../parse-record.ts';
 import { stringifyRecord } from '../record.ts';
@@ -25,7 +25,7 @@ export function bothRules(unitVersion = '2'): string[] {
 
 /** Creates a scratch root containing the fixture tree. */
 export async function createFixtureRoot(): Promise<string> {
-  const root = await mkdtemp(path.join(tmpdir(), 'revise-prose-cli-'));
+  const root = makeScratchDir('revise-prose-cli-');
   for (const [file, content] of Object.entries(FIXTURE_FILES)) {
     await mkdir(path.join(root, path.dirname(file)), { recursive: true });
     await writeFile(path.join(root, file), content, 'utf8');

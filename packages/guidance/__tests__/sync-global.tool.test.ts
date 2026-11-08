@@ -1,10 +1,11 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { makeScratchDir } from '../src/test-utils/make-scratch-dir.ts';
 
 const PACKAGE_ROOT = path.resolve(import.meta.dirname, '..');
 const CONTENT_DIR = path.join(PACKAGE_ROOT, 'content');
@@ -15,12 +16,8 @@ const CODEASSEMBLY_BIN = path.join(PACKAGE_ROOT, 'node_modules', '.bin', 'codeas
 describe('sync --global (library, seeded collections)', { timeout: 60_000 }, () => {
   let homeDir: string;
 
-  beforeEach(async () => {
-    homeDir = await mkdtemp(path.join(tmpdir(), 'guidance-sync-global-'));
-  });
-
-  afterEach(async () => {
-    await rm(homeDir, { recursive: true, force: true });
+  beforeEach(() => {
+    homeDir = makeScratchDir('guidance-sync-global-');
   });
 
   it('deploys the seeded collections with transforms applied', async () => {

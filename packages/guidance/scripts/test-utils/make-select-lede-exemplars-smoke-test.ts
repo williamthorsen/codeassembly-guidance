@@ -1,11 +1,11 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { resolveEventsDir, resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /** The lede-decision records that the fixture corpus contains, oldest first. */
@@ -23,7 +23,7 @@ const FIXTURE_DECISIONS = [
  * The invocation does not pass `--data-dir`, so the run reads the work-type taxonomy embedded in the bundle.
  */
 export function makeSelectLedeExemplarsSmokeTest(): SmokeTestInvocation {
-  const storePath = mkdtempSync(path.join(tmpdir(), 'select-lede-exemplars-store-'));
+  const storePath = makeSmokeScratchDir('select-lede-exemplars-store-');
   mkdirSync(resolveKbDir(storePath), { recursive: true });
   const eventsDir = resolveEventsDir(storePath);
   mkdirSync(eventsDir, { recursive: true });
@@ -31,7 +31,7 @@ export function makeSelectLedeExemplarsSmokeTest(): SmokeTestInvocation {
     writeFileSync(path.join(eventsDir, `${decision.id}.md`), renderDecision(decision), 'utf8');
   }
 
-  const home = mkdtempSync(path.join(tmpdir(), 'select-lede-exemplars-home-'));
+  const home = makeSmokeScratchDir('select-lede-exemplars-home-');
   mkdirSync(path.join(home, '.agents'), { recursive: true });
   writeFileSync(
     path.join(home, '.agents', 'kb.yaml'),

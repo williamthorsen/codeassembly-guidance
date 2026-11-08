@@ -1,10 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -14,7 +14,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * real because the bundle resolves the project root through its real git adapter.
  */
 export function makeDescribeChangeSmokeTest(): SmokeTestInvocation {
-  const repo = mkdtempSync(path.join(tmpdir(), 'describe-change-smoke-repo-'));
+  const repo = makeSmokeScratchDir('describe-change-smoke-repo-');
   execFileSync('git', ['init', '--quiet', repo]);
   mkdirSync(path.join(repo, '.agents'), { recursive: true });
   writeFileSync(
@@ -22,7 +22,7 @@ export function makeDescribeChangeSmokeTest(): SmokeTestInvocation {
     "commit:\n  title_format: '[[{scope}|]{type}: ]{title}'\n",
     'utf8',
   );
-  const home = mkdtempSync(path.join(tmpdir(), 'describe-change-smoke-home-'));
+  const home = makeSmokeScratchDir('describe-change-smoke-home-');
 
   return {
     args: ['parse-title', 'commit', 'agents|feat!: Add the parser'],

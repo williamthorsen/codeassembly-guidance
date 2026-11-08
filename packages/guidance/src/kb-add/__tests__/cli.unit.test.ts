@@ -1,11 +1,11 @@
-import { copyFile, mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { copyFile, mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
 import { describe, expect, it } from 'vitest';
 
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { parseArgs, runAdd } from '../cli.ts';
 import { makeKb } from '../test-utils/make-kb.ts';
 import { NOW } from '../test-utils/now.ts';
@@ -200,7 +200,7 @@ describe(runAdd, () => {
 
   it('names the registered KBs and points to --kb @default in the missing-destination message', async () => {
     const kbPath = await makeKb();
-    const homeDir = await mkdtemp(join(tmpdir(), 'kb-add-missing-'));
+    const homeDir = makeScratchDir('kb-add-missing-');
     await mkdir(join(homeDir, '.agents'), { recursive: true });
     await writeFile(
       join(homeDir, '.agents', 'kb.yaml'),
@@ -229,7 +229,7 @@ describe(runAdd, () => {
 
   it('returns no-default when --kb @default is given but the registry does not configure a default_kb', async () => {
     const kbPath = await makeKb();
-    const homeDir = await mkdtemp(join(tmpdir(), 'kb-add-no-default-'));
+    const homeDir = makeScratchDir('kb-add-no-default-');
     await mkdir(join(homeDir, '.agents'), { recursive: true });
     await writeFile(join(homeDir, '.agents', 'kb.yaml'), `kbs:\n  primary:\n    path: ${kbPath}\n`, 'utf8');
 
@@ -338,7 +338,7 @@ describe(runAdd, () => {
     // runAdd resolves through resolveWritableKb, so it reports the refusal as a top-level readonly-kb error
     // without ever touching disk inside the KB.
     const kbPath = await makeKb();
-    const homeDir = await mkdtemp(join(tmpdir(), 'kb-add-readonly-'));
+    const homeDir = makeScratchDir('kb-add-readonly-');
     await mkdir(join(homeDir, '.agents'), { recursive: true });
     await writeFile(
       join(homeDir, '.agents', 'kb.yaml'),

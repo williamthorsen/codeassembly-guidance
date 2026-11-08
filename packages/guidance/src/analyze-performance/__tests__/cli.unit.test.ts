@@ -1,9 +1,9 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCli } from '../cli.ts';
 import { buildFakeDependencies, type FakeHandlers } from '../test-utils/fake-dependencies.ts';
 import { buildReport } from '../test-utils/fixtures.ts';
@@ -12,11 +12,7 @@ describe('runCli', () => {
   let root: string;
 
   beforeEach(() => {
-    root = mkdtempSync(path.join(tmpdir(), 'analyze-performance-cli-'));
-  });
-
-  afterEach(() => {
-    rmSync(root, { recursive: true, force: true });
+    root = makeScratchDir('analyze-performance-cli-');
   });
 
   it.each([

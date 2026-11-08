@@ -1,11 +1,11 @@
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import packageJson from '../../../package.json' with { type: 'json' };
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCheckProse } from '../cli.ts';
 
 const programName = 'check-prose';
@@ -13,12 +13,8 @@ const programName = 'check-prose';
 describe(runCheckProse, () => {
   let workDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'check-prose-cli-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('check-prose-cli-');
   });
 
   it('checks a file outside any repository and exits 1 with its candidates', async () => {

@@ -1,7 +1,7 @@
 import { readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 
@@ -49,10 +49,6 @@ describe(runDetect, () => {
 
   beforeEach(async () => {
     scratch = await createFixtureRoot();
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   describe(runRecord, () => {

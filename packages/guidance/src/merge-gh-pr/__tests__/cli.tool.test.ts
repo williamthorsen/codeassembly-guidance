@@ -1,14 +1,14 @@
 import { execFile } from 'node:child_process';
-import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { chmod, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { isEnoent, isRecord } from '../../lib/type-guards.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const execFileAsync = promisify(execFile);
 
@@ -40,14 +40,10 @@ describe('merge-gh-pr CLI', () => {
   let workDir: string;
 
   beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'merge-gh-pr-'));
+    workDir = makeScratchDir('merge-gh-pr-');
     const ghPath = path.join(workDir, 'gh');
     await writeFile(ghPath, GH_STUB);
     await chmod(ghPath, 0o755);
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { force: true, recursive: true });
   });
 
   it('passes a title containing shell syntax to gh byte-for-byte and prints the result', async () => {

@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { deriveSessionContext } from '../cli.ts';
 
 /** A git adapter for a working directory without any remote. */
@@ -20,14 +20,9 @@ describe('recompose on every invocation', () => {
   let workDir: string;
   let homeDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'derive-session-context-recompose-'));
-    homeDir = await mkdtemp(path.join(tmpdir(), 'derive-session-context-recompose-home-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
-    await rm(homeDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('derive-session-context-recompose-');
+    homeDir = makeScratchDir('derive-session-context-recompose-home-');
   });
 
   it('follows a change to the project ticket_ref_prefix', async () => {

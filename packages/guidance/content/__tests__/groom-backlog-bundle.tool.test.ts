@@ -1,9 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
+
+import { makeScratchDir } from '../../src/test-utils/make-scratch-dir.ts';
 
 /**
  * The deployed bundle, executed as a process.
@@ -42,7 +43,7 @@ describe('the deployed bundle', () => {
   let scratch: string;
 
   beforeEach(async () => {
-    scratch = await mkdtemp(path.join(tmpdir(), 'groom-backlog-bundle-'));
+    scratch = makeScratchDir('groom-backlog-bundle-');
     execFileSync('git', ['-C', scratch, 'init', '--quiet']);
     execFileSync('git', [
       '-C',
@@ -61,10 +62,6 @@ describe('the deployed bundle', () => {
       path.join(scratch, 'ticket.json'),
       JSON.stringify({ number: 10, updatedAt: '2026-01-01T00:00:00Z', inProgress: null }),
     );
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   it('ingests a reply, renders the digest, and renders a comment', async () => {
