@@ -19,6 +19,7 @@ const ROUTES: ReadonlyArray<{ readonly skill: string; readonly condition: string
   { skill: 'refine-plan', condition: 'inside its `## Decisions taken` section whose text starts with 🔲' },
   { skill: 'refine-prototype', condition: 'does not contain an `open` row' },
   { skill: 'triage-spike-findings', condition: 'proposes work' },
+  { skill: 'triage-spike-findings', condition: '`triage/dispositions.json` without a `dispositions` artifact' },
 ];
 
 /** The skills whose split report includes the launch prompts of a plan-time split. */
@@ -30,8 +31,10 @@ const RETIRED_ROUTE_LIST = "Choose each ticket's entry point";
 describe('entry points', () => {
   it.each(ROUTES)('routes to $skill', async ({ skill, condition }) => {
     const content = await readContentFile(ENTRY_POINTS);
-    expect(content).toContain(condition);
-    expect(content).toContain(skill);
+    const skillName = new RegExp(`(?<![\\w-])${skill}(?![\\w-])`);
+    const routeLines = content.split('\n').filter((line) => line.includes(condition));
+    expect(routeLines, `no route states "${condition}"`).not.toHaveLength(0);
+    expect(routeLines.some((line) => skillName.test(line))).toBe(true);
   });
 
   it('stops on a closed ticket or a merged pull request', async () => {
