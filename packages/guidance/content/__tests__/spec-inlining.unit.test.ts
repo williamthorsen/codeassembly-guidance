@@ -198,7 +198,7 @@ const NEXT_STEPS_AFTER_PLAN: Spec = {
     '🔬 **Investigate** -> `investigate-spike`',
     // The end of an investigation. Without it the run stops at the artifact, and the spike's ticket closes without its
     // conclusion.
-    "ends the run with the plan's `## Deliverable`, which includes offering the [closing post]",
+    "ends the run with the plan's `## Deliverable`: the offer of the [closing post]",
     // The rule that a spike falls through to. Without it rule 2 can match on an investigation and propose cutting
     // into tickets work that produces findings rather than a diff.
     'Investigate is the fallthrough whenever rule 1 does not match',
