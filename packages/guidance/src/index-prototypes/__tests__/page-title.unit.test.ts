@@ -6,6 +6,10 @@ describe(formatPrototypeTitle, () => {
   it('names the set, the id, and the prototype', () => {
     expect(formatPrototypeTitle('Top Right', 1, 1, 'Next item')).toBe('Top Right - 1.1 Next item');
   });
+
+  it('collapses whitespace as the reader does', () => {
+    expect(formatPrototypeTitle(' Top  Right', 1, 1, 'Next item ')).toBe('Top Right - 1.1 Next item');
+  });
 });
 
 describe(formatIndexTitle, () => {

@@ -335,6 +335,33 @@ describe(runIndexPrototypes, () => {
     expect(result).toMatchObject({ ok: false, error: 'source-not-found' });
   });
 
+  it('accepts a source whose title matches a title flag with stray whitespace', async () => {
+    const setDir = makeSetDir();
+    const source = path.join(setDir, 'a-v1.html');
+    await writePrototypeSource(source, 'Set - 1.1 Next item');
+
+    const result = await runIndexPrototypes({
+      argv: [
+        'register',
+        '--set-dir',
+        setDir,
+        '--slug',
+        'a',
+        '--title',
+        'Next item ',
+        '--url',
+        'https://claude.ai/artifact/x',
+        '--set-title',
+        'Set',
+        '--source',
+        source,
+      ],
+      now: NOW,
+    });
+
+    expect(result).toMatchObject({ ok: true, entry: { version: 1, source } });
+  });
+
   it('checks a renaming registration against the new set title', async () => {
     const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Old']);

@@ -14,9 +14,12 @@ export function formatIndexTitle(setTitle: string): string {
   return `${setTitle} - Prototypes`;
 }
 
-/** Returns the browser title that a prototype page of the set must have. */
+/**
+ * Returns the browser title that a prototype page of the set must have, with whitespace collapsed as `readPageTitle`
+ * collapses it, so that a title flag with stray whitespace still names a title that a page can match.
+ */
 export function formatPrototypeTitle(setTitle: string, number: number, version: number, title: string): string {
-  return `${setTitle} - ${formatId(number, version)} ${title}`;
+  return collapseWhitespace(`${setTitle} - ${formatId(number, version)} ${title}`);
 }
 
 /**
@@ -30,8 +33,14 @@ export function readPageTitle(html: string): string | null {
   if (match?.[1] === undefined) {
     return null;
   }
-  return match[1]
-    .replaceAll(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity] ?? entity)
-    .replaceAll(/\s+/g, ' ')
-    .trim();
+  return collapseWhitespace(match[1].replaceAll(/&(?:amp|lt|gt|quot|#39);/g, (entity) => ENTITIES[entity] ?? entity));
 }
+
+// region | Helpers
+
+/** Replaces each run of whitespace with one space and trims the ends. */
+function collapseWhitespace(text: string): string {
+  return text.replaceAll(/\s+/g, ' ').trim();
+}
+
+// endregion | Helpers
