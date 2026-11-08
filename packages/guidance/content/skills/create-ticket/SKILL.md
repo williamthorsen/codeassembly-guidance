@@ -383,6 +383,7 @@ Relationships: {list}                      <- only if any were created
 Relationships skipped: {list with reasons} <- only if any were skipped
 Labels skipped: {labels}                   <- only when `--label` was given on the Jira path
 Branch association skipped: {reason}       <- only when the step-6 guard skipped the persist
+Start in its worktree: {skill?:start-ticket} <- omitted for a ticket in another repository
 Target configuration missing: {files}      <- only when the target's default branch lacks a file in `missing`
 ```
 
