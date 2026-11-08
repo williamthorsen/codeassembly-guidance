@@ -48,9 +48,14 @@ export const DEFAULT_EXCLUDE_PATHSPECS: readonly string[] = [
   ].map((name) => `:(exclude,glob)**/${name}`),
 ];
 
+/** The pathspecs that leave out each `--exclude` glob, without the default exclusions. */
+export function buildExcludeGlobPathspecs(excludeGlobs: readonly string[]): string[] {
+  return excludeGlobs.map((glob) => `:(exclude,glob)${glob}`);
+}
+
 /** The pathspecs that leave out the default exclusions and each `--exclude` glob. */
 export function buildExcludePathspecs(excludeGlobs: readonly string[]): string[] {
-  return [...DEFAULT_EXCLUDE_PATHSPECS, ...excludeGlobs.map((glob) => `:(exclude,glob)${glob}`)];
+  return [...DEFAULT_EXCLUDE_PATHSPECS, ...buildExcludeGlobPathspecs(excludeGlobs)];
 }
 
 /** The `git log` arguments that `parseNumstatLog` reads, restricted to the unit and the exclusions. */
