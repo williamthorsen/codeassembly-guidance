@@ -171,8 +171,8 @@ catalogs:
       specifier: 0.3.0
       version: 0.3.0
     '@williamthorsen/nmr':
-      specifier: 0.54.1
-      version: 0.54.1
+      specifier: 0.55.0
+      version: 0.55.0
     '@williamthorsen/toolbelt.errors':
       specifier: 0.9.0
       version: 0.9.0
@@ -233,14 +233,14 @@ importers:
         specifier: 1.6.28
         version: 1.6.28(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.1.0)
       '@williamthorsen/eslint-config-typescript':
-        specifier: 20.2.0
-        version: 20.2.0(@typescript-eslint/utils@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(@vitest/eslint-plugin@1.6.28(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.1.0))(eslint@10.14.0(jiti@2.7.0))(readyup@0.45.0(esbuild@0.28.2))(typescript@6.0.3)
+        specifier: 20.3.0
+        version: 20.3.0(@typescript-eslint/utils@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(@vitest/eslint-plugin@1.6.28(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.1.0))(eslint@10.14.0(jiti@2.7.0))(readyup@0.45.0(esbuild@0.28.2))(typescript@6.0.3)
       '@williamthorsen/nmr':
         specifier: 'catalog:'
-        version: 0.54.1(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)
+        version: 0.55.0(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)
       '@williamthorsen/release-kit':
-        specifier: 16.1.1
-        version: 16.1.1
+        specifier: 16.1.2
+        version: 16.1.2
       '@williamthorsen/strict-lint':
         specifier: 14.2.1
         version: 14.2.1(eslint@10.14.0(jiti@2.7.0))
@@ -281,8 +281,8 @@ importers:
         specifier: 8.72.1
         version: 8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)
       v11y-check:
-        specifier: 0.20.0
-        version: 0.20.0
+        specifier: 0.20.1
+        version: 0.20.1
       vite:
         specifier: 'catalog:'
         version: 8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
@@ -306,7 +306,7 @@ importers:
         version: 0.11.1
       '@williamthorsen/nmr':
         specifier: 'catalog:'
-        version: 0.54.1(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)
+        version: 0.55.0(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)
       '@williamthorsen/toolbelt.errors':
         specifier: 'catalog:'
         version: 0.9.0
@@ -616,8 +616,8 @@ packages:
     resolution: {integrity: sha512-FcD0B9cOTIj8bJCrX7RtsLSnA2CrX43KCdaFOpS2cH9VnNMuKX4EJ3mgSdQFWF6vz/fbXUNYU1LpIYXYn3TTXA==}
     engines: {node: '>=18.0.0'}
 
-  '@hyperjump/json-pointer@1.1.3':
-    resolution: {integrity: sha512-GVSs+wzefSO5VOEVMuOz118MDJrJtMdm8h+2vlghzMG/5QpboTSQ12gaMKvGQo7S4oPMw9rCyFWNAJ9DUEdA5Q==}
+  '@hyperjump/json-pointer@1.1.4':
+    resolution: {integrity: sha512-c6slpSqSiNL10JA78HdQOx50xaXHy1dKsPZOiEVjr/RqcVg5MgnWcP7vbvpxa42CD7pMkU6TtTCS+redjpjc2w==}
 
   '@hyperjump/json-schema-formats@1.1.0':
     resolution: {integrity: sha512-vLMIOwMThlgWgPJBV39Ds7kaTaygK0+UxjvQShTmKB8rRy8HXq472jnHP8/uaik+77HDx2M+W5Bvzhq6zFc2zQ==}
@@ -633,8 +633,8 @@ packages:
   '@hyperjump/uri@1.4.0':
     resolution: {integrity: sha512-A6eBnSLNb6GdJHnYnA0sDutV950mWNmmlWgASwIoZvXqtXcYKBeEhbGrXpHeyHHInC/LHVt8zNanILp2S2oRXg==}
 
-  '@isaacs/nonrecursive-glob-match@1.0.3':
-    resolution: {integrity: sha512-SI7kyKHq4XXDRozw+r9GlRZkia1ZkFrpLW98r2IC2Bpr8YkFGE3fvjzmxCG0x78A++69HmDNrDvSMYBZmHGpKA==}
+  '@isaacs/nonrecursive-glob-match@1.1.0':
+    resolution: {integrity: sha512-GPm/Dbvk5RLmhRnxXIa7nTpK0xtl4E0wj0MslsuNiJ1FIROU+2+9lgUC/dgF7Ey4QCWhfEsgxilMRMCdHPfDfw==}
 
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
@@ -1095,8 +1095,8 @@ packages:
     resolution: {integrity: sha512-o3uKa5Q7tHCfuZW//fqQj2Lwexkh99xsT5Z3GjuDOtwp8eG8obq/Ihr51GM4P2feWU1pTlKI9x5a30ZDHt7Nug==}
     engines: {node: '>=24.16.0'}
 
-  '@williamthorsen/eslint-config-typescript@20.2.0':
-    resolution: {integrity: sha512-4La36FNiXkgZKAh6NYUds7i12A+uCRjEEfIGwQi8PRPJy1jvmZXZywxqazcbhON8HW1Rf/1VIHpWkTOlMEXWIw==}
+  '@williamthorsen/eslint-config-typescript@20.3.0':
+    resolution: {integrity: sha512-YzEXbNKoQFKx3uvvVai7cDh123+Xy+a4e+dOgk9SmG9FJU+dBRDxG5QIrQvCAo4vRhxFIGV3Z49+HUWwaFRLZQ==}
     engines: {node: '>=24'}
     peerDependencies:
       '@next/eslint-plugin-next': ^16.3.5
@@ -1137,12 +1137,12 @@ packages:
     resolution: {integrity: sha512-WjJVuXZ7QEgKSMRit5NdQzYhX4sUPAFs0pVFNeFfQMkOCYTkvqSThu7fjIaeH7l21GXaEsgCiRYh4Gcr//bclQ==}
     engines: {node: '>=24.16.0'}
 
-  '@williamthorsen/nmr-core@0.15.0':
-    resolution: {integrity: sha512-8TKHQ8Yqh+j6I7vh3YTEjQnKgOhcW8yWZXfs/4zNO8k7RNQEr99ECyKstifLcdTstSFjghmjo/5uun1aphU3WA==}
+  '@williamthorsen/nmr-core@0.15.1':
+    resolution: {integrity: sha512-lFKxByiJG7MnwN5Jg+jbO5X2jlnBgfRpldqR6O9FtkoXj3Roq5l//l2jf2va56MuieJc7day6QOGdy1/fKyf/w==}
     engines: {node: '>=24.16.0'}
 
-  '@williamthorsen/nmr@0.54.1':
-    resolution: {integrity: sha512-MX3bI5fbl4z+2gm+YAjfiuRZhRowtNmU/fKn6OIkM5aanAGwgSJMFa6Qd1m7F85VGhmvXWRROP2d7kYFwWvupw==}
+  '@williamthorsen/nmr@0.55.0':
+    resolution: {integrity: sha512-ZfUOQT2WUZiLt0jXmewIw0TGLQL6CmTS15ct9EzFsHmCFEAwrdWTBDti1kd3kn+Ik6/vPJPq+rytuBKLtUMXww==}
     engines: {node: '>=24.16.0', pnpm: '>=11'}
     hasBin: true
     peerDependencies:
@@ -1157,8 +1157,8 @@ packages:
       vitest:
         optional: true
 
-  '@williamthorsen/release-kit@16.1.1':
-    resolution: {integrity: sha512-gdpSg3GFNDJcsd0jj9Qsyf+TbYKr7kIEmL0mvBYEzS4JS2HoS24DXJNhODuPW+HlVKeZvrFPPf2o0Cp5beML4A==}
+  '@williamthorsen/release-kit@16.1.2':
+    resolution: {integrity: sha512-MYdau1VXXyIZacbJ8fIpdYv2+HPB05XjnWElkrUyUUit765j2crKhfrZ3rTfAcJYKG7lXvPMnm10EquzqWYxYQ==}
     engines: {node: '>=24.16.0'}
     hasBin: true
 
@@ -1325,8 +1325,8 @@ packages:
   cacheable@2.5.0:
     resolution: {integrity: sha512-60cyAOytib/OzBw1JNSoSV/boK1AtHryDIjvVBk7XbN4ugfkM3+Sry7fEjNgPMGgOjuaZPAp8ruZ0Cxafwyq9g==}
 
-  caniuse-lite@1.0.30001822:
-    resolution: {integrity: sha512-Y3fvWQWzc69dlCyr07tuNrEhotv+db5FpMSPD3slZnkPKwRNOKwFBz2dP966XUmWMXLTOt+YShkFoQoom3U7hg==}
+  caniuse-lite@1.0.30001823:
+    resolution: {integrity: sha512-TQ5s/djDjNk1axreUW+4rULH+BmdCMLiJkhaXnO5wqivG7tITkSUj4ItIdzqdZHKaXcHAV8dhH3JxOM7/7bwqw==}
 
   chai@6.3.0:
     resolution: {integrity: sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg==}
@@ -1434,8 +1434,8 @@ packages:
   duplexer@0.1.2:
     resolution: {integrity: sha512-jtD6YG370ZCIi/9GTaJKQxWTZD045+4R4hTk/x1UyoqadyJ9x9CgSi1RlVDQF8U2sxLLSnFkCaMihqljHIWgMg==}
 
-  electron-to-chromium@1.5.477:
-    resolution: {integrity: sha512-PN++F4zWZoVDGWinxMnSCpVqKhqFOJfLXxdU8bYJKudAEsHL/XKVITOKWVbfMt1r276Mi9RDLU9VHx9uKJ4RMQ==}
+  electron-to-chromium@1.5.478:
+    resolution: {integrity: sha512-pftG+ma5Lm8O6/p45bhYT6StBN5ziQymaRzmCZwFl8DwWHKPPD93FdOmP1aqftcepolQYvrcyTLa17kE8Yf+jg==}
 
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
@@ -1566,8 +1566,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-package-json@1.12.0:
-    resolution: {integrity: sha512-hBHJu0yIFV67pMsb4VWj1t2Hf4bTzP1qO7w4nKp7xEXoP5ZPu17dY7/jASggGZq1mhkF2QL6f13K1Deix1rDAQ==}
+  eslint-plugin-package-json@1.14.0:
+    resolution: {integrity: sha512-EF4oCRtyhJz+SQCKOiCfdbButYIraXd19W7/pEVrDCGzRDWv91Kgd7eTbWywhbPd4zOsThbDLOQHe9B1oSjOZA==}
     engines: {node: ^22.22.2 || >=24.15.0}
     peerDependencies:
       '@eslint/json': '>=1.0.0'
@@ -1597,8 +1597,8 @@ packages:
       typescript:
         optional: true
 
-  eslint-plugin-yml@3.9.0:
-    resolution: {integrity: sha512-o4ByMVFd/mGc0Q/vJmbG9pz7Kyg/BiKAGnWCzvMLqzpa2KMdpUrLgF5a6yYeL2mf1Br/9dckd0ADl3vw7uF+jA==}
+  eslint-plugin-yml@3.10.0:
+    resolution: {integrity: sha512-9Qfg0JMZ0YUPa/m6FwWhzKFDwXf/oGnM+EvTzRkM72UccHuzCFk/L77R6qtABZ/As/UJVvx1lYYcbwgO+gcioA==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24.0.0}
     peerDependencies:
       eslint: '>=9.38.0'
@@ -1727,8 +1727,8 @@ packages:
     resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
     engines: {node: '>=18'}
 
-  globals@17.13.0:
-    resolution: {integrity: sha512-RwMTC61u7hrG3ZJMkZQOK4JLJrKS8QtoTii63EmWvFXHqycY9FObBJQCbsLxSO8kjKhWE5kV1GC+Vb1g3RI0Zg==}
+  globals@17.14.0:
+    resolution: {integrity: sha512-UtdkTVyAJePQv0J2M9Xe4L0ruNSDV314XiIJsADI2Zf40bcdAonE/D/OhAU8AT99oij9mhLByb+NvA3QWZYgCg==}
     engines: {node: '>=18'}
 
   globrex@0.1.2:
@@ -2092,8 +2092,8 @@ packages:
     resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
     engines: {node: 18 || 20 || >=22}
 
-  minimatch@11.0.4:
-    resolution: {integrity: sha512-/UJ1dEoVQTjPNDh6SGlUo+ueLMmoHTas4q+8yaAR/5t6nLAIiBDJtoYUh20IYleix7ehiQkgczb84PE3uzHkxg==}
+  minimatch@11.0.5:
+    resolution: {integrity: sha512-snPlVppFcYWfLLFQGhDxUyBcHNtMlWmn3jtj7pEaO+DP8pqL0IvAzXhMYmn1z9ASNtgmwLBdFxSf4tMUB0OTKA==}
     engines: {node: 20 || >=22}
 
   minipass@7.1.3:
@@ -2454,8 +2454,8 @@ packages:
     resolution: {integrity: sha512-Sc5u1VVln93y1Xnz4R+CunOZc7R9LUcTmhj7Rc7Eg3HVcf7rVn2FOoa812fe0W8p3jD7xeoGSYbfqCGGH2B6xw==}
     hasBin: true
 
-  v11y-check@0.20.0:
-    resolution: {integrity: sha512-uTGXaPrmqGP5BIBP71Vz1Hg2mQsPSU3PSNOK/7WHrahF1cHsagoGZlU6pPGUtNQV0cHDDvLPioL2EEuL/D6Qzg==}
+  v11y-check@0.20.1:
+    resolution: {integrity: sha512-vjsSnj5puMcolmlbFC0XRJDp2WnSRVYReUk1y1mfCnVCay7Av95yto0RbNK1muGEaPgwsmkM39bRjrX4TrQYHw==}
     engines: {node: '>=24'}
     hasBin: true
 
@@ -2805,11 +2805,11 @@ snapshots:
 
   '@hyperjump/browser@1.6.0':
     dependencies:
-      '@hyperjump/json-pointer': 1.1.3
+      '@hyperjump/json-pointer': 1.1.4
       '@hyperjump/uri': 1.4.0
       content-type: 1.0.5
 
-  '@hyperjump/json-pointer@1.1.3': {}
+  '@hyperjump/json-pointer@1.1.4': {}
 
   '@hyperjump/json-schema-formats@1.1.0':
     dependencies:
@@ -2819,7 +2819,7 @@ snapshots:
   '@hyperjump/json-schema@1.18.0(@hyperjump/browser@1.6.0)':
     dependencies:
       '@hyperjump/browser': 1.6.0
-      '@hyperjump/json-pointer': 1.1.3
+      '@hyperjump/json-pointer': 1.1.4
       '@hyperjump/json-schema-formats': 1.1.0
       '@hyperjump/pact': 1.5.1
       '@hyperjump/uri': 1.4.0
@@ -2831,7 +2831,7 @@ snapshots:
 
   '@hyperjump/uri@1.4.0': {}
 
-  '@isaacs/nonrecursive-glob-match@1.0.3': {}
+  '@isaacs/nonrecursive-glob-match@1.1.0': {}
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
@@ -3183,7 +3183,7 @@ snapshots:
 
   '@williamthorsen/change-grammar@0.3.0': {}
 
-  '@williamthorsen/eslint-config-typescript@20.2.0(@typescript-eslint/utils@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(@vitest/eslint-plugin@1.6.28(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.1.0))(eslint@10.14.0(jiti@2.7.0))(readyup@0.45.0(esbuild@0.28.2))(typescript@6.0.3)':
+  '@williamthorsen/eslint-config-typescript@20.3.0(@typescript-eslint/utils@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(@vitest/eslint-plugin@1.6.28(@typescript-eslint/eslint-plugin@8.72.1(@typescript-eslint/parser@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)(vitest@5.1.0))(eslint@10.14.0(jiti@2.7.0))(readyup@0.45.0(esbuild@0.28.2))(typescript@6.0.3)':
     dependencies:
       '@eslint-community/eslint-plugin-eslint-comments': 4.8.1(eslint@10.14.0(jiti@2.7.0))
       '@eslint/js': 10.0.1(eslint@10.14.0(jiti@2.7.0))
@@ -3192,12 +3192,12 @@ snapshots:
       eslint-plugin-import-x: 4.17.1(@typescript-eslint/utils@8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3))(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-jsonc: 3.4.2(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-n: 18.5.0(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)
-      eslint-plugin-package-json: 1.12.0(eslint@10.14.0(jiti@2.7.0))
+      eslint-plugin-package-json: 1.14.0(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-promise: 7.3.0(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-simple-import-sort: 14.0.0(eslint@10.14.0(jiti@2.7.0))
       eslint-plugin-unicorn: 79.0.0(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)
-      eslint-plugin-yml: 3.9.0(eslint@10.14.0(jiti@2.7.0))
-      globals: 17.13.0
+      eslint-plugin-yml: 3.10.0(eslint@10.14.0(jiti@2.7.0))
+      globals: 17.14.0
       jsonc-eslint-parser: 3.3.0
       typescript: 6.0.3
       typescript-eslint: 8.72.1(eslint@10.14.0(jiti@2.7.0))(typescript@6.0.3)
@@ -3229,7 +3229,7 @@ snapshots:
       diff: 9.0.0
       yaml: 2.9.1
 
-  '@williamthorsen/nmr-core@0.15.0':
+  '@williamthorsen/nmr-core@0.15.1':
     dependencies:
       '@williamthorsen/toolbelt.datetime': 4.1.0
       '@williamthorsen/toolbelt.errors': 0.9.0
@@ -3239,9 +3239,9 @@ snapshots:
       diff: 9.0.0
       yaml: 2.9.1
 
-  '@williamthorsen/nmr@0.54.1(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)':
+  '@williamthorsen/nmr@0.55.0(typescript@6.0.3)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)':
     dependencies:
-      '@williamthorsen/nmr-core': 0.15.0
+      '@williamthorsen/nmr-core': 0.15.1
       '@williamthorsen/toolbelt.errors': 0.9.0
       '@williamthorsen/toolbelt.filesystem': 0.10.0
       glob: 14.0.3
@@ -3254,10 +3254,10 @@ snapshots:
       vite: 8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       vitest: 5.1.0(@types/node@24.19.2)(@vitest/coverage-v8@5.1.0)(happy-dom@21.0.4)(vite@8.3.6(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
-  '@williamthorsen/release-kit@16.1.1':
+  '@williamthorsen/release-kit@16.1.2':
     dependencies:
       '@williamthorsen/change-grammar': 0.3.0
-      '@williamthorsen/nmr-core': 0.15.0
+      '@williamthorsen/nmr-core': 0.15.1
       '@williamthorsen/toolbelt.errors': 0.9.0
       json-stringify-pretty-compact: 4.0.0
       semver: 7.8.6
@@ -3392,8 +3392,8 @@ snapshots:
   browserslist@4.29.5:
     dependencies:
       baseline-browser-mapping: 2.11.35
-      caniuse-lite: 1.0.30001822
-      electron-to-chromium: 1.5.477
+      caniuse-lite: 1.0.30001823
+      electron-to-chromium: 1.5.478
       node-releases: 2.0.63
       update-browserslist-db: 1.3.4(browserslist@4.29.5)
 
@@ -3413,7 +3413,7 @@ snapshots:
       keyv: 5.6.0
       qified: 0.10.1
 
-  caniuse-lite@1.0.30001822: {}
+  caniuse-lite@1.0.30001823: {}
 
   chai@6.3.0: {}
 
@@ -3497,7 +3497,7 @@ snapshots:
 
   duplexer@0.1.2: {}
 
-  electron-to-chromium@1.5.477: {}
+  electron-to-chromium@1.5.478: {}
 
   emoji-regex@8.0.0: {}
 
@@ -3644,7 +3644,7 @@ snapshots:
     optionalDependencies:
       typescript: 6.0.3
 
-  eslint-plugin-package-json@1.12.0(eslint@10.14.0(jiti@2.7.0)):
+  eslint-plugin-package-json@1.14.0(eslint@10.14.0(jiti@2.7.0)):
     dependencies:
       '@altano/repository-tools': 2.1.2
       '@types/estree': 1.0.10
@@ -3681,7 +3681,7 @@ snapshots:
       entities: 8.1.0
       eslint: 10.14.0(jiti@2.7.0)
       find-up-simple: 1.0.1
-      globals: 17.13.0
+      globals: 17.14.0
       identifier-regex: 1.1.0
       indent-string: 5.0.0
       is-builtin-module: 5.0.0
@@ -3699,7 +3699,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-yml@3.9.0(eslint@10.14.0(jiti@2.7.0)):
+  eslint-plugin-yml@3.10.0(eslint@10.14.0(jiti@2.7.0)):
     dependencies:
       '@eslint/core': 1.2.1
       '@eslint/plugin-kit': 0.7.3
@@ -3844,13 +3844,13 @@ snapshots:
 
   glob@14.0.3:
     dependencies:
-      minimatch: 11.0.4
+      minimatch: 11.0.5
       minipass: 7.1.3
       path-scurry: 3.0.0
 
   globals@15.15.0: {}
 
-  globals@17.13.0: {}
+  globals@17.14.0: {}
 
   globrex@0.1.2: {}
 
@@ -4223,9 +4223,9 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.12
 
-  minimatch@11.0.4:
+  minimatch@11.0.5:
     dependencies:
-      '@isaacs/nonrecursive-glob-match': 1.0.3
+      '@isaacs/nonrecursive-glob-match': 1.1.0
       brace-expansion: 5.0.12
 
   minipass@7.1.3: {}
@@ -4610,9 +4610,9 @@ snapshots:
 
   uuid@14.0.3: {}
 
-  v11y-check@0.20.0:
+  v11y-check@0.20.1:
     dependencies:
-      '@williamthorsen/nmr-core': 0.15.0
+      '@williamthorsen/nmr-core': 0.15.1
       '@williamthorsen/toolbelt.errors': 0.9.0
       audit-ci: 7.1.0
       zod: 4.6.7
