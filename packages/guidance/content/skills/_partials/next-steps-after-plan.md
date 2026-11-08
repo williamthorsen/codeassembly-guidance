@@ -16,12 +16,13 @@ Present all three options as a numbered list per [option format](#option-format)
 
 **One `➕` line is mandatory rather than omitted.** When Refine plan is the selected option, it must include a `➕` line naming the specific unsettled decision that the pass would raise (rule 1). The line names an open decision, never a reassurance about work already done: "a refine pass is the cheap way to find out whether I missed something" is the shape that this requirement exists to forbid. When Split the ticket is the selected option, it must include a `➕` line naming the plan's size and the pieces (rule 2). Selecting either without its line is a defect: If the line cannot be written, the rule did not match and the cascade continues.
 
-**Spike plans.** A spike plan has `## Investigation steps` rather than `## Tasks` (see [spike conventions](../_data/spike-conventions.md)). It is carried out to produce findings rather than implemented to produce a diff, and `implement-plan` reads only the feature shape. Render option 3 as 🔬 Investigate, without invoking a skill; the agent works the investigation steps directly and ends the run with the plan's `## Deliverable`, which includes offering the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and making it on consent. Option 1 renders unchanged. Option 2 renders at □□□ with the `➖` that a spike produces findings rather than pieces that ship. In the recommendation rules below, rule 2 never matches on a spike plan, so Investigate is the fallthrough whenever rule 1 does not match.
+**Spike plans.** A spike plan has `## Investigation steps` rather than `## Tasks` (see [spike conventions](../_data/spike-conventions.md)). It is carried out to produce findings rather than implemented to produce a diff. Render option 3 as 🔬 Investigate, invoking {skill?:investigate-spike} with plan: {plan_path}, ticket: {ticket_source}; that skill works the investigation steps and ends the run with the plan's `## Deliverable`, which includes offering the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and making it on consent. Option 1 renders unchanged. Option 2 renders at □□□ with the `➖` that a spike produces findings rather than pieces that ship. In the recommendation rules below, rule 2 never matches on a spike plan, so Investigate is the fallthrough whenever rule 1 does not match.
 
 Options that invoke a skill include context-clearing guidance:
 
 - **Refine plan**: Prepend "Clear context, then..." because the plan artifact is self-contained; prior conversation wastes tokens and can introduce bias.
 - **Split the ticket**: No "Clear context" prefix, and no pasted invocation line; the split runs in this session because the library doesn't have a skill for it, and it cuts the pieces from the saved plan. See [Splitting the ticket](#splitting-the-ticket).
+- **Investigate**: No "Clear context" prefix, for the same reason as Implement: `investigate-spike` re-resolves the plan and ticket from the environment.
 - **Implement**: No "Clear context" prefix. The ticket and plan are self-contained, so `implement-plan` works the same in this session or in a fresh one, and clearing gains nothing: Unlike a refine or review pass, implementation is not harmed by sharing the planner's view. The user can also paste the same line into a fresh session, or into the other harness with its own skill sigil, in which the skill re-resolves the plan and ticket from the environment.
 
 Example (rendered for the default case, in which the recommendation rules below select Implement):
@@ -40,7 +41,7 @@ Skill names for each option:
 
 - 🧠 **Refine plan** -> `refine-plan`
 - ✂️ **Split the ticket** -> `{skill:create-ticket}`, once per piece, in this session
-- 🚀 **Implement** -> `implement-plan`; on a spike plan the option is 🔬 **Investigate** and does not invoke a skill
+- 🚀 **Implement** -> `implement-plan`; on a spike plan the option is 🔬 **Investigate** -> `investigate-spike`
 
 ### Recommendation rules
 

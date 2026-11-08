@@ -12,7 +12,7 @@ Dispose of every item that a findings artifact leaves undisposed: the proposals,
 
 ## Inputs
 
-- **The findings artifact**: A spike's findings, a `usability-findings` artifact, a `code-health-findings` artifact, or a `performance-findings` artifact, by local path or by artifact URL. Read a URL with the Artifact tool and save the content to `{ticket_dir}/triage/findings.md`, so that the challenger can read it from a path; on a harness without that tool, the input is a local path.
+- **The findings artifact**: A `spike-findings` artifact, a `usability-findings` artifact, a `code-health-findings` artifact, or a `performance-findings` artifact, by local path or by artifact URL. Read a URL with the Artifact tool and save the content to `{ticket_dir}/triage/findings.md`, so that the challenger can read it from a path; on a harness without that tool, the input is a local path.
 - **The triage ticket**: The ticket on which the dispositions are posted and under which the working files are kept, resolved per [ticket source resolution](../_data/ticket-source-resolution.md); when none is given, the session's ticket. The umbrella is created as a separate ticket, so the triage ticket may be the spike's own ticket.
 - **The batch**, optional: the item ids, each with its title, that a follow-up triage ticket names. When it is given, the inventory covers those items alone.
 

@@ -44,7 +44,7 @@ Deliverable: a findings & recommendation artifact, and the closing post on this 
 
 `Context` and `Scope` are opt-in: Include either only when it adds signal on which the reader must act.
 
-Differences from the feature ticket: `Question` replaces `Problem`; `Timebox` is a first-class section; acceptance criteria are questions-to-answer and decisions-to-enable rather than observable-behavior checkboxes; the spike ticket does not have a test or documentation criterion; the deliverable is a findings artifact, saved via the standard `save-artifact` conventions (without a dedicated artifact type), and the [closing post](#closing-post) on the ticket.
+Differences from the feature ticket: `Question` replaces `Problem`; `Timebox` is a first-class section; acceptance criteria are questions-to-answer and decisions-to-enable rather than observable-behavior checkboxes; the spike ticket does not have a test or documentation criterion; the deliverable is a findings artifact, saved as a `spike-findings` artifact via the standard `save-artifact` conventions, and the [closing post](#closing-post) on the ticket.
 
 ## Spike plan template
 
@@ -85,6 +85,8 @@ Differences from the feature ticket: `Question` replaces `Problem`; `Timebox` is
 ```
 
 Differences from the feature plan: Investigation steps, each framed by the question that it probes, replace tasks with create/modify/test file lists; `Timebox` is first-class; `Deliverable` replaces `Verification`, since a spike produces findings rather than verifiable behavior, and it names the [closing post](#closing-post); a step does not have a test or documentation criterion.
+
+The `investigate-spike` skill carries out a spike plan.
 
 ## Closing post
 

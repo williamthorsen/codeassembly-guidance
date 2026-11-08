@@ -193,9 +193,9 @@ const NEXT_STEPS_AFTER_PLAN: Spec = {
     // The Implement option's skill mapping. Without it the agent improvises "implement manually", which is the
     // ungoverned path that this option exists to replace.
     '🚀 **Implement** -> `implement-plan`',
-    // The spike carve-out. Without it option 3 offers `implement-plan` for a spike plan, which the skill reads far
-    // enough to turn away: the round trip that the carve-out exists to prevent.
-    'Render option 3 as 🔬 Investigate, without invoking a skill',
+    // The spike route. Without it option 3 offers `implement-plan` for a spike plan, which covers feature plans only.
+    'Render option 3 as 🔬 Investigate, invoking',
+    '🔬 **Investigate** -> `investigate-spike`',
     // The end of an investigation. Without it the run stops at the artifact, and the spike's ticket closes without its
     // conclusion.
     "ends the run with the plan's `## Deliverable`, which includes offering the [closing post]",

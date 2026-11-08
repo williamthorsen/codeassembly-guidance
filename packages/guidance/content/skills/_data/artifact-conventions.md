@@ -411,6 +411,7 @@ The first `coder_change-summary` in a run does not have dispositions (nothing to
 - `pull-request`: PR description file; `capture-lede-decision` reads its `## What` as the agent's side of a lede episode
 - `refinement-log`: The accepted changes of one session of `refine-prototype`, grouped under the id of the version that each one entered, with the transplants' sources and the open forks; the end vision reads it with the `idea-decisions` artifact
 - `review`: Code review (ticket-level, commit scope)
+- `spike-findings`: The findings and recommendation of a spike: the answer to each of the ticket's questions to answer, the recommendation on each decision to enable, the residual unknowns, the evidence, and any proposed work; `investigate-spike` saves it, and `triage-spike-findings` reads it
 - `ticket`: Issue ticket
 - `usability-brief`: The brief that every lens of a usability assessment reads: the medium, the targets and their write rules, the lenses with their minimum use cases, and the exclusions; `assess-usability` saves it at its checkpoint
 - `usability-findings`: The merged findings of a usability assessment, ranked by effect and reach, with the use-case outcomes, the ideas, the proposed groupings, the residual unknowns, and the lens reports; `assess-usability` saves it, and `triage-spike-findings` reads it
