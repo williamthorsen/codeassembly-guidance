@@ -117,8 +117,6 @@ const DESIGN_AND_PLAN_CHECKPOINT_SPLIT: Spec = {
     // The umbrella case. Without it the session renders the next-steps menu, whose Implement option implements a
     // child in the umbrella's worktree.
     'the launch prompts replace the `Next action` menu',
-    // The planned piece's prompt. Without it the child's session starts without the plan that this session saved.
-    "the planned piece's prompt names its saved plan",
   ],
 };
 
@@ -229,9 +227,9 @@ const NEXT_STEPS_AFTER_PLAN: Spec = {
     // the fallthrough is either capped at ■■□, demoting a trivial plan's Implement, or free to claim ■■■ unearned.
     "The selected option's marker follows how cleanly its rule matched",
     'its marker follows how squarely rules 1 and 2 failed',
-    // The entry-point rule for the split's launch prompts. Without it every prompt defaults to one skill, whatever
-    // the piece's artifacts settle.
-    "Choose each ticket's entry point from what its artifacts settle",
+    // The entry of the split's launch prompts. Without it each prompt names a skill chosen at split time, which goes
+    // stale once the piece's artifacts change.
+    'Every piece enters at `{skill?:start-ticket}`, invoked without arguments',
   ],
 };
 
