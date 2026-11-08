@@ -16,7 +16,7 @@ const ROUTES: ReadonlyArray<{ readonly skill: string; readonly condition: string
   { skill: 'investigate-spike', condition: 'The newest plan is a spike plan' },
   { skill: 'plan', condition: 'The ticket is ready' },
   { skill: 'prepare-prototype-brief', condition: 'decide the ideas (step 7)' },
-  { skill: 'refine-plan', condition: 'inside its `## Decisions taken` section' },
+  { skill: 'refine-plan', condition: 'inside its `## Decisions taken` section whose text starts with 🔲' },
   { skill: 'refine-prototype', condition: 'does not contain an `open` row' },
   { skill: 'triage-spike-findings', condition: 'proposes work' },
 ];

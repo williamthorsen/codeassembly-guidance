@@ -14,7 +14,7 @@ Check the routes in order and stop at the first match. Each route names the skil
 
 1. **Done.** The ticket is closed, or the branch has a pull request that is open or merged: Stop, and report in one line `{ticket_ref} is {state}; PR {url} is {state}.`, with each clause only when it applies. A closed pull request that was not merged does not match, because the work may restart.
 
-2. **Unsettled plan.** The newest plan contains an entry marked 🔲 inside its `## Decisions taken` section: {skill?:refine-plan} with the plan path and the ticket. Reason: the plan contains a decision that no checkpoint approved. A marker outside that section does not match.
+2. **Unsettled plan.** The newest plan contains a list entry inside its `## Decisions taken` section whose text starts with 🔲: {skill?:refine-plan} with the plan path and the ticket. Reason: the plan contains a decision that no checkpoint approved. A 🔲 elsewhere in the plan, or one that a decision mentions rather than starts with, does not match.
 
 3. **Spike.** The ticket body, in its newest ticket artifact or on the platform, contains the `## Question` section and the `### Questions to answer` tier of the [spike ticket template](spike-conventions.md#spike-ticket-template), or the newest plan contains `## Investigation steps`:
    - The ticket directory contains `triage/dispositions.json`: Stop, and report the findings artifact and the record. The spike is finished.
