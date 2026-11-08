@@ -1,9 +1,9 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -12,7 +12,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * replace with injected ones.
  */
 export function makeAssessCodeHealthSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'assess-code-health-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('assess-code-health-smoke-');
   const ghPath = path.join(fixtureDir, 'gh');
   writeFileSync(ghPath, `#!${process.execPath}\nprocess.exit(1);\n`);
   chmodSync(ghPath, 0o755);

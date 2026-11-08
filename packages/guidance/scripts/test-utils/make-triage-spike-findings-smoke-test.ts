@@ -1,9 +1,9 @@
-import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -11,7 +11,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * Exercises the entry point's wiring of the real command runner, which the unit tests replace with an injected one.
  */
 export function makeTriageSpikeFindingsSmokeTest(): SmokeTestInvocation {
-  const binDir = mkdtempSync(path.join(tmpdir(), 'triage-spike-findings-bin-'));
+  const binDir = makeSmokeScratchDir('triage-spike-findings-bin-');
   const labels = JSON.stringify(
     ['bug', 'confidence:high', 'confidence:low', 'confidence:medium', 'value:must-have'].map((name) => ({ name })),
   );

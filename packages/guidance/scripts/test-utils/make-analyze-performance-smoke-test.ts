@@ -1,8 +1,8 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * Lighthouse CLI, and asserts the median mobile LCP. `summarize` reads only local files, so the run stays offline.
  */
 export function makeAnalyzePerformanceSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'analyze-performance-'));
+  const dir = makeSmokeScratchDir('analyze-performance-');
   const slug = 'localhost';
   mkdirSync(path.join(dir, slug));
   const runs = [];

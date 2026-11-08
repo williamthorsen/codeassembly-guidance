@@ -1,10 +1,10 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -14,7 +14,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * needs a real repository to read.
  */
 export function makeReviseProseSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'revise-prose-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('revise-prose-smoke-');
   execFileSync('git', ['-C', fixtureDir, 'init', '--quiet']);
   writeFileSync(path.join(fixtureDir, 'guide.md'), 'Finds the ticket a branch name encodes.\n', 'utf8');
 

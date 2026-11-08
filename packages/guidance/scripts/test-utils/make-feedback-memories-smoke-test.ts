@@ -1,9 +1,9 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -13,7 +13,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * which setting `HOME` alone does not override.
  */
 export function makeFeedbackMemoriesSmokeTest(): SmokeTestInvocation {
-  const home = mkdtempSync(path.join(tmpdir(), 'feedback-memories-home-'));
+  const home = makeSmokeScratchDir('feedback-memories-home-');
   const memoryDir = path.join(home, '.claude', 'projects', '-store-smoke', 'memory');
   mkdirSync(memoryDir, { recursive: true });
   writeFileSync(

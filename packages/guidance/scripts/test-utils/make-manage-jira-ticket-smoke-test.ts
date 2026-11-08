@@ -1,8 +1,8 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * without contacting Jira.
  */
 export function makeManageJiraTicketSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'manage-jira-ticket-smoke-'));
+  const dir = makeSmokeScratchDir('manage-jira-ticket-smoke-');
   const bodyFile = path.join(dir, 'body.md');
   writeFileSync(bodyFile, '## Acceptance criteria\n\n- [ ] works\n');
 

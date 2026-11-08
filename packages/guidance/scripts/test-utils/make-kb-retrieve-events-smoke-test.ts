@@ -1,11 +1,11 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -17,10 +17,10 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * build.
  */
 export function makeKbRetrieveEventsSmokeTest(): SmokeTestInvocation {
-  const storePath = mkdtempSync(path.join(tmpdir(), 'kb-retrieve-events-store-'));
+  const storePath = makeSmokeScratchDir('kb-retrieve-events-store-');
   mkdirSync(resolveKbDir(storePath), { recursive: true });
 
-  const home = mkdtempSync(path.join(tmpdir(), 'kb-retrieve-events-home-'));
+  const home = makeSmokeScratchDir('kb-retrieve-events-home-');
   mkdirSync(path.join(home, '.agents'), { recursive: true });
   writeFileSync(
     path.join(home, '.agents', 'kb.yaml'),

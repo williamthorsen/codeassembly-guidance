@@ -1,8 +1,8 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -10,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * bundled schema accepts the stage and reports the misspelling as a warning.
  */
 export function makeValidatePreferencesSmokeTest(): SmokeTestInvocation {
-  const dir = mkdtempSync(path.join(tmpdir(), 'validate-preferences-'));
+  const dir = makeSmokeScratchDir('validate-preferences-');
   const filePath = path.join(dir, 'preferences.yaml');
   writeFileSync(filePath, 'project:\n  maturity: hobby\n  sensitivity: low\n  audience: owner\nprojct: {}\n', 'utf8');
   return { args: ['--json', filePath], assertResult: assertOneWarning };

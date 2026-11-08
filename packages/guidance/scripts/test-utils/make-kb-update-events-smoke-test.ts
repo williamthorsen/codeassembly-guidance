@@ -1,11 +1,11 @@
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
 import { resolveEventPath, resolveEventsDir, resolveKbDir } from '@williamthorsen/kb/layout';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -14,7 +14,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * the `@default` resolution → read → parse → mutate → atomic write pipeline.
  */
 export function makeKbUpdateEventsSmokeTest(): SmokeTestInvocation {
-  const storePath = mkdtempSync(path.join(tmpdir(), 'kb-update-events-store-'));
+  const storePath = makeSmokeScratchDir('kb-update-events-store-');
   mkdirSync(resolveKbDir(storePath), { recursive: true });
 
   mkdirSync(resolveEventsDir(storePath), { recursive: true });
@@ -37,7 +37,7 @@ export function makeKbUpdateEventsSmokeTest(): SmokeTestInvocation {
     'utf8',
   );
 
-  const home = mkdtempSync(path.join(tmpdir(), 'kb-update-events-home-'));
+  const home = makeSmokeScratchDir('kb-update-events-home-');
   mkdirSync(path.join(home, '.agents'), { recursive: true });
   writeFileSync(
     path.join(home, '.agents', 'kb.yaml'),

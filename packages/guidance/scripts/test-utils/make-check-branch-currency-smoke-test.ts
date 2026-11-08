@@ -1,9 +1,8 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -11,7 +10,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * Exercises the fetch and the counts, which the bundle runs through real git.
  */
 export function makeCheckBranchCurrencySmokeTest(): SmokeTestInvocation {
-  const root = mkdtempSync(path.join(tmpdir(), 'check-branch-currency-smoke-'));
+  const root = makeSmokeScratchDir('check-branch-currency-smoke-');
   const remote = path.join(root, 'remote.git');
   const upstream = path.join(root, 'upstream');
   const work = path.join(root, 'work');

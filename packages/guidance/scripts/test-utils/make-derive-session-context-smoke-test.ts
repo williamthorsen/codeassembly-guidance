@@ -1,8 +1,8 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { isRecord } from './is-record.ts';
+import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
 /**
@@ -11,7 +11,7 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * current git branch, so the smoke test cannot use the ambient environment.
  */
 export function makeDeriveSessionContextSmokeTest(): SmokeTestInvocation {
-  const fixtureDir = mkdtempSync(path.join(tmpdir(), 'derive-session-context-smoke-'));
+  const fixtureDir = makeSmokeScratchDir('derive-session-context-smoke-');
   mkdirSync(path.join(fixtureDir, '.agents'), { recursive: true });
   writeFileSync(path.join(fixtureDir, '.agents', 'preferences.yaml'), 'project:\n  slug: smoke-test-project\n', 'utf8');
   return {
