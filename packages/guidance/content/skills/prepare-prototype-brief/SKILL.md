@@ -61,9 +61,9 @@ The failure that this prevents: the lens paragraph reproduced as helper text und
 
 ### Require a salience order
 
-Require a salience order in every working view: the current state in one place, the next thing to happen more prominent than the rest, and every action visibly an action. Name {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} as the floor, including the accessibility rulebook's named-model, placement, and toggle rules, and state that usability outranks restraint. A builder departs from the named model only for a reason, which it reports with its distinctive ideas. Require that a status repeated on every row be a mark, a column, or a style, not a sentence.
+Require a salience order in every working view: the current state in one place, the next thing to happen more prominent than the rest, and every action visibly an action. Name {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} as the floor, including the accessibility rulebook's named-model, placement, toggle, glanceable-state, and button-at-rest rules, and state that usability outranks restraint: A calm or restrained direction never hides a state for which the reader scans. A builder departs from the named model only for a reason, which it reports with its distinctive ideas. Require that a status repeated on every row be a mark, a column, or a style, not a sentence.
 
-The failure that this prevents: a page in one colour, in which the operator hunts for the control, and "Hidden from the players." written out on every hidden row.
+The failure that this prevents: a page in one colour, in which the operator hunts for the control, "Hidden from the players." written out on every hidden row, and an expiry column in plain text, in which the operator reads every row to find the expired ones.
 
 ### Write the brief in plain speech
 
@@ -82,7 +82,7 @@ Write the brief in this order, with these headings:
 3. **Deliverable.** The file and its path per {skill:index-prototypes}; the constraints (self-contained, opens from `file://`, inline CSS and JavaScript, no framework, readable with JavaScript off, phone width); the mechanism that must run; the demo control that plays the written scene; a full-screen mode when the product has an audience view. The demo chrome (the demo control, scene captions, the lens note, the data-model note, the API list) is in a band visibly distinct from the product surface, and every part of it is inside an element that has the `data-demo` attribute. The band's first line is the id and the title from the dispatch block, `{id} {title}`.
 4. **Sections.** Numbered, each a noun phrase plus what it contains and a length bound. None asks for persuasion; one is the scene, exhibited; one is the data-model note when the product stores data; one is the API list when the product has an API.
 5. **Quality bar.** Works, legible, accessible, and within the copy rules, with {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} named, the design skill to invoke before markup, and the salience order required.
-6. **How this round is judged.** The criteria, in the reviewer's voice, with the divergence between lenses named as the point of the round. One criterion is the copy: "Read every string on the product surface as its user opening the page for the tenth time. A string that explains the page, reassures, or repeats the brief, and any copy over the budget in {rulebook:ui-copy-conventions}, is a defect."
+6. **How this round is judged.** The criteria, in the reviewer's voice, with the divergence between lenses named as the point of the round. One criterion is the copy: "Read every string on the product surface as its user opening the page for the tenth time. A string that explains the page, reassures, or repeats the brief, and any copy over the budget in {rulebook:ui-copy-conventions}, is a defect." Another is the glanceable state: "A list in which the reader must read each item to find a state for which it scans, such as expired or failing, is a defect, whatever restraint the lens asks for."
 7. **Rules of engagement.** The write allowance from the inputs. The default: Write the output file and nothing else, modify nothing in the repository, install nothing. When the ask allows more, state what it allows. Then: Publish the prototype and report its artifact URL, a value for each of the set's note labels (listed here), and five lines of distinctive ideas.
 
 Then add the lens sections, one per builder, in the developer's words after a plain-speech pass.
@@ -129,7 +129,7 @@ Write the brief to `{scratch_dir}/brief.md`. Then check it against each rule abo
 - Every `do not know`, `mystery`, `unknown to`, `without knowing` in an audience-facing instruction: rewritten as what the audience sees, without the withheld information.
 - `cost`, `price`, `free`, `cheap`, `budget`: absent, or present once in the judging section.
 - Every `state`, `say`, `tell`, `explain` in a requirement: rewritten as what the viewer can learn and at what moment.
-- Salience order, the accessibility floor, and the copy rules: named in the quality bar, and the copy rules named again in "How this round is judged".
+- Salience order, the accessibility floor, and the copy rules: named in the quality bar, and the copy rules and the glanceable state named again in "How this round is judged".
 - The `data-demo` band: required in the deliverable.
 - The write allowance: stated in the rules of engagement.
 - The note labels: listed in the rules of engagement.
