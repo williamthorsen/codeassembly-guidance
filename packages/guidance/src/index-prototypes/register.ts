@@ -52,26 +52,14 @@ export async function register(
   const version = nextVersion(existing, slug);
   const title = requireFlag(values, 'title');
   const source = values['source'];
-  if (source !== undefined) {
-    const mismatch = await checkSourceTitle(source, formatPrototypeTitle(setTitle, number, version, title));
-    if (mismatch !== null) {
-      return mismatch;
-    }
+  const mismatch = await checkSourceTitle(source, formatPrototypeTitle(setTitle, number, version, title));
+  if (mismatch !== null) {
+    return mismatch;
   }
 
-  let shot: string | null = null;
-  const screenshot = values['screenshot'];
-  if (screenshot !== undefined) {
-    const intake = await intakeScreenshot({
-      sourcePath: path.resolve(screenshot),
-      setDir,
-      slug,
-      version,
-    });
-    if (!intake.ok) {
-      return fail(intake.error, intake.message);
-    }
-    shot = intake.shot;
+  const stored = await storeScreenshot(values['screenshot'], setDir, slug, version);
+  if ('error' in stored) {
+    return stored;
   }
 
   const entry: ManifestEntry = {
@@ -86,7 +74,7 @@ export async function register(
     inputs: parseInputs(values['inputs']),
     description: values['description'] ?? null,
     notes,
-    shot,
+    shot: stored.shot,
   };
 
   const manifest: Manifest = {
@@ -103,9 +91,12 @@ export async function register(
 
 /**
  * Returns the failure for a source that cannot be read as a file or whose `<title>` is not `expected`, and `null` for
- * a conforming source. A read error other than a missing file or a directory propagates.
+ * a conforming source or an absent one. A read error other than a missing file or a directory propagates.
  */
-async function checkSourceTitle(source: string, expected: string): Promise<IndexPrototypesFailure | null> {
+async function checkSourceTitle(source: string | undefined, expected: string): Promise<IndexPrototypesFailure | null> {
+  if (source === undefined) {
+    return null;
+  }
   let html: string;
   try {
     html = await readFile(path.resolve(source), 'utf8');
@@ -155,6 +146,23 @@ function resolveRegistrationNumber(
   }
   const holder = entries.find((entry) => entry.number === number);
   return holder === undefined ? number : fail('number-conflict', `number ${number} belongs to slug "${holder.slug}"`);
+}
+
+/**
+ * Copies the screenshot into the set under the registration's version and returns its set-relative path, `null` when
+ * the registration does not have a screenshot, or the intake's failure.
+ */
+async function storeScreenshot(
+  screenshot: string | undefined,
+  setDir: string,
+  slug: string,
+  version: number,
+): Promise<IndexPrototypesFailure | { shot: string | null }> {
+  if (screenshot === undefined) {
+    return { shot: null };
+  }
+  const intake = await intakeScreenshot({ sourcePath: path.resolve(screenshot), setDir, slug, version });
+  return intake.ok ? { shot: intake.shot } : fail(intake.error, intake.message);
 }
 
 // endregion | Helpers
