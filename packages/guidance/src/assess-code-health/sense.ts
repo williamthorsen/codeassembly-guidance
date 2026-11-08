@@ -6,6 +6,7 @@ import path from 'node:path';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import {
+  buildExcludeGlobPathspecs,
   buildExcludePathspecs,
   buildLogArgs,
   computeCoChange,
@@ -95,8 +96,9 @@ export function runSense(options: SenseOptions, dependencies: SenseDependencies)
   const outDir = path.dirname(options.out);
 
   const analyzable = listFiles(dependencies, root, [unit, ...buildExcludePathspecs(options.excludeGlobs)]);
+  const inScope = listFiles(dependencies, root, [unit, ...buildExcludeGlobPathspecs(options.excludeGlobs)]);
   const { results: structural, graph } = runStructuralSensors(
-    { root, unit, outDir, analyzable, unitTracked: tracked, excludeGlobs: options.excludeGlobs },
+    { root, unit, outDir, analyzable, inScope, excludeGlobs: options.excludeGlobs },
     dependencies,
   );
   const importers = graph === undefined ? undefined : new Map(graph.map((row) => [row.path, row.importers.length]));

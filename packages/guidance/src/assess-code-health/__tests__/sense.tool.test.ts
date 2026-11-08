@@ -107,6 +107,36 @@ describe('sense', () => {
     ]);
   });
 
+  it('keeps an unused-dependency row only for a manifest that no --exclude glob matches', async () => {
+    writeFile('pkg/a/package.json', '{}\n');
+    writeFile('pkg/b/package.json', '{}\n');
+    commit('manifests');
+    const out = path.join(scratch, 'out', 'sense.json');
+    const report = {
+      issues: [
+        { file: 'pkg/a/package.json', devDependencies: [{ name: 'kept', line: 2 }] },
+        { file: 'pkg/b/package.json', devDependencies: [{ name: 'excluded', line: 2 }] },
+      ],
+    };
+
+    await runCli(
+      ['sense', '--unit', 'pkg', '--exclude', 'pkg/b/**', '--out', out],
+      buildContext(scratch, {
+        sense: {
+          runTool: (_command, args) =>
+            args.includes('knip')
+              ? { exitCode: 0, stdout: JSON.stringify(report), stderr: '' }
+              : { spawnError: 'not under test' },
+        },
+      }),
+    );
+
+    const document = SenseDocumentSchema.parse(JSON.parse(readFileSync(out, 'utf8')));
+    expect(findSensor(document, 'dead-code').data).toEqual([
+      { path: 'pkg/a/package.json', kind: 'devDependencies', name: 'kept', line: 2 },
+    ]);
+  });
+
   /** Runs git in the scratch repository with a fixed author. */
   function git(...args: string[]): void {
     execFileSync('git', ['-C', scratch, '-c', 'user.email=test@example.com', '-c', 'user.name=Test', ...args]);

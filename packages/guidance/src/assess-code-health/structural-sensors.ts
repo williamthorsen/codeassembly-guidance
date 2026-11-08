@@ -45,8 +45,8 @@ export interface StructuralOptions {
   outDir: string;
   /** The unit's tracked files, less the exclusions: the only paths that a row may name. */
   analyzable: ReadonlySet<string>;
-  /** Every tracked file under the unit, which admits a manifest that the exclusions remove. */
-  unitTracked: ReadonlySet<string>;
+  /** The unit's tracked files, less the `--exclude` globs alone, which admits a manifest that the default exclusions remove. */
+  inScope: ReadonlySet<string>;
   excludeGlobs: readonly string[];
 }
 
@@ -150,12 +150,12 @@ function buildDlxArgs(tool: ToolSpec<unknown>, toolArgs: readonly string[]): str
   ];
 }
 
-/** Keeps the rows that name an analyzable file, or a manifest tracked under the unit. */
+/** Keeps the rows that name an analyzable file, or a manifest tracked under the unit and not matched by an `--exclude` glob. */
 function filterDeadCode(rows: readonly DeadCodeRow[], options: StructuralOptions): DeadCodeRow[] {
   return rows.filter(
     (row) =>
       options.analyzable.has(row.path) ||
-      (path.posix.basename(row.path) === 'package.json' && options.unitTracked.has(row.path)),
+      (path.posix.basename(row.path) === 'package.json' && options.inScope.has(row.path)),
   );
 }
 

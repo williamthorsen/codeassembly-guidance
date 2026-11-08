@@ -75,7 +75,7 @@ describe('runStructuralSensors', () => {
       buildOptions({
         unit: 'packages/guidance',
         analyzable: [`${SRC}/sense.ts`, `${SRC}/cli.ts`, `${SRC}/git-history.ts`],
-        unitTracked: ['packages/guidance/package.json'],
+        inScope: ['packages/guidance/package.json'],
       }),
       buildDependencies((command, args) =>
         args.includes('knip')
@@ -164,7 +164,7 @@ describe('runStructuralSensors', () => {
 
   /** Builds options over the fixture paths, rooted at the scratch directory. */
   function buildOptions(
-    overrides: { unit?: string; analyzable?: string[]; unitTracked?: string[] } = {},
+    overrides: { unit?: string; analyzable?: string[]; inScope?: string[] } = {},
   ): StructuralOptions {
     const analyzable = overrides.analyzable ?? [`${SRC}/sense.ts`, `${SRC}/structural-sensors.ts`];
     return {
@@ -172,7 +172,7 @@ describe('runStructuralSensors', () => {
       unit: overrides.unit ?? 'packages/guidance',
       outDir: path.join(root, 'out'),
       analyzable: new Set(analyzable),
-      unitTracked: new Set([...analyzable, ...(overrides.unitTracked ?? [])]),
+      inScope: new Set([...analyzable, ...(overrides.inScope ?? [])]),
       excludeGlobs: [],
     };
   }
