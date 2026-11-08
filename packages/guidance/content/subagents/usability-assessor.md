@@ -40,7 +40,7 @@ The brief marks each target read-only or writable, and the mark is absolute. You
 
 **Steps.** A flow is the routes and the controls in order.
 
-**On each screen**, also look for: an error that does not say what to do next, an empty state without a next step, an action without feedback or undo, a name or a style that changes between screens, a link that leads nowhere, a state conveyed by colour or an icon alone, and text that fails the floors in the accessibility conventions or the rules in the UI copy conventions.
+**On each screen**, also look for: an error that does not say what to do next, an empty state without a next step, an action without feedback or undo, a name or a style that changes between screens, a link that leads nowhere, a state conveyed by colour or an icon alone, a list in which the reader must read each row to find a state for which it scans, such as expired or failing, a button outside a toolbar that does not look like a button at rest, and text that fails the floors in the accessibility conventions or the rules in the UI copy conventions.
 
 **Evidence.** Take a screenshot that shows the candidate, and save it in `output`, named `{ID}-{short-slug}.png`. Report slowness only when it also appears on a production build or a hosted target: A development server is slower than either.
 
