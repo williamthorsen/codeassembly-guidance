@@ -10,7 +10,7 @@ catalog:
   '@williamthorsen/toolbelt.errors': '0.9.0'
   '@williamthorsen/toolbelt.terminal': '0.3.0'
   '@williamthorsen/toolbelt.testing': '0.8.0'
-  '@williamthorsen/toolbelt.vitest': '0.13.1'
+  '@williamthorsen/toolbelt.vitest': '0.13.2'
   codeassembly: '0.20.0'
   esbuild: '0.28.2'
   eslint: '10.14.0'
