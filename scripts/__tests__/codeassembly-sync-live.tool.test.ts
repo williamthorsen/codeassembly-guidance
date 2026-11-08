@@ -1,19 +1,10 @@
 import { execFileSync, spawnSync } from 'node:child_process';
-import {
-  chmodSync,
-  copyFileSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { createTempTree } from '@williamthorsen/toolbelt.testing/candidate';
+import { disposeOnTestFinished } from '@williamthorsen/toolbelt.vitest/candidate';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 const scriptSource = path.join(import.meta.dirname, '..', 'codeassembly-sync-live.sh');
 
@@ -24,10 +15,6 @@ describe('codeassembly-sync-live', () => {
 
   beforeEach(() => {
     fixture = createFixture();
-  });
-
-  afterEach(() => {
-    rmSync(fixture.baseDir, { recursive: true, force: true });
   });
 
   it('advances live to origin/main, builds both live worktrees, and deploys with the sibling CLI', () => {
@@ -163,10 +150,6 @@ describe('codeassembly-sync-live without a live worktree', () => {
 
   beforeEach(() => {
     fixture = createFixture({ live: false });
-  });
-
-  afterEach(() => {
-    rmSync(fixture.baseDir, { recursive: true, force: true });
   });
 
   it('advances main to origin/main and deploys with the pinned CLI', () => {
@@ -336,7 +319,7 @@ function createCliWorktree(dir: string): string {
  * sibling path. The stubs append each deploy step to a log.
  */
 function createFixture({ live = true }: FixtureOptions = {}): Fixture {
-  const baseDir = realpathSync(mkdtempSync(path.join(tmpdir(), 'sync-live-')));
+  const baseDir = disposeOnTestFinished(createTempTree({}, { prefix: 'sync-live-' })).dir;
   const originDir = path.join(baseDir, 'origin.git');
   const repoDir = path.join(baseDir, 'repo');
   const liveDir = path.join(baseDir, 'repo.live');
