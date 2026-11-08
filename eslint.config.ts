@@ -4,6 +4,10 @@ import baseConfig, { commonIgnores, toolIgnores } from '@williamthorsen/eslint-c
 import { defineConfig, globalIgnores } from 'eslint/config';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
 
+// Names the helpers that remove a test's scratch directory, so that a direct `mkdtemp` in a test cannot leak one.
+const SCRATCH_DIR_MESSAGE =
+  'Create test scratch directories with `makeScratchDir` (packages/guidance/src/test-utils/make-scratch-dir.ts), with `makeSmokeScratchDir` in a smoke-test builder, or elsewhere with `createTempTree` and `disposeOnTestFinished`, which remove them.';
+
 const config = defineConfig([
   ...baseConfig,
   globalIgnores([
@@ -63,6 +67,35 @@ const config = defineConfig([
       '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
+  {
+    files: ['**/__tests__/**', '**/test-utils/**'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        ...readBaseRuleOptions('no-restricted-syntax'),
+        ...[
+          'CallExpression[callee.name=/^mkdtemp(Sync)?$/]',
+          'CallExpression[callee.property.name=/^mkdtemp(Sync)?$/]',
+        ].map((selector) => ({ selector, message: SCRATCH_DIR_MESSAGE })),
+      ],
+    },
+  },
 ]);
 
 export default config;
+
+// region | Helpers
+
+/**
+ * Returns the options after the severity that the base config sets for `rule`, so that a block restating the rule
+ * keeps them: A later block replaces a rule's options rather than merging with them.
+ */
+function readBaseRuleOptions(rule: string): unknown[] {
+  for (const block of baseConfig.toReversed()) {
+    const setting: unknown = block.rules?.[rule];
+    if (Array.isArray(setting)) return setting.slice(1);
+  }
+  return [];
+}
+
+// endregion | Helpers
