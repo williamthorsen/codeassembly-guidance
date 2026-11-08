@@ -12,6 +12,7 @@ import { COPY_PROBE_SCRIPT } from './copy-probe.ts';
 import { fail } from './failure.ts';
 import { isValidSlug, listLatestEntries, readManifest, resolveIds, writeManifest } from './manifest.ts';
 import { parseArgs, type ParsedArgs, parseInputs, requireFlag, resolveSetDir } from './parse-args.ts';
+import { probeTargets } from './probe-targets.ts';
 import { isWebUrl, register } from './register.ts';
 import { type IndexCard, PAGE_LIMIT_BYTES, PAGE_WARN_BYTES, renderIndexPage } from './render-index.ts';
 import type { IndexPrototypesResult, SetSummary } from './types.ts';
@@ -56,6 +57,8 @@ export async function runIndexPrototypes(input: {
       return { ok: true, command: 'copy-probe', function: COPY_PROBE_SCRIPT };
     case 'describe-set':
       return describeSet(resolveSetDir(args.values), path.resolve(requireFlag(args.values, 'file')));
+    case 'probe-targets':
+      return probeTargets(requireFlag(args.values, 'endpoint'));
     case 'record-index':
       return recordIndex(resolveSetDir(args.values), requireFlag(args.values, 'url'));
     case 'register':

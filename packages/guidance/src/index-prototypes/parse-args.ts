@@ -3,7 +3,15 @@ import path from 'node:path';
 import { type FlagSpec, scanFlags, valueFlagMap } from '../lib/parse-flags.ts';
 import type { Note } from './types.ts';
 
-const COMMANDS = ['copy-probe', 'describe-set', 'record-index', 'register', 'render', 'resolve-ids'] as const;
+const COMMANDS = [
+  'copy-probe',
+  'describe-set',
+  'probe-targets',
+  'record-index',
+  'register',
+  'render',
+  'resolve-ids',
+] as const;
 
 type Command = (typeof COMMANDS)[number];
 
@@ -11,6 +19,7 @@ const COMMAND_NAMES: ReadonlySet<string> = new Set(COMMANDS);
 
 const FLAGS: readonly FlagSpec[] = [
   { name: 'description', takesValue: true },
+  { name: 'endpoint', takesValue: true },
   { name: 'file', takesValue: true },
   { name: 'inputs', takesValue: true },
   { name: 'lens', takesValue: true },
@@ -30,6 +39,7 @@ const FLAGS: readonly FlagSpec[] = [
 const COMMAND_FLAGS: Record<Command, { required: readonly string[]; optional: readonly string[] }> = {
   'copy-probe': { required: [], optional: [] },
   'describe-set': { required: ['file', 'set-dir'], optional: [] },
+  'probe-targets': { required: ['endpoint'], optional: [] },
   'record-index': { required: ['set-dir', 'url'], optional: [] },
   register: {
     required: ['set-dir', 'slug', 'title', 'url'],

@@ -52,13 +52,13 @@ mktemp -d "${TMPDIR:-/tmp}/prototypes.XXXXXX"
 
 ### 2. Build the prototypes
 
-Choose a slug for each prototype, resolve the ids, and choose the set's note labels, per [The set](#the-set). When a subagent builds one, give it the slug, the id, and the note labels, and tell it to:
+Choose a slug for each prototype, resolve the ids, and choose the set's note labels, per [The set](#the-set). Every build meets this contract:
 
 1. Write the page source to `{set_dir}/{slug}-v{n}.html`, with `{id} {title}` as the first line of its `data-demo` band.
 2. Publish that file with the Artifact tool.
 3. Report the artifact URL, a short title, the lens (the angle or constraint that distinguishes this prototype), the inputs on which it drew, a one-sentence description, and one line per note label as `{label}: {value}`.
 
-Build a prototype in the main session the same way.
+When a subagent builds a prototype, dispatch a {subagent:prototype-builder} and give it the slug, the id, the note labels, and the output path; it meets the contract and checks the page in a headless browser of its own, so that several builders can run at once without blocking each other or this session. Build a prototype in the main session the same way.
 
 ### 3. Capture the screenshots
 
@@ -79,6 +79,15 @@ Then, for each prototype:
 Stop the server once every prototype is captured.
 
 The Playwright MCP attaches to the worktree's debug browser, and a call that reports a refused connection means that the browser is not running. Run `thor-chrome` from the worktree; the next call then reaches the browser without restarting the MCP. When `thor-chrome` refuses the launch with `session-unavailable`, as it can in the agent sandbox, ask the developer to run `thor-chrome` from the worktree in a terminal in the GUI login session, and wait for it rather than publishing an index without screenshots.
+
+A Playwright call that ends in a timeout error, or that takes over 30 seconds, most likely waits on a page that hangs its renderer, and every later call queues behind it. Close that page:
+
+```bash
+node {harness_home_dir}/skills/index-prototypes/index-prototypes.mjs probe-targets \
+  --endpoint "{endpoint from thor-chrome status --json}"
+```
+
+The result's `closed` lists each page that did not answer and was closed, and `answered` lists the rest. Report the prototype of each closed page as defective, leave it without a screenshot, and continue with the rest.
 
 ### 4. Register each prototype
 
@@ -186,6 +195,7 @@ Every command prints one JSON object. A success has `ok: true`. A failure has `o
 
 | `error`                | Meaning                                                                                                                  |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `endpoint-unreachable` | The browser's DevTools endpoint did not return its target list, or did not answer a close                                |
 | `invalid-args`         | Unknown command, a flag that this command rejects, a missing required flag, or a `--note` that is not `{label}: {value}` |
 | `invalid-manifest`     | `manifest.json` is not valid JSON or does not have the manifest layout                                                   |
 | `invalid-slug`         | The slug does not match `[a-z0-9][a-z0-9-]{0,39}`                                                                        |
