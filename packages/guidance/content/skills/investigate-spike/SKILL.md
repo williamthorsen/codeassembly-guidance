@@ -1,6 +1,6 @@
 ---
 name: investigate-spike
-description: Carry out a spike plan's investigation steps and deliver its findings artifact and the closing post on the ticket
+description: Carry out a spike plan's investigation steps and deliver its findings artifact, with the closing post on the ticket when no triage round follows
 user-invocable: true
 ---
 
