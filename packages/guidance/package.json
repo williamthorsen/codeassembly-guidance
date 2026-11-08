@@ -58,6 +58,7 @@
     "@williamthorsen/toolbelt.errors": "catalog:",
     "@williamthorsen/toolbelt.terminal": "catalog:",
     "@williamthorsen/toolbelt.testing": "catalog:",
+    "@williamthorsen/toolbelt.vitest": "catalog:",
     "codeassembly": "catalog:",
     "esbuild": "catalog:",
     "eslint": "catalog:",
