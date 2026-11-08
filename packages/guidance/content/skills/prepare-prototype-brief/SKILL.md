@@ -85,7 +85,7 @@ Write the brief in this order, with these headings:
 
 1. **Context.** The ticket, quoted. The developer's motivating picture, restated in plain speech.
 2. **Settled intent.** Bullets. Each is a decision, with its reason when the reason constrains the design.
-3. **Deliverable.** The file and its path per {skill:index-prototypes}; the constraints (self-contained, opens from `file://`, inline CSS and JavaScript, no framework, readable with JavaScript off, phone width, every loop bounded by an iteration count or a time limit); the mechanism that must run; the demo control that plays the written scene; a full-screen mode when the product has an audience view. The demo chrome (the demo control, scene captions, the lens note, the data-model note, the API list) is in a band visibly distinct from the product surface, and every part of it is inside an element that has the `data-demo` attribute. The band's first line is the id and the title from the dispatch block, `{id} {title}`.
+3. **Deliverable.** The file and its path per {skill:index-prototypes}; the constraints (self-contained, opens from `file://`, inline CSS and JavaScript, no framework, readable with JavaScript off, phone width, every loop bounded by an iteration count or a time limit); the mechanism that must run; the demo control that plays the written scene; a full-screen mode when the product has an audience view. The demo chrome (the demo control, scene captions, the lens note, the data-model note, the API list) is in a band visibly distinct from the product surface, and every part of it is inside an element that has the `data-demo` attribute. The band's first line is the id from the dispatch block and the prototype's title, `{id} {title}`. The page's `<title>` is `{set title} - {id} {title}`, with the set title and the id from the dispatch block.
 4. **Sections.** Numbered, each a noun phrase plus what it contains and a length bound. None asks for persuasion; one is the scene, exhibited; one is the data-model note when the product stores data; one is the API list when the product has an API.
 5. **Quality bar.** Works, legible, accessible, and within the copy rules, with {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} named, the design skill to invoke before markup, and the salience order required.
 6. **How this round is judged.** The criteria, in the reviewer's voice, with the divergence between lenses named as the point of the round. One criterion is the copy: "Read every string on the product surface as its user opening the page for the tenth time. A string that explains the page, reassures, or repeats the brief, and any copy over the budget in {rulebook:ui-copy-conventions}, is a defect." Another is the glanceable state: "A list in which the reader must read each item to find a state for which the reader scans, such as expired or failing, is a defect, whatever restraint the lens asks for."
@@ -122,7 +122,7 @@ Resolve the set directory and the scratch directory per {skill:index-prototypes}
 
 ### 2. Gather the inputs
 
-Take the ticket and the ask. Propose lenses when the ask lacks them. Take the write allowance from the ask, and apply the default when the ask does not state one. Choose a slug per lens and the set's note labels, per {skill:index-prototypes} "The set", before anything is built, and resolve the slugs' ids per the same section, in the order of the lens sections.
+Take the ticket and the ask. Propose lenses when the ask lacks them. Take the write allowance from the ask, and apply the default when the ask does not state one. Choose the set title (or read it from the manifest), a slug per lens, and the set's note labels, per {skill:index-prototypes} "The set", before anything is built, and resolve the slugs' ids per the same section, in the order of the lens sections.
 
 ### 3. Compose and check the brief
 
@@ -159,6 +159,7 @@ lens: {lens name}
 slug: {slug}
 version: {n}
 id: {number}.{n}
+set-title: {set title}
 output: {set_dir}/{slug}-v{n}.html
 ```
 

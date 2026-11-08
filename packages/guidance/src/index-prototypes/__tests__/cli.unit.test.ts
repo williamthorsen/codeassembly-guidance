@@ -1,4 +1,4 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
@@ -7,6 +7,7 @@ import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runIndexPrototypes } from '../cli.ts';
 import { COPY_PROBE_SCRIPT } from '../copy-probe.ts';
 import { buildPng } from '../test-utils/build-png.ts';
+import { writePrototypeSource } from '../test-utils/write-prototype-source.ts';
 
 const NOW = new Date('2026-10-03T01:19:36.000Z');
 
@@ -30,6 +31,7 @@ describe(runIndexPrototypes, () => {
 
   it('creates the manifest on the first registration', async () => {
     const setDir = makeSetDir();
+    await writePrototypeSource(path.join(setDir, 'dense-v1.html'), 'Header variants - 1.1 Dense header');
 
     const result = await runIndexPrototypes({
       argv: [
@@ -285,6 +287,90 @@ describe(runIndexPrototypes, () => {
     });
 
     expect(result).toMatchObject({ ok: false, error: 'invalid-url' });
+  });
+
+  it('refuses a source whose title differs from the rule and writes nothing', async () => {
+    const setDir = makeSetDir();
+    const source = path.join(setDir, 'a-v1.html');
+    const capture = path.join(setDir, 'capture.png');
+    await writePrototypeSource(source, 'Set a');
+    await writeFile(capture, buildPng(1280, 2));
+
+    const result = await register(setDir, 'a', NOW, [
+      '--set-title',
+      'Set',
+      '--source',
+      source,
+      '--screenshot',
+      capture,
+    ]);
+
+    expect(result).toEqual({
+      ok: false,
+      error: 'title-mismatch',
+      message: `the source's <title> must be "Set - 1.1 Prototype a"; found "Set a"`,
+    });
+    expect((await readdir(setDir)).toSorted()).toEqual(['a-v1.html', 'capture.png']);
+  });
+
+  it('refuses a source without a title', async () => {
+    const setDir = makeSetDir();
+    const source = path.join(setDir, 'a-v1.html');
+    await writePrototypeSource(source, null);
+
+    const result = await register(setDir, 'a', NOW, ['--set-title', 'Set', '--source', source]);
+
+    expect(result).toMatchObject({
+      ok: false,
+      error: 'title-mismatch',
+      message: expect.stringContaining('found no <title>'),
+    });
+  });
+
+  it('refuses a source that does not exist', async () => {
+    const setDir = makeSetDir();
+
+    const result = await register(setDir, 'a', NOW, ['--set-title', 'Set', '--source', path.join(setDir, 'a-v1.html')]);
+
+    expect(result).toMatchObject({ ok: false, error: 'source-not-found' });
+  });
+
+  it('accepts a source whose title matches a title flag with stray whitespace', async () => {
+    const setDir = makeSetDir();
+    const source = path.join(setDir, 'a-v1.html');
+    await writePrototypeSource(source, 'Set - 1.1 Next item');
+
+    const result = await runIndexPrototypes({
+      argv: [
+        'register',
+        '--set-dir',
+        setDir,
+        '--slug',
+        'a',
+        '--title',
+        'Next item ',
+        '--url',
+        'https://claude.ai/artifact/x',
+        '--set-title',
+        'Set',
+        '--source',
+        source,
+      ],
+      now: NOW,
+    });
+
+    expect(result).toMatchObject({ ok: true, entry: { version: 1, source } });
+  });
+
+  it('checks a renaming registration against the new set title', async () => {
+    const setDir = makeSetDir();
+    await register(setDir, 'a', NOW, ['--set-title', 'Old']);
+    const source = path.join(setDir, 'a-v2.html');
+    await writePrototypeSource(source, 'New - 1.2 Prototype a');
+
+    const result = await register(setDir, 'a', LATER, ['--set-title', 'New', '--source', source]);
+
+    expect(result).toMatchObject({ ok: true, entry: { version: 2, source } });
   });
 
   it("stores a screenshot under the registration's version and records it on the entry", async () => {

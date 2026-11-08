@@ -22,6 +22,11 @@ A ticket has one prototype set, in its artifact directory:
 
 A later round of prototypes revises the same set: A new idea takes a new slug, and a revision of an existing prototype keeps its slug and takes the next version. The page shows the latest version of each slug.
 
+The set title is the product's name as the developer refers to it, without a qualifier such as "chart": `Top Right`, not `Top Right chart`. Choose it before the set's first prototype is built; a later round reads it from the manifest's `title`. Every page in the set names it in its browser title, so that the developer can tell the tabs of a round apart:
+
+- **A prototype page**: `<title>{set title} - {id} {title}</title>`, such as `Top Right - 1.1 Next item`.
+- **The index page**: `{set title} - Prototypes`, which `render` writes.
+
 A slug matches `[a-z0-9][a-z0-9-]{0,39}`. You choose each slug, before any prototype is built.
 
 The helper gives each slug a number at its first registration, and every later version of the slug keeps it. A version's id is `{number}.{version}`, and it is how the developer refers to a version: Name each one to them as `{id} {title}`, such as `3.2 Catalog first`; the index card leads with the same form, and the page itself states it as the first line of its `data-demo` band. A bare number names the slug whose entries have that number, at its latest version. When the manifest does not contain an entry with that number, ask which prototype they mean rather than guess. The slug stays the key in the manifest and in the verdicts.
@@ -54,7 +59,7 @@ mktemp -d "${TMPDIR:-/tmp}/prototypes.XXXXXX"
 
 Choose a slug for each prototype, resolve the ids, and choose the set's note labels, per [The set](#the-set). Every build meets this contract:
 
-1. Write the page source to `{set_dir}/{slug}-v{n}.html`, with `{id} {title}` as the first line of its `data-demo` band.
+1. Write the page source to `{set_dir}/{slug}-v{n}.html`, with the `<title>` that [The set](#the-set) states and with `{id} {title}` as the first line of its `data-demo` band.
 2. Publish that file with the Artifact tool.
 3. Report the artifact URL, a short title, the lens (the angle or constraint that distinguishes this prototype), the inputs on which it drew, a one-sentence description, and one line per note label as `{label}: {value}`.
 
@@ -108,6 +113,8 @@ node {harness_home_dir}/skills/index-prototypes/index-prototypes.mjs register \
   --note "{label}: {value}" \
   --screenshot "{working_dir}/.playwright-mcp/{slug}-v{n}.png"
 ```
+
+`register` checks the source's `<title>` against the rule in [The set](#the-set). On `title-mismatch`, correct the source's `<title>` to the expected title that the message names, republish the source to the prototype's artifact URL with the Artifact tool, reading the artifact first when this session did not publish it (a builder's publish counts as another), and register again. When the artifact cannot be republished, report the prototype as defective and leave it unregistered.
 
 Pass `--number` with the number that `resolve-ids` gave the slug. Pass one `--note` per note label, in the set's label order. Omit any optional flag that does not have a value. The result's `entry.version` must equal the `{n}` in the source's name; when it does not, the manifest already contained another version of the slug, so rename the source to match.
 
@@ -193,18 +200,20 @@ Then, in step 3, after each screenshot, pass the result's `function` to `browser
 
 Every command prints one JSON object. A success has `ok: true`. A failure has `ok: false`, an `error` code, and a `message`, and the command exits 1:
 
-| `error`                | Meaning                                                                                                                  |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `endpoint-unreachable` | The browser's DevTools endpoint did not return its target list, or did not answer a close                                |
-| `invalid-args`         | Unknown command, a flag that this command rejects, a missing required flag, or a `--note` that is not `{label}: {value}` |
-| `invalid-manifest`     | `manifest.json` is not valid JSON or does not have the manifest layout                                                   |
-| `invalid-slug`         | The slug does not match `[a-z0-9][a-z0-9-]{0,39}`                                                                        |
-| `invalid-summary`      | The summary file is not valid JSON or does not have the summary layout                                                   |
-| `invalid-url`          | The URL is not http or https                                                                                             |
-| `manifest-not-found`   | The set does not have a manifest yet; register a prototype first                                                         |
-| `missing-set-title`    | The set's first registration lacks `--set-title`                                                                         |
-| `not-png`              | The screenshot is not a PNG file                                                                                         |
-| `number-conflict`      | `--number` is not a positive integer, differs from the slug's number, or belongs to another slug                         |
-| `page-too-large`       | The page would exceed the 16,000,000-byte artifact cap; nothing was written                                              |
-| `screenshot-not-found` | The screenshot path does not exist                                                                                       |
-| `summary-not-found`    | The summary file does not exist                                                                                          |
+| `error`                | Meaning                                                                                                                                 |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `endpoint-unreachable` | The browser's DevTools endpoint did not return its target list, or did not answer a close                                               |
+| `invalid-args`         | Unknown command, a flag that this command rejects, a missing required flag, or a `--note` that is not `{label}: {value}`                |
+| `invalid-manifest`     | `manifest.json` is not valid JSON or does not have the manifest layout                                                                  |
+| `invalid-slug`         | The slug does not match `[a-z0-9][a-z0-9-]{0,39}`                                                                                       |
+| `invalid-summary`      | The summary file is not valid JSON or does not have the summary layout                                                                  |
+| `invalid-url`          | The URL is not http or https                                                                                                            |
+| `manifest-not-found`   | The set does not have a manifest yet; register a prototype first                                                                        |
+| `missing-set-title`    | The set's first registration lacks `--set-title`                                                                                        |
+| `not-png`              | The screenshot is not a PNG file                                                                                                        |
+| `number-conflict`      | `--number` is not a positive integer, differs from the slug's number, or belongs to another slug                                        |
+| `page-too-large`       | The page would exceed the 16,000,000-byte artifact cap; nothing was written                                                             |
+| `screenshot-not-found` | The screenshot path does not exist                                                                                                      |
+| `source-not-found`     | The source path does not exist or is a directory                                                                                        |
+| `summary-not-found`    | The summary file does not exist                                                                                                         |
+| `title-mismatch`       | The source's `<title>` differs from `{set title} - {id} {title}`, or the source does not have one; the message names the expected title |

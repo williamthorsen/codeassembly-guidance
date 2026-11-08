@@ -1,5 +1,6 @@
 import { INDEX_PAGE_SCRIPT } from './index-page-script.ts';
 import { formatId } from './manifest.ts';
+import { formatIndexTitle } from './page-title.ts';
 import { renderTokenDeclarations } from './tokens.ts';
 import type { ManifestEntry, Note, SetSummary } from './types.ts';
 
@@ -27,7 +28,7 @@ export function renderIndexPage(input: {
   const title = escapeHtml(input.title);
   const count = input.cards.length;
   return [
-    `<title>${title}</title>`,
+    `<title>${escapeHtml(formatIndexTitle(input.title))}</title>`,
     `<style>${renderStyles()}</style>`,
     '<main>',
     '<header>',

@@ -15,10 +15,11 @@ import type { Manifest, ManifestEntry } from '../types.ts';
 const NOW = new Date('2026-10-03T01:19:36.000Z');
 
 describe(renderIndexPage, () => {
-  it('opens with the title and the stylesheet, without a document wrapper', () => {
+  it('opens with the index title and the stylesheet, without a document wrapper, and heads the page with the set title', () => {
     const page = renderIndexPage({ title: 'Header variants', summary: null, cards: [] });
 
-    expect(page.startsWith('<title>Header variants</title>\n<style>')).toBe(true);
+    expect(page.startsWith('<title>Header variants - Prototypes</title>\n<style>')).toBe(true);
+    expect(page).toContain('<h1>Header variants</h1>');
     expect(page).not.toMatch(/<!doctype|<(?:body|head|html)[\s>]/i);
   });
 
@@ -81,7 +82,7 @@ describe(renderIndexPage, () => {
       cards: [{ entry: buildEntry({ slug: 'a', title: '<img onerror=x>', description: "it's <b>" }), shot: null }],
     });
 
-    expect(page).toContain('<title>&lt;Set&gt; &amp; &quot;co&quot;</title>');
+    expect(page).toContain('<title>&lt;Set&gt; &amp; &quot;co&quot; - Prototypes</title>');
     expect(page).not.toContain('<img onerror=x>');
     expect(page).toContain('<p class="description">it&#39;s &lt;b&gt;</p>');
   });

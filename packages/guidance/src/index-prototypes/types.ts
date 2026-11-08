@@ -66,7 +66,9 @@ export type IndexPrototypesErrorCode =
   | 'number-conflict'
   | 'page-too-large'
   | 'screenshot-not-found'
-  | 'summary-not-found';
+  | 'source-not-found'
+  | 'summary-not-found'
+  | 'title-mismatch';
 
 /** The helper's stdout payload on a recoverable failure. */
 export interface IndexPrototypesFailure {
