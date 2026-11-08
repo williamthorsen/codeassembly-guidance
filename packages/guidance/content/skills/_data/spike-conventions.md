@@ -97,7 +97,9 @@ The agent that ends a spike posts its conclusion on the ticket as a comment. The
 - The counts and the proposed groupings, when the spike produced them.
 - Links to the published page, when the spike published one, and to the findings artifact, with the artifact's path written `~/`-relative, so that the post does not publish a home-directory path.
 
-Offer the post as an item in the closing action-items block, show its body, and post it only on consent: It is a remote write, and the developer is the one who can tell whether a finding is fit for the ticket's tracker. When the session does not have a ticket, do not offer it.
+The skill that ends the spike offers the post. When the findings leave an item without a disposition, the triage round that disposes of them on the same ticket ends the spike: `triage-spike-findings` offers the post, and the skill that produced the findings names the triage as its next step without offering the post, which could not yet answer the decisions to enable. When the findings leave nothing to triage, the skill that produced them offers it. A follow-up triage ticket for a later batch does not take a closing post, because its dispositions comment is its record; the post on the original ticket names the follow-ups.
+
+Offer the post as an item in the closing action-items block of that skill, show its body, and post it only on consent: It is a remote write, and the developer is the one who can tell whether a finding is fit for the ticket's tracker. When the session does not have a ticket, do not offer it.
 
 Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-body-file). Before posting, read the ticket's comments, and skip the post when a comment already opens with the post's first line, so that a rerun does not post it twice.
 
@@ -105,7 +107,7 @@ Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-
 
 A batch is the set of items that one triage round inventories: the proposals, findings, and ideas of a findings artifact, with a grouping counted as one item. A batch holds at most 10 items, so that the developer can review it in one sitting.
 
-Each batch has a ticket of its own, which covers the assessment that produced the batch and the triage round that disposes of it. An assessment that spans more than one unit is an umbrella with one child per unit, each child covering that unit's assessment and triage round and blocked by the child before it, so that each round runs after the earlier rounds have posted their dispositions and can read them. A findings artifact that holds more than 10 items is triaged in several batches, each on its own ticket, as `triage-spike-findings` states.
+Each batch has a ticket of its own, which covers the assessment that produced the batch and the triage round that disposes of it, so the ticket's [closing post](#closing-post) follows the triage round. An assessment that spans more than one unit is an umbrella with one child per unit, each child covering that unit's assessment and triage round and blocked by the child before it, so that each round runs after the earlier rounds have posted their dispositions and can read them. A findings artifact that holds more than 10 items is triaged in several batches, each on its own ticket, as `triage-spike-findings` states.
 
 ## Aligning a spike
 

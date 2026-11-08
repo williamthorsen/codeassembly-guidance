@@ -113,10 +113,20 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
    gh issue comment {issue} --body-file "$body_path"
    ```
 
+   Keep the URL that `gh issue comment` prints for the dispositions comment; when the post was skipped, keep the `url` of the matching comment instead. Step 8 links it.
+
 7. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
 
 ### 8. Report
 
 Report the umbrella when one was created, each child with its grades and blockers in the order in which step 7 created them, each follow-up triage ticket with its batch, each issue commented on, and the artifact's path. The triage ticket stays open: Closing it is the developer's call, once they have read the record.
+
+The triage round ends the spike, so offer the [closing post](../_data/spike-conventions.md#closing-post) on the triage ticket in the same response's action-items block, showing its body, and post it on consent with that section's duplicate check, passing the body through a file. Do not offer it when the run was given **The batch**: A follow-up triage ticket's dispositions comment is its record. The post contains:
+
+- The answer to each question to answer and the recommendation on each decision to enable that the triage ticket's body lists, taken from the findings and the approved dispositions. A body that lists neither leaves the post with the items below alone.
+- The count of items by disposition.
+- Links to the umbrella, to each follow-up triage ticket, to the dispositions comment, and to the findings artifact, its path written `~/`-relative.
+
+It does not repeat the dispositions, which the dispositions comment records.
 
 <!-- include: ../_partials/gh-body-file.md / -->
