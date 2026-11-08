@@ -93,7 +93,7 @@ Each skill supplies its own recommendation context (e.g., whether the plan was d
 
 **Save the first piece's plan.** With two pieces, save the first piece's plan in the originating ticket's directory per `{skill:save-artifact}`. Its timestamp is later than the approved plan's, so `implement-plan` resolves it rather than the unsplit plan.
 
-**Report.** Report the ticket references and the plan paths. Choose each ticket's entry point from what its artifacts settle: `{skill?:design-and-plan}` when the piece's design needs a closer look; `{skill?:plan}` when the ticket is ready but does not have a plan; `{skill?:refine-plan}` when its plan leaves a decision unsettled, by the test in rule 1 above; `{skill?:implement-plan}` otherwise, which is the default for a plan cut from an approved one.
+**Report.** Report the ticket references and the plan paths. Every piece enters at `{skill?:start-ticket}`, invoked without arguments, which chooses the skill that opens the work from the piece's artifacts per [entry points](../_data/entry-points.md). A fact that the choice needs and that the artifacts do not state belongs in the piece's ticket or plan, not in its prompt.
 
 <!-- include: split-launch-prompts.md / -->
 

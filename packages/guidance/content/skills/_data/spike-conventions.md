@@ -4,7 +4,7 @@ Spike work is an investigation, not a build: Its artifacts answer questions and 
 
 The ticket is the record of a spike, and the findings artifact is its log: The artifact holds the full findings and the evidence, and the ticket holds what the spike concluded. See [Purpose](artifact-conventions.md#purpose) for the artifact directory's role.
 
-Spike mode is entered explicitly (the invocation signals it) and is not auto-detected from ticket type, label, or title. Everything outside the two templates below (source resolution, staleness, Q&A, saving) is unchanged from the feature flow.
+Spike mode is entered explicitly (the invocation signals it) and is not auto-detected from ticket type, label, or title. {skill?:start-ticket} signals it for a ticket or a plan written in the shape of a template below, per [entry points](entry-points.md). Everything outside the two templates below (source resolution, staleness, Q&A, saving) is unchanged from the feature flow.
 
 The concision and content-placement doctrines for feature tickets and plans apply unchanged; only what differs for a spike is stated here.
 
