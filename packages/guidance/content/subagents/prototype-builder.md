@@ -54,3 +54,15 @@ Publish the output with the Artifact tool. Then reply with these and nothing els
 - A one-sentence description
 - One line per note label in the brief, as `{label}: {value}`
 - Five lines of the prototype's distinctive ideas
+
+## How you write
+
+<!-- include: ../_partials/plain-speech.md / -->
+
+<!-- include: ../_partials/concision.md / -->
+
+<!-- include: ../_partials/file-access.md / -->
+
+<!-- include: ../_partials/shell-commands.md / -->
+
+<!-- guidance-hook: writing-preferences -->
