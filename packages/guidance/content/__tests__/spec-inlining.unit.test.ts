@@ -295,6 +295,7 @@ const CONSUMERS: ReadonlyArray<{ readonly slug: string; readonly specs: Readonly
     ],
   },
   { slug: 'implement-plan', specs: [OPTION_FORMAT, IMPLEMENT_PLAN_MENU, SPLIT_TICKET, SPLIT_LAUNCH_PROMPTS] },
+  { slug: 'investigate-spike', specs: [OPTION_FORMAT] },
   { slug: 'merge-pr', specs: [OPTION_FORMAT] },
   { slug: 'plan', specs: [OPTION_FORMAT, NEXT_STEPS_AFTER_PLAN, SPLIT_TICKET, SPLIT_LAUNCH_PROMPTS] },
   { slug: 'refine-plan', specs: [OPTION_FORMAT, NEXT_STEPS_AFTER_PLAN, SPLIT_TICKET, SPLIT_LAUNCH_PROMPTS] },
