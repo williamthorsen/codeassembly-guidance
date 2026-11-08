@@ -60,6 +60,10 @@ const CARRIERS: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
     'skills/implement-plan/SKILL.md',
     ['**Residue:**', 'never a step for the developer to run', 'stay yours even when the step has a residue line'],
   ],
+  [
+    'skills/investigate-spike/SKILL.md',
+    ['**Residue:**', 'never a step for the developer to run', 'stay yours even when the step has a residue line'],
+  ],
   ['skills/plan/SKILL.md', ['who applies the change']],
   ['subagents/handoff-reviewer.md', ['residue reason']],
   ['subagents/plan-reviewer.md', ['Actor assignment']],
