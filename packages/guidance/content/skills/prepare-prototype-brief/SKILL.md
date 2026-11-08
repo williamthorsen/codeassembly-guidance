@@ -162,7 +162,7 @@ id: {number}.{n}
 output: {set_dir}/{slug}-v{n}.html
 ```
 
-Dispatch a builder once more with the same block when it returns without the file, with a file that does not open, without an artifact URL, or with a page that it reports as still not responding. Report a second failure in the summary and leave the lens out of the round.
+Dispatch a builder once more with the same block when it returns without the file, with a file that does not open, without an artifact URL, or with a page that it reports as still not responding. A builder whose browser call hangs on its own page cannot return, so stop a builder that has not replied 30 minutes after its dispatch, and count that as a failed attempt. Report a second failure in the summary and leave the lens out of the round.
 
 ### 6. Index and compare
 
