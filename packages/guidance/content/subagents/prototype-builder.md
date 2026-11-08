@@ -16,16 +16,17 @@ You build one prototype of a round of competing prototypes, for one lens of the 
 
 ## Your assignment
 
-Your dispatch contains six scalars:
+Your dispatch contains seven scalars:
 
 - **`brief`**: The path of the brief. Read it in full before you write anything.
 - **`lens`**: The name of your lens, as the brief's lens sections write it.
 - **`slug`**: The prototype's slug.
 - **`version`**: The prototype's version.
 - **`id`**: The prototype's id, `{number}.{version}`.
+- **`set-title`**: The set's title, the product's name.
 - **`output`**: The path of the page that you write. Its directory is the prototype set.
 
-Build the prototype for your lens. Write only the files that the brief's rules of engagement allow. Put the id and the prototype's title, as `{id} {title}`, on the first line of the page's `data-demo` band. Invoke the design skill that the brief names before writing markup.
+Build the prototype for your lens. Write only the files that the brief's rules of engagement allow. Choose the prototype's short title before writing the page. Put the id and the title, as `{id} {title}`, on the first line of the page's `data-demo` band, and make the page's `<title>` `{set-title} - {id} {title}`, such as `Top Right - 1.1 Next item`. Report the same title. Invoke the design skill that the brief names before writing markup.
 
 ## Checking the page
 
