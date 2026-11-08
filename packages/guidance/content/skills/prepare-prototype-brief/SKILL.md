@@ -1,6 +1,6 @@
 ---
 name: prepare-prototype-brief
-description: Compose the shared brief and the lens sections for a round of competing prototypes, check the brief against the rules that builders over-apply, dispatch one builder per lens, and once the round is judged, take the developer through a decision on every prototype idea. Use when a ticket calls for two or more prototypes of one idea built in parallel, or when the developer has judged such a round.
+description: Compose the shared brief and the lens sections for a round of competing prototypes, check the brief against the rules that builders over-apply, dispatch one builder per lens, and once the round is judged, take the developer through a decision on every prototype idea. Use when a ticket calls for two or more competing prototypes of one idea, or when the developer has judged such a round.
 user-invocable: true
 supported-harnesses: [claude]
 ---
@@ -151,7 +151,7 @@ Save the brief with {skill:save-artifact} as a ticket-level `brief` artifact, an
 
 ### 5. Dispatch the builders
 
-Each builder is a {subagent:prototype-builder}, which checks its page in a headless browser of its own, so the builders can run at once: A page that hangs blocks only its own builder. Send one {tool:Task} call per lens in one message, `subagent_type: prototype-builder`, each with this block and nothing else composed into it:
+Each builder is a {subagent:prototype-builder}, which checks its page in a headless browser apart from this session's. Dispatch the builders one at a time, in the order of the lens sections, and wait for each reply before the next dispatch: Builders that run at once share one browser, and a page that hangs there stalls every builder. Send one {tool:Task} call per lens, `subagent_type: prototype-builder`, with this block and nothing else composed into it:
 
 ```dispatch
 brief: {path to the saved brief}

@@ -58,7 +58,7 @@ Choose a slug for each prototype, resolve the ids, and choose the set's note lab
 2. Publish that file with the Artifact tool.
 3. Report the artifact URL, a short title, the lens (the angle or constraint that distinguishes this prototype), the inputs on which it drew, a one-sentence description, and one line per note label as `{label}: {value}`.
 
-When a subagent builds a prototype, dispatch a {subagent:prototype-builder} and give it the slug, the id, the note labels, and the output path; it meets the contract and checks the page in a headless browser of its own, so that several builders can run at once without blocking each other or this session. Build a prototype in the main session the same way.
+When a subagent builds a prototype, dispatch a {subagent:prototype-builder} and give it the slug, the id, the note labels, and the output path; it meets the contract and checks the page in a headless browser apart from this session's. Dispatch builders one at a time, waiting for each reply, because builders that run at once share one browser. Build a prototype in the main session the same way.
 
 ### 3. Capture the screenshots
 
