@@ -40,7 +40,7 @@ A proposal is one change that makes the code or a test the way it would be writt
 Each proposal has:
 
 - **`key`**: `{path}:{rule-or-smell}`, a stable name for the subject, such as `src/run.ts:long-function` or `src/a.test.ts:duplicated-setup`. Use the smell or tidying names of Fowler's catalogue and Beck's tidyings, or the rulebook's own term, in kebab case. Two runs that find the same problem write the same key.
-- **`paths`**: The files that the change touches.
+- **`paths`**: The files that the proposal is about, each of which exists in the tree at the time of the assessment. Name every file that the change creates in `change`, and leave it out of `paths`.
 - **`evidence`**: One or more entries that a helper checks against the tree:
   - `span`: a `path`, a `startLine` and `endLine`, and a `quote` copied from those lines.
   - `rule`: a `rulebook` path, a `section` (the heading text without `#`), and a `quote` copied from that section.
@@ -50,7 +50,7 @@ Each proposal has:
 - **`size`**: `small` (one function or one test), `medium` (one module), or `large` (several modules). It records the extent of the change, so that the triage can scope the ticket for it, such as whether the change fits one pull request; it is not a cost to weigh against the proposal.
 - **`reach`**: The number of files or call sites that the problem affects.
 
-A quote that is not copied exactly from its lines or its section fails the check, and the proposal is dropped. Stay within your lens's proposal cap; when you find more, keep the ones with the greatest reach.
+A quote that is not copied exactly from its lines or its section fails the check, and so does a `paths` entry that names a missing file; either way, the proposal is dropped. Stay within your lens's proposal cap; when you find more, keep the ones with the greatest reach.
 
 ## Report format
 
