@@ -1,11 +1,11 @@
 import { execFile } from 'node:child_process';
-import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { realGit } from '../git.ts';
 
 /**
@@ -29,15 +29,11 @@ describe('realGit', () => {
   let repository: string;
 
   beforeEach(async () => {
-    repository = await realpath(await mkdtemp(join(tmpdir(), 'describe-change-git-')));
+    repository = makeScratchDir('describe-change-git-');
     await git('init', '--quiet');
     await writeFile(join(repository, 'seed.txt'), 'seed\n', 'utf8');
     await commitAll('seed');
     await git('tag', 'base');
-  });
-
-  afterEach(async () => {
-    await rm(repository, { recursive: true, force: true });
   });
 
   describe('hasCommit', () => {
@@ -50,12 +46,8 @@ describe('realGit', () => {
     });
 
     it('if the directory is not a repository, throws a git failure', async () => {
-      const outside = await mkdtemp(join(tmpdir(), 'describe-change-git-outside-'));
-      try {
-        await expect(realGit.hasCommit(outside, 'HEAD')).rejects.toThrow(/not a git repository/);
-      } finally {
-        await rm(outside, { recursive: true, force: true });
-      }
+      const outside = makeScratchDir('describe-change-git-outside-');
+      await expect(realGit.hasCommit(outside, 'HEAD')).rejects.toThrow(/not a git repository/);
     });
   });
 
@@ -167,12 +159,8 @@ describe('realGit', () => {
     });
 
     it('if the directory is not a repository, throws a git failure', async () => {
-      const outside = await mkdtemp(join(tmpdir(), 'describe-change-git-outside-'));
-      try {
-        await expect(realGit.listCommits(outside, 'base', 'HEAD')).rejects.toThrow(/not a git repository/);
-      } finally {
-        await rm(outside, { recursive: true, force: true });
-      }
+      const outside = makeScratchDir('describe-change-git-outside-');
+      await expect(realGit.listCommits(outside, 'base', 'HEAD')).rejects.toThrow(/not a git repository/);
     });
   });
 

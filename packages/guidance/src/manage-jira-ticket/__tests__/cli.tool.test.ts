@@ -1,14 +1,14 @@
 import { execFile } from 'node:child_process';
-import { chmod, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { chmod, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { isEnoent, isRecord } from '../../lib/type-guards.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const execFileAsync = promisify(execFile);
 
@@ -55,17 +55,13 @@ describe('manage-jira-ticket CLI', () => {
   let homeDir: string;
 
   beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'manage-jira-ticket-'));
+    workDir = makeScratchDir('manage-jira-ticket-');
     projectDir = path.join(workDir, 'project');
     homeDir = path.join(workDir, 'home');
     await mkdir(path.join(projectDir, '.agents'), { recursive: true });
     await mkdir(homeDir);
     await writeStub('acli', ACLI_STUB);
     await writeStub('git', GIT_STUB);
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { force: true, recursive: true });
   });
 
   it('creates the work item with the resolved target and an ADF description', async () => {

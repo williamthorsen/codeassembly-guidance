@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { enumerateFeedbackMemories } from '../enumerate.ts';
 
 const MACHINE = 'test-host';
@@ -64,8 +64,8 @@ Body of a malformed memory.
 `;
 
 /** Creates an empty temporary projects root and returns its absolute path. */
-async function makeProjectsRoot(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'migrate-enum-'));
+function makeProjectsRoot(): string {
+  return makeScratchDir('migrate-enum-');
 }
 
 /** Writes a memory file into `<root>/<store>/memory/<filename>`, creating the store's memory directory. */
@@ -82,7 +82,7 @@ function slugFor(repoPath: string): string {
 
 describe(enumerateFeedbackMemories, () => {
   it('enumerates both frontmatter schemas and both filename conventions', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'run-nmr-from-root.md', LEGACY_FEEDBACK);
 
@@ -96,7 +96,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('reads name, description, body, and index path for a discovered memory', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
 
     const result = await enumerateFeedbackMemories({ projectsRoot: root, machine: MACHINE });
@@ -111,7 +111,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('extracts originSessionId from either schema and leaves it null when absent', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'run-nmr-from-root.md', LEGACY_FEEDBACK);
     await writeMemory(root, '-store-b', 'atlaskit-xcss.md', LEGACY_NO_SESSION);
@@ -127,7 +127,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('excludes non-feedback memories and the MEMORY.md index', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'user-preference.md', USER_MEMORY);
     await writeMemory(root, '-store-a', 'MEMORY.md', '# Memory\n\n## Feedback\n\n- [x](feedback-nested-example.md)\n');
@@ -140,7 +140,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('reports a malformed memory (bad YAML in a real fence) in skipped rather than dropping it', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'feedback-malformed.md', MALFORMED_FEEDBACK);
 
@@ -155,7 +155,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('omits a fence-less file from both memories and skipped, since a feedback memory always has frontmatter', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'interaction-style.md', '# Interaction style\n\nProse with no frontmatter.\n');
 
@@ -168,7 +168,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('skips a store without a memory directory and returns an empty list when nothing matches', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await mkdir(join(root, '-store-empty'), { recursive: true });
     await writeMemory(root, '-store-b', 'user-preference.md', USER_MEMORY);
 
@@ -181,7 +181,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('orders memories by memory store then slug for stable output', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-b', 'zebra.md', LEGACY_NO_SESSION);
     await writeMemory(root, '-store-a', 'run-nmr-from-root.md', LEGACY_FEEDBACK);
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
@@ -198,7 +198,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('scopes enumeration to a single store when memoryStore is set', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-b', 'atlaskit-xcss.md', LEGACY_NO_SESSION);
 
@@ -210,8 +210,8 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('scopes enumeration to a store named by the label that list displays', async () => {
-    const root = await makeProjectsRoot();
-    const repoPath = join(await mkdtemp(join(tmpdir(), 'fm-repo-')), 'labelled-app');
+    const root = makeProjectsRoot();
+    const repoPath = join(makeScratchDir('fm-repo-'), 'labelled-app');
     await mkdir(repoPath, { recursive: true });
     await writeMemory(root, slugFor(repoPath), 'feedback-nested-example.md', NESTED_FEEDBACK);
     await writeMemory(root, '-store-a', 'atlaskit-xcss.md', LEGACY_NO_SESSION);
@@ -229,7 +229,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it("fails with no-such-memory-store when memoryStore doesn't name a directory under the root", async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-nested-example.md', NESTED_FEEDBACK);
 
     const result = await enumerateFeedbackMemories({
@@ -244,7 +244,7 @@ describe(enumerateFeedbackMemories, () => {
   });
 
   it('fails with no-projects-root when the projects root is absent', async () => {
-    const root = join(await makeProjectsRoot(), 'does-not-exist');
+    const root = join(makeProjectsRoot(), 'does-not-exist');
 
     const result = await enumerateFeedbackMemories({ projectsRoot: root, machine: MACHINE });
 

@@ -1,8 +1,8 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type FakeGit, makeFakeGit, makeRawCommit } from './make-fake-git.ts';
 
 /** A taxonomy declaring only the types that the suite names, in the order that its ranking cases read. */
@@ -52,9 +52,9 @@ export async function makePullRequestRepo(
 
 /** Creates a project root with `content` as its preferences and a fake git rooted there, plus an empty global home. */
 export async function makeRepo(content: string): Promise<{ cwd: string; git: FakeGit; home: string }> {
-  const cwd = await mkdtemp(join(tmpdir(), 'describe-change-repo-'));
+  const cwd = makeScratchDir('describe-change-repo-');
   await writeAgentsPreferences(cwd, content);
-  const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
+  const home = makeScratchDir('describe-change-home-');
   return { cwd, git: makeFakeGit({ topLevel: cwd }), home };
 }
 
@@ -71,7 +71,7 @@ export async function writeAgentsPreferences(root: string, content: string): Pro
 
 /** Writes `content` to a pull-request body file under a scratch directory and returns its path. */
 export async function writeBody(content: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'describe-change-body-'));
+  const dir = makeScratchDir('describe-change-body-');
   const bodyFile = join(dir, 'body.md');
   await writeFile(bodyFile, content, 'utf8');
   return bodyFile;
@@ -79,7 +79,7 @@ export async function writeBody(content: string): Promise<string> {
 
 /** Writes `content` to an entries file under a scratch directory and returns its path. */
 export async function writeEntries(content: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'describe-change-entries-'));
+  const dir = makeScratchDir('describe-change-entries-');
   const entriesFile = join(dir, 'entries.yaml');
   await writeFile(entriesFile, `${content}\n`, 'utf8');
   return entriesFile;

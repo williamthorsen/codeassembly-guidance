@@ -1,15 +1,15 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import type { KbAssertion } from '@williamthorsen/kb/records';
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { writeBackNote } from '../write-back.ts';
 
 /** Returns the path of a `note.md` that does not exist yet, inside a fresh temporary directory. */
-async function makeTempPath(prefix: string): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), prefix));
+function makeTempPath(prefix: string): string {
+  const dir = makeScratchDir(prefix);
   return join(dir, 'note.md');
 }
 
@@ -30,7 +30,7 @@ function buildAssertion(overrides: Partial<KbAssertion> = {}): KbAssertion {
 
 describe(writeBackNote, () => {
   it('renders the record to disk on a valid write', async () => {
-    const path = await makeTempPath('kb-edit-wb-ok-');
+    const path = makeTempPath('kb-edit-wb-ok-');
 
     const result = await writeBackNote({ path, record: buildAssertion({ title: 'New', body: '\nNew body\n' }) });
 
@@ -41,7 +41,7 @@ describe(writeBackNote, () => {
   });
 
   it('returns the written content on success', async () => {
-    const path = await makeTempPath('kb-edit-wb-content-');
+    const path = makeTempPath('kb-edit-wb-content-');
 
     const result = await writeBackNote({ path, record: buildAssertion() });
 
@@ -53,7 +53,7 @@ describe(writeBackNote, () => {
   });
 
   it('refuses to write and leaves an existing file untouched when the rendered record fails re-parse', async () => {
-    const path = await makeTempPath('kb-edit-wb-bad-');
+    const path = makeTempPath('kb-edit-wb-bad-');
     const before = '---\ntitle: original\n---\n\nuntouched\n';
     await writeFile(path, before, 'utf8');
 

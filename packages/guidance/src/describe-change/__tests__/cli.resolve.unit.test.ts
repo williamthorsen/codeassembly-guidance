@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { renderChangeRecordBlock } from '../change-record-block.ts';
 import { runDescribe } from '../cli.ts';
 import { parseArgs } from '../parse-args.ts';
@@ -163,9 +163,9 @@ describe('resolve-scopes', () => {
   });
 
   it('warns and anchors at the invoking directory when git cannot resolve a repository root', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'describe-change-bare-'));
+    const cwd = makeScratchDir('describe-change-bare-');
     const git = makeFakeGit();
-    const home = await mkdtemp(join(tmpdir(), 'describe-change-home-'));
+    const home = makeScratchDir('describe-change-home-');
 
     const argv = ['resolve-scopes', '--path', 'AGENTS.md'];
     const { output, warnings } = await runDescribe({ argv, cwd, git, dataDir: DATA_DIR, home });

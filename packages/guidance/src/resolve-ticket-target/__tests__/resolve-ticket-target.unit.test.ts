@@ -1,9 +1,9 @@
-import { mkdtemp, readFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type GhResult, type GhRunner, resolveTicketTarget } from '../resolve-ticket-target.ts';
 
 const LABEL_MAP = '{"scopes":{"guidance":"scope:guidance"},"types":{"feat":"feature"}}';
@@ -19,7 +19,7 @@ describe(resolveTicketTarget, () => {
     const preferences = "project:\n  slug: assembly\n  ticket_ref_prefix: '#'\n";
     const gh = makeGh({ '.agents/preferences.yaml': preferences, '.meta/label-map.json': LABEL_MAP });
 
-    const target = await resolveTicketTarget({ gh, repo: 'Owner/Repo', tempRoot: await makeTempRoot() });
+    const target = await resolveTicketTarget({ gh, repo: 'Owner/Repo', tempRoot: makeTempRoot() });
 
     expect(target).toMatchObject({ missing: [], projectSlug: 'assembly', repo: 'owner/repo', ticketRefPrefix: '#' });
     await expect(readFile(join(target.projectRoot, '.meta', 'label-map.json'), 'utf8')).resolves.toBe(LABEL_MAP);
@@ -29,7 +29,7 @@ describe(resolveTicketTarget, () => {
   it('reports a missing label map and still reads the preferences', async () => {
     const gh = makeGh({ '.agents/preferences.yaml': 'repository:\n  slug: repo-slug\n' });
 
-    const target = await resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: await makeTempRoot() });
+    const target = await resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: makeTempRoot() });
 
     expect(target).toMatchObject({ missing: ['.meta/label-map.json'], projectSlug: 'repo-slug', ticketRefPrefix: '' });
   });
@@ -37,7 +37,7 @@ describe(resolveTicketTarget, () => {
   it('reports missing preferences and falls back to the repository name for the slug', async () => {
     const gh = makeGh({ '.meta/label-map.json': LABEL_MAP });
 
-    const target = await resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: await makeTempRoot() });
+    const target = await resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: makeTempRoot() });
 
     expect(target).toMatchObject({ missing: ['.agents/preferences.yaml'], projectSlug: 'repo', ticketRefPrefix: '' });
   });
@@ -45,7 +45,7 @@ describe(resolveTicketTarget, () => {
   it('refuses a repository that GitHub does not report', async () => {
     const gh: GhRunner = () => Promise.resolve(NOT_FOUND);
 
-    await expect(resolveTicketTarget({ gh, repo: 'owner/absent', tempRoot: await makeTempRoot() })).rejects.toThrow(
+    await expect(resolveTicketTarget({ gh, repo: 'owner/absent', tempRoot: makeTempRoot() })).rejects.toThrow(
       'repository owner/absent: not found, or not readable with the current gh credentials',
     );
   });
@@ -58,7 +58,7 @@ describe(resolveTicketTarget, () => {
           : { exitCode: 1, stderr: 'gh: Bad credentials (HTTP 401)\n', stdout: '{"status":"401"}' },
       );
 
-    await expect(resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: await makeTempRoot() })).rejects.toThrow(
+    await expect(resolveTicketTarget({ gh, repo: 'owner/repo', tempRoot: makeTempRoot() })).rejects.toThrow(
       'owner/repo: .meta/label-map.json cannot be fetched: gh: Bad credentials (HTTP 401)',
     );
   });
@@ -72,7 +72,7 @@ describe(resolveTicketTarget, () => {
         return Promise.resolve(NOT_FOUND);
       };
 
-      await expect(resolveTicketTarget({ gh, repo, tempRoot: await makeTempRoot() })).rejects.toThrow(
+      await expect(resolveTicketTarget({ gh, repo, tempRoot: makeTempRoot() })).rejects.toThrow(
         `--repo takes OWNER/REPO; got ${repo}`,
       );
       expect(calls).toStrictEqual([]);
@@ -99,8 +99,8 @@ function makeGh(files: Readonly<Record<string, string>>): GhRunner {
 }
 
 /** Creates a directory under which the run creates its project root. */
-async function makeTempRoot(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'resolve-ticket-target-'));
+function makeTempRoot(): string {
+  return makeScratchDir('resolve-ticket-target-');
 }
 
 // endregion | Helpers

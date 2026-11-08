@@ -1,11 +1,11 @@
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { symlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { isEntryPoint } from '../is-entry-point.ts';
 
 describe(isEntryPoint, () => {
@@ -15,7 +15,7 @@ describe(isEntryPoint, () => {
   let originalArgv: string[];
 
   beforeEach(() => {
-    dir = mkdtempSync(path.join(tmpdir(), 'is-entry-point-'));
+    dir = makeScratchDir('is-entry-point-');
     modulePath = path.join(dir, 'cli.mjs');
     writeFileSync(modulePath, '');
     moduleUrl = pathToFileURL(modulePath).href;
@@ -25,7 +25,6 @@ describe(isEntryPoint, () => {
   afterEach(() => {
     process.argv = originalArgv;
     vi.restoreAllMocks();
-    rmSync(dir, { recursive: true, force: true });
   });
 
   it('returns false when the process has no entry path', () => {

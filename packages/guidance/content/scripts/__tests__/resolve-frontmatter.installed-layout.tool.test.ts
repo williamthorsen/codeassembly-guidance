@@ -1,12 +1,12 @@
 import { spawnSync } from 'node:child_process';
-import { chmod, copyFile, mkdir, mkdtemp, rm, symlink, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { chmod, copyFile, mkdir, symlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
 import type { RenderedTree } from 'codeassembly/api';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../../src/test-utils/make-scratch-dir.ts';
 import { CONTENT_ROOT } from '../../test-utils/content-root.ts';
 import { renderLibrary } from '../../test-utils/rendered-library.ts';
 
@@ -22,17 +22,11 @@ const FIXTURE_BRANCH = 'MAC-999/feat/fixture';
 
 const HELPER_SUFFIX = '/derive-session-context/derive-session-context.mjs';
 
-const tempDirs: Array<string> = [];
-
 describe('resolve-frontmatter.sh in the installed layout', () => {
   let tree: RenderedTree;
 
   beforeAll(async () => {
     tree = await renderLibrary('claude');
-  });
-
-  afterAll(async () => {
-    await Promise.all(tempDirs.map((dir) => rm(dir, { force: true, recursive: true })));
   });
 
   it.each(['copy', 'symlink'] as const)('runs the deployed helper when installed as a %s', async (mode) => {
@@ -62,7 +56,7 @@ describe('resolve-frontmatter.sh in the installed layout', () => {
   });
 
   it('fails and names the searched path when no source deploys the helper', async () => {
-    const harnessHome = await makeTempDir('harness-');
+    const harnessHome = makeScratchDir('resolve-frontmatter-harness-');
     const scriptPath = await installScript(harnessHome, 'copy');
 
     const result = await runScript(scriptPath);
@@ -88,13 +82,6 @@ async function installScript(harnessHome: string, mode: 'copy' | 'symlink'): Pro
   return scriptPath;
 }
 
-/** Creates a temporary directory that the suite removes once it finishes. */
-async function makeTempDir(prefix: string): Promise<string> {
-  const dir = await mkdtemp(path.join(tmpdir(), `resolve-frontmatter-${prefix}`));
-  tempDirs.push(dir);
-  return dir;
-}
-
 /** Returns the content of the helper as the rendered tree deploys it. */
 function readHelperContent(tree: RenderedTree): string {
   const found = Object.entries(tree).find(([filePath]) => filePath.endsWith(HELPER_SUFFIX));
@@ -109,7 +96,7 @@ function readHelperContent(tree: RenderedTree): string {
  * deriver reads its global preferences from the repository through `--home`, not from the real home directory.
  */
 async function runScript(scriptPath: string): Promise<{ status: number | null; stderr: string; stdout: string }> {
-  const repo = await makeTempDir('repo-');
+  const repo = makeScratchDir('resolve-frontmatter-repo-');
   spawnSync('git', ['init', '--quiet', `--initial-branch=${FIXTURE_BRANCH}`], { cwd: repo });
   spawnSync(
     'git',
@@ -136,7 +123,7 @@ async function runScript(scriptPath: string): Promise<{ status: number | null; s
 
 /** Writes every file of the rendered tree into a new harness home and returns its path. */
 async function writeHarnessHome(tree: RenderedTree): Promise<string> {
-  const harnessHome = await makeTempDir('harness-');
+  const harnessHome = makeScratchDir('resolve-frontmatter-harness-');
   for (const [filePath, entry] of Object.entries(tree)) {
     const destination = path.join(harnessHome, filePath);
     await mkdir(path.dirname(destination), { recursive: true });

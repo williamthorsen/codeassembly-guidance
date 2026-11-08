@@ -1,9 +1,8 @@
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { renderChangeRecordBlock } from '../change-record-block.ts';
 import { runDescribe } from '../cli.ts';
 import { parseArgs } from '../parse-args.ts';
@@ -328,7 +327,7 @@ describe('resolve-effective-record', () => {
 
   it('refuses when the data directory does not contain a readable taxonomy', async () => {
     const { cwd, git, home } = await makeRepo(HOUSE_TEMPLATES);
-    const dataDir = await mkdtemp(join(tmpdir(), 'describe-change-data-'));
+    const dataDir = makeScratchDir('describe-change-data-');
 
     await expect(
       runDescribe({

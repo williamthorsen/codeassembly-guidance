@@ -1,9 +1,9 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type LabelMap, readLabelMap, resolveLabeledRecord, resolveLabelKey } from '../read-label-map.ts';
 
 const MAP: LabelMap = {
@@ -31,13 +31,13 @@ describe(readLabelMap, () => {
   });
 
   it('reads an absent map as empty', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'read-label-map-'));
+    const dir = makeScratchDir('read-label-map-');
 
     expect(await readLabelMap(join(dir, 'absent.json'))).toStrictEqual({ scopes: {}, types: {} });
   });
 
   it('reads a map that is not valid JSON as empty', async () => {
-    const dir = await mkdtemp(join(tmpdir(), 'read-label-map-'));
+    const dir = makeScratchDir('read-label-map-');
     const labelMapPath = join(dir, 'label-map.json');
     await writeFile(labelMapPath, '{ not json', 'utf8');
 
@@ -102,7 +102,7 @@ describe(resolveLabeledRecord, () => {
 
 /** Writes a label map under a scratch directory and returns its path. */
 async function writeLabelMap(content: unknown): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'read-label-map-'));
+  const dir = makeScratchDir('read-label-map-');
   const labelMapPath = join(dir, 'label-map.json');
   await writeFile(labelMapPath, JSON.stringify(content), 'utf8');
   return labelMapPath;

@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, utimes, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, utimes, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { summarizeFeedbackMemories } from '../summarize.ts';
 
 const MACHINE = 'test-host';
@@ -14,8 +14,8 @@ function feedback(description: string): string {
 }
 
 /** Creates an empty temporary projects root and returns its absolute path. */
-async function makeProjectsRoot(): Promise<string> {
-  return mkdtemp(join(tmpdir(), 'fm-summarize-'));
+function makeProjectsRoot(): string {
+  return makeScratchDir('fm-summarize-');
 }
 
 /** Writes a feedback memory into `<root>/<store>/memory/<filename>` with the given mtime, creating the store directory. */
@@ -35,7 +35,7 @@ async function writeMemory(
 
 describe(summarizeFeedbackMemories, () => {
   it('rolls memories up per project with counts and the newest mtime', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-old.md', new Date('2026-06-01T00:00:00.000Z'));
     await writeMemory(root, '-store-a', 'feedback-new.md', new Date('2026-06-15T12:30:00.000Z'));
     await writeMemory(root, '-store-b', 'feedback-solo.md', new Date('2026-05-20T08:00:00.000Z'));
@@ -53,7 +53,7 @@ describe(summarizeFeedbackMemories, () => {
   });
 
   it('sorts projects alphabetically by label', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     const mtime = new Date('2026-06-01T00:00:00.000Z');
     await writeMemory(root, '-zed', 'feedback-z.md', mtime);
     await writeMemory(root, '-alpha', 'feedback-a.md', mtime);
@@ -67,7 +67,7 @@ describe(summarizeFeedbackMemories, () => {
   });
 
   it('includes each memory slug and description for verbose rendering', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-first.md', new Date('2026-06-01T00:00:00.000Z'), 'first description');
 
     const result = await summarizeFeedbackMemories({ projectsRoot: root, machine: MACHINE });
@@ -78,7 +78,7 @@ describe(summarizeFeedbackMemories, () => {
   });
 
   it('propagates a no-such-memory-store failure from enumeration', async () => {
-    const root = await makeProjectsRoot();
+    const root = makeProjectsRoot();
     await writeMemory(root, '-store-a', 'feedback-a.md', new Date('2026-06-01T00:00:00.000Z'));
 
     const result = await summarizeFeedbackMemories({ projectsRoot: root, memoryStore: '-missing', machine: MACHINE });
@@ -90,7 +90,7 @@ describe(summarizeFeedbackMemories, () => {
 
   it('propagates a no-projects-root failure from enumeration', async () => {
     const result = await summarizeFeedbackMemories({
-      projectsRoot: join(await makeProjectsRoot(), 'nope'),
+      projectsRoot: join(makeProjectsRoot(), 'nope'),
       machine: MACHINE,
     });
 

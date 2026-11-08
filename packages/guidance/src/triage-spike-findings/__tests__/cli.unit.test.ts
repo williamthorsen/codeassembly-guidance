@@ -1,11 +1,10 @@
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { buildFakeRunner } from '../../test-utils/fake-runner.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type CommandContext, runCli } from '../cli.ts';
 import { LABEL_FAMILIES } from '../labels.ts';
 import type { DispositionsRecord } from '../schemas.ts';
@@ -16,15 +15,11 @@ describe(runCli, () => {
   let context: CommandContext;
 
   beforeEach(() => {
-    root = mkdtempSync(path.join(tmpdir(), 'triage-cli-'));
+    root = makeScratchDir('triage-cli-');
     const runner = buildFakeRunner(() =>
       JSON.stringify([...LABEL_FAMILIES.confidence, ...LABEL_FAMILIES.value].map((name) => ({ name }))),
     );
     context = { root, run: runner.run };
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
   });
 
   it('reports invalid-args for an unknown command, a positional, a repeated flag, and a missing flag', async () => {

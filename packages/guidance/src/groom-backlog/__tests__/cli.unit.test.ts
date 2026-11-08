@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { RunnerCall } from '../../test-utils/fake-runner.ts';
 import { runCli } from '../cli.ts';
@@ -9,7 +9,7 @@ import type { CommandContext } from '../command.ts';
 import { renderMarker } from '../marker.ts';
 import type { AssessorReply } from '../schemas.ts';
 import { buildReply } from '../test-utils/build-reply.ts';
-import { setUpCliFixture, tearDownCliFixture } from '../test-utils/cli-fixture.ts';
+import { setUpCliFixture } from '../test-utils/cli-fixture.ts';
 import { assessment, ISSUES } from '../test-utils/issue-fixtures.ts';
 import { writeLedger } from '../test-utils/write-ledger.ts';
 
@@ -22,10 +22,6 @@ describe(runCli, () => {
   beforeEach(() => {
     issues = structuredClone(ISSUES);
     ({ calls, context, root } = setUpCliFixture(() => issues));
-  });
-
-  afterEach(async () => {
-    await tearDownCliFixture(root);
   });
 
   describe('parent-status', () => {

@@ -1,12 +1,12 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { runCli } from '../cli.ts';
 import type { CommandContext } from '../command.ts';
 import { buildReply } from '../test-utils/build-reply.ts';
-import { setUpCliFixture, tearDownCliFixture } from '../test-utils/cli-fixture.ts';
+import { setUpCliFixture } from '../test-utils/cli-fixture.ts';
 import { ISSUES } from '../test-utils/issue-fixtures.ts';
 
 describe(runCli, () => {
@@ -16,10 +16,6 @@ describe(runCli, () => {
   beforeEach(() => {
     const issues = structuredClone(ISSUES);
     ({ context, root } = setUpCliFixture(() => issues));
-  });
-
-  afterEach(async () => {
-    await tearDownCliFixture(root);
   });
 
   describe('ingest', () => {

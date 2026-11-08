@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { readPreferences, readProjectPreferences } from '../read-preferences.ts';
 
 describe(readPreferences, () => {
@@ -13,15 +13,11 @@ describe(readPreferences, () => {
   let homeDir: string;
 
   beforeEach(async () => {
-    workRoot = await mkdtemp(path.join(tmpdir(), 'derive-session-context-prefs-'));
+    workRoot = makeScratchDir('derive-session-context-prefs-');
     projectDir = path.join(workRoot, 'project');
     homeDir = path.join(workRoot, 'home');
     await mkdir(projectDir, { recursive: true });
     await mkdir(homeDir, { recursive: true });
-  });
-
-  afterEach(async () => {
-    await rm(workRoot, { recursive: true, force: true });
   });
 
   it('returns an empty preferences object when neither file exists', async () => {
@@ -254,12 +250,8 @@ describe(readPreferences, () => {
 describe(readProjectPreferences, () => {
   let workRoot: string;
 
-  beforeEach(async () => {
-    workRoot = await mkdtemp(path.join(tmpdir(), 'read-project-preferences-'));
-  });
-
-  afterEach(async () => {
-    await rm(workRoot, { recursive: true, force: true });
+  beforeEach(() => {
+    workRoot = makeScratchDir('read-project-preferences-');
   });
 
   it('returns the repository file unprojected, including keys that the deriver does not consume', async () => {

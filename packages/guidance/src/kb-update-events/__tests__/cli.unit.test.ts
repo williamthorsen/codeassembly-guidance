@@ -1,21 +1,21 @@
-import { mkdir, mkdtemp, readFile, stat, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { readNoteContent } from '@williamthorsen/kb/note-io';
 import { parseEvent } from '@williamthorsen/kb/records';
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { buildHelp, parseArgs, runUpdate } from '../cli.ts';
 
 const EVENT_ID = '01HZCEVENTAAAAAAAAAAAAAAAA';
 
 /** Creates a temp event store plus an isolated home that registers it under `name` and marks it `default_kb`. */
 async function makeStore(name: string): Promise<{ storePath: string; home: string }> {
-  const storePath = await mkdtemp(join(tmpdir(), 'update-events-store-'));
+  const storePath = makeScratchDir('update-events-store-');
   await mkdir(join(storePath, '.kb'), { recursive: true });
 
-  const home = await mkdtemp(join(tmpdir(), 'update-events-home-'));
+  const home = makeScratchDir('update-events-home-');
   await mkdir(join(home, '.agents'), { recursive: true });
   await writeFile(
     join(home, '.agents', 'kb.yaml'),

@@ -1,10 +1,10 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { Script } from 'node:vm';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runIndexPrototypes } from '../cli.ts';
 import { INDEX_PAGE_SCRIPT, SHORTCUT_KEYS, VERDICTS_COLLECTION } from '../index-page-script.ts';
 import { PAGE_LIMIT_BYTES, PAGE_WARN_BYTES, renderIndexPage } from '../render-index.ts';
@@ -169,7 +169,7 @@ describe(renderIndexPage, () => {
 
 describe('render command', () => {
   it('renders only the latest version of each slug and reports the page', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await mkdir(path.join(setDir, 'shots'), { recursive: true });
     await writeFile(path.join(setDir, 'shots', 'a-v2.png'), buildPng(4, 2));
     await writeManifestFile(setDir, {
@@ -211,7 +211,7 @@ describe('render command', () => {
   });
 
   it("renders the manifest's summary", async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await writeManifestFile(setDir, {
       title: 'Set',
       indexUrl: null,
@@ -225,7 +225,7 @@ describe('render command', () => {
   });
 
   it('renders the placeholder for a recorded screenshot missing from disk and reports it', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await writeManifestFile(setDir, {
       title: 'Set',
       indexUrl: null,
@@ -260,7 +260,7 @@ describe('render command', () => {
   });
 
   it('refuses a set without a manifest', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     await expect(render(setDir, path.join(setDir, 'index.html'))).resolves.toMatchObject({
       ok: false,
@@ -290,13 +290,13 @@ function buildEntry(fields: Partial<ManifestEntry> & { slug: string }): Manifest
 }
 
 /** Creates an empty set directory. */
-async function makeSetDir(): Promise<string> {
-  return mkdtemp(path.join(tmpdir(), 'index-prototypes-render-'));
+function makeSetDir(): string {
+  return makeScratchDir('index-prototypes-render-');
 }
 
 /** Creates a set with one prototype whose stored screenshot is `size` bytes. */
 async function makeSetDirWithShotOfSize(size: number): Promise<string> {
-  const setDir = await makeSetDir();
+  const setDir = makeSetDir();
   await mkdir(path.join(setDir, 'shots'), { recursive: true });
   await writeFile(path.join(setDir, 'shots', 'a-v1.png'), Buffer.alloc(size));
   await writeManifestFile(setDir, {

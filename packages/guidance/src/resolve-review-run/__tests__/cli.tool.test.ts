@@ -1,14 +1,14 @@
 import { execFile } from 'node:child_process';
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { isRecord } from '../../lib/type-guards.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const execFileAsync = promisify(execFile);
 
@@ -17,12 +17,8 @@ const CLI_PATH = fileURLToPath(new URL('../cli.ts', import.meta.url));
 describe('resolve-review-run CLI', () => {
   let ticketDir: string;
 
-  beforeEach(async () => {
-    ticketDir = await mkdtemp(path.join(tmpdir(), 'resolve-review-run-'));
-  });
-
-  afterEach(async () => {
-    await rm(ticketDir, { force: true, recursive: true });
+  beforeEach(() => {
+    ticketDir = makeScratchDir('resolve-review-run-');
   });
 
   it('prints a null active run as JSON when none exists', async () => {

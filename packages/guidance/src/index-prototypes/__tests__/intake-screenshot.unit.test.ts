@@ -1,9 +1,9 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { intakeScreenshot } from '../intake-screenshot.ts';
 import { buildPng } from '../test-utils/build-png.ts';
 
@@ -28,7 +28,7 @@ describe(intakeScreenshot, () => {
   });
 
   it('refuses a missing file', async () => {
-    const setDir = await mkdtemp(path.join(tmpdir(), 'index-prototypes-intake-'));
+    const setDir = makeScratchDir('index-prototypes-intake-');
 
     await expect(
       intakeScreenshot({ sourcePath: path.join(setDir, 'absent.png'), setDir, slug: 'a', version: 1 }),
@@ -40,7 +40,7 @@ describe(intakeScreenshot, () => {
 
 /** Writes `bytes` as a capture beside a fresh set directory. */
 async function makeCapture(bytes: Buffer): Promise<{ setDir: string; sourcePath: string }> {
-  const root = await mkdtemp(path.join(tmpdir(), 'index-prototypes-intake-'));
+  const root = makeScratchDir('index-prototypes-intake-');
   const sourcePath = path.join(root, 'capture.png');
   await writeFile(sourcePath, bytes);
   return { setDir: path.join(root, 'set'), sourcePath };

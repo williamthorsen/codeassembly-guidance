@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 /** The work types declared by the fixture taxonomy, spanning all three tiers so that widening has somewhere to go. */
 export const FIXTURE_WORK_TYPES = [
@@ -69,7 +70,7 @@ export async function createCorpusFixture(
     storeName?: string;
   } = {},
 ): Promise<CorpusFixture> {
-  const storePath = await mkdtemp(join(tmpdir(), 'lede-corpus-'));
+  const storePath = makeScratchDir('lede-corpus-');
   const eventsDir = join(storePath, 'content', 'events');
   await mkdir(join(storePath, '.kb'), { recursive: true });
   await mkdir(eventsDir, { recursive: true });
@@ -87,7 +88,7 @@ export async function createCorpusFixture(
   await mkdir(dataDir, { recursive: true });
   await writeFile(join(dataDir, 'work-types.json'), JSON.stringify({ types: FIXTURE_WORK_TYPES }), 'utf8');
 
-  const home = await mkdtemp(join(tmpdir(), 'lede-corpus-home-'));
+  const home = makeScratchDir('lede-corpus-home-');
   const storeName = input.storeName ?? 'codeassembly';
   await mkdir(join(home, '.agents'), { recursive: true });
   await writeFile(

@@ -1,10 +1,10 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeStore, seedEvents } from '../../lesson-clusters/test-utils/seed-store.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { buildHelp, runCli } from '../cli.ts';
 import type { CurateGit } from '../git.ts';
 
@@ -24,7 +24,7 @@ describe(runCli, () => {
   it('runs references, pin, assign, validate, and render end to end', async () => {
     const { storePath, home } = await makeStore('fixture');
     await seedEvents(storePath, [{ id: '01A' }, { id: '01B' }, { id: '01Z', addressedBy: [TICKET] }]);
-    const work = await mkdtemp(join(tmpdir(), 'curate-cli-'));
+    const work = makeScratchDir('curate-cli-');
     const context = { cwd: work, home, git: fakeGit };
     const run = (...argv: string[]) => runCli(argv, context);
 
@@ -48,7 +48,9 @@ describe(runCli, () => {
       ok: true,
       references: 1,
     });
-    expect(await run('pin', '--source', work, '--source', tmpdir(), '--out', 'pins.json')).toMatchObject({
+    expect(
+      await run('pin', '--source', work, '--source', makeScratchDir('curate-cli-source-'), '--out', 'pins.json'),
+    ).toMatchObject({
       ok: true,
       pins: [`acme/guide@${SHA}`],
     });
@@ -97,7 +99,7 @@ describe(runCli, () => {
   });
 
   it('reports a missing bins file as a violation rather than failing the command', async () => {
-    const work = await mkdtemp(join(tmpdir(), 'curate-cli-'));
+    const work = makeScratchDir('curate-cli-');
     await writeFile(
       join(work, 'assignment-01.json'),
       JSON.stringify({ store: 'fixture', clusters: [], references: [], pins: [] }),
@@ -113,7 +115,7 @@ describe(runCli, () => {
   });
 
   it('refuses an unknown command, a repeated single-valued flag, and a pin without a source', async () => {
-    const context = { cwd: tmpdir(), git: fakeGit };
+    const context = { cwd: makeScratchDir('curate-cli-'), git: fakeGit };
 
     expect(await runCli(['curate'], context)).toMatchObject({ ok: false, error: 'invalid-args' });
     expect(await runCli(['render', '--file', 'a', '--file', 'b', '--out', 'c'], context)).toMatchObject({

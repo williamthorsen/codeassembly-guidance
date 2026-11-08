@@ -1,9 +1,9 @@
-import { access, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { deleteMemories } from '../delete-memory.ts';
 
 const INDEX_TWO = `# Memory
@@ -16,7 +16,7 @@ const INDEX_TWO = `# Memory
 
 /** Creates a temp store memory directory and returns its absolute path. */
 async function makeMemoryDir(): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'migrate-del-'));
+  const dir = makeScratchDir('migrate-del-');
   const memory = join(dir, 'memory');
   await mkdir(memory, { recursive: true });
   return memory;

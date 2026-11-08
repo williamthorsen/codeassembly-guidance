@@ -1,15 +1,10 @@
-import { mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { loadNote } from '../load-note.ts';
-
-/** Creates a temporary directory whose name starts with `prefix`, and returns its path. */
-async function makeTempDir(prefix: string): Promise<string> {
-  return mkdtemp(join(tmpdir(), prefix));
-}
 
 const VALID_NOTE = `---
 title: Example
@@ -25,7 +20,7 @@ Body text.
 
 describe(loadNote, () => {
   it('returns the parsed record when the file exists and frontmatter is a valid assertion', async () => {
-    const dir = await makeTempDir('kb-edit-load-ok-');
+    const dir = makeScratchDir('kb-edit-load-ok-');
     const path = join(dir, 'note.md');
     await writeFile(path, VALID_NOTE, 'utf8');
 
@@ -43,7 +38,7 @@ describe(loadNote, () => {
   });
 
   it('returns note-not-found when the path does not exist', async () => {
-    const dir = await makeTempDir('kb-edit-load-missing-');
+    const dir = makeScratchDir('kb-edit-load-missing-');
     const path = join(dir, 'absent.md');
 
     const result = await loadNote({ path });
@@ -52,7 +47,7 @@ describe(loadNote, () => {
   });
 
   it('returns note-parse when the frontmatter block is malformed YAML', async () => {
-    const dir = await makeTempDir('kb-edit-load-bad-yaml-');
+    const dir = makeScratchDir('kb-edit-load-bad-yaml-');
     const path = join(dir, 'note.md');
     // A frontmatter block with an unterminated flow mapping forces yaml to record a parse error.
     await writeFile(path, '---\ntitle: {broken\n---\n\nBody\n', 'utf8');
@@ -72,7 +67,7 @@ describe(loadNote, () => {
   });
 
   it('returns note-parse when the note does not contain a frontmatter block', async () => {
-    const dir = await makeTempDir('kb-edit-load-no-fm-');
+    const dir = makeScratchDir('kb-edit-load-no-fm-');
     const path = join(dir, 'note.md');
     await writeFile(path, 'Just body, no frontmatter.\n', 'utf8');
 
@@ -85,7 +80,7 @@ describe(loadNote, () => {
   });
 
   it('returns note-parse when the frontmatter does not satisfy the assertion contract', async () => {
-    const dir = await makeTempDir('kb-edit-load-off-contract-');
+    const dir = makeScratchDir('kb-edit-load-off-contract-');
     const path = join(dir, 'note.md');
     // Frontmatter parses as a sequence, not an assertion map, so the record fails to project.
     await writeFile(path, '---\n- one\n- two\n---\n\nBody\n', 'utf8');

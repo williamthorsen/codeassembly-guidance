@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runCheck } from '../cli.ts';
 import type { StreamlineGit } from '../git.ts';
 import { makeFakeGit } from '../test-utils/make-fake-git.ts';
@@ -14,12 +14,8 @@ const GUIDE = 'docs/guide.md';
 describe(runCheck, () => {
   let repository: string;
 
-  beforeEach(async () => {
-    repository = await realpath(await mkdtemp(path.join(tmpdir(), 'streamline-check-')));
-  });
-
-  afterEach(async () => {
-    await rm(repository, { recursive: true, force: true });
+  beforeEach(() => {
+    repository = makeScratchDir('streamline-check-');
   });
 
   it("reports each cut's phrase history as git returns it", () => {

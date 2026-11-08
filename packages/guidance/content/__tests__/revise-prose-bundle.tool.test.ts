@@ -1,11 +1,11 @@
 import { execFileSync } from 'node:child_process';
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { DetectSuccess } from '../../src/revise-prose/types.ts';
+import { makeScratchDir } from '../../src/test-utils/make-scratch-dir.ts';
 
 /**
  * The deployed bundle, executed as a process.
@@ -25,16 +25,12 @@ describe('the deployed bundle', () => {
   let scratch: string;
 
   beforeEach(async () => {
-    scratch = await mkdtemp(path.join(tmpdir(), 'revise-prose-bundle-'));
+    scratch = makeScratchDir('revise-prose-bundle-');
     execFileSync('git', ['-C', scratch, 'init', '--quiet']);
     for (const [file, content] of Object.entries(FIXTURE_FILES)) {
       await mkdir(path.join(scratch, path.dirname(file)), { recursive: true });
       await writeFile(path.join(scratch, file), content, 'utf8');
     }
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   it('sweeps and reports JSON on the pre-rules invocation', () => {

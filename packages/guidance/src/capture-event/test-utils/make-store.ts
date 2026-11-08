@@ -1,6 +1,7 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const STORE_CONFIG = `targets:
   - 'content/**/*.md'
@@ -12,7 +13,7 @@ exclude:
 export async function makeStore(name: string): Promise<{ storePath: string; home: string }> {
   const storePath = await makeStoreDir();
 
-  const home = await mkdtemp(join(tmpdir(), 'capture-cli-home-'));
+  const home = makeScratchDir('capture-cli-home-');
   await mkdir(join(home, '.agents'), { recursive: true });
   await writeFile(
     join(home, '.agents', 'kb.yaml'),
@@ -25,7 +26,7 @@ export async function makeStore(name: string): Promise<{ storePath: string; home
 
 /** Creates a temp event store directory containing a default `.kb/config.yaml`, returning its path. */
 export async function makeStoreDir(): Promise<string> {
-  const storePath = await mkdtemp(join(tmpdir(), 'capture-cli-store-'));
+  const storePath = makeScratchDir('capture-cli-store-');
   await mkdir(join(storePath, '.kb'), { recursive: true });
   await writeFile(join(storePath, '.kb', 'config.yaml'), STORE_CONFIG, 'utf8');
   return storePath;

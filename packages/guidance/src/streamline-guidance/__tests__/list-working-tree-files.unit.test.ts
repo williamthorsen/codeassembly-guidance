@@ -1,9 +1,9 @@
-import { mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import type { StreamlineGit } from '../git.ts';
 import { listWorkingTreeFiles } from '../list-working-tree-files.ts';
 import { makeFakeGit } from '../test-utils/make-fake-git.ts';
@@ -11,12 +11,8 @@ import { makeFakeGit } from '../test-utils/make-fake-git.ts';
 describe(listWorkingTreeFiles, () => {
   let root: string;
 
-  beforeEach(async () => {
-    root = await realpath(await mkdtemp(path.join(tmpdir(), 'streamline-list-')));
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
+  beforeEach(() => {
+    root = makeScratchDir('streamline-list-');
   });
 
   it("returns git's listing, dropping a listed file deleted from the working tree", async () => {

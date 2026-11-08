@@ -1,11 +1,11 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runValidatePreferences } from '../cli.ts';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
@@ -14,12 +14,8 @@ const programName = 'validate-preferences';
 describe(runValidatePreferences, () => {
   let workDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'validate-preferences-cli-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('validate-preferences-cli-');
   });
 
   it("passes the repository's own `.agents/preferences.yaml` without any finding, even under --strict", async () => {

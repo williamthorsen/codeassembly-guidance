@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { readDeclaredScopes } from '../read-declared-scopes.ts';
 
 describe(readDeclaredScopes, () => {
@@ -127,7 +127,7 @@ function indent(entry: string): string {
  * `content`.
  */
 async function writeRoot(dirs: readonly string[], content: string | undefined): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'read-declared-scopes-'));
+  const root = makeScratchDir('read-declared-scopes-');
   for (const dir of dirs) {
     await mkdir(join(root, dir), { recursive: true });
   }

@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import {
   discoverWorkspaceDirs,
   mergeScopeDirs,
@@ -25,8 +25,8 @@ describe(discoverWorkspaceDirs, () => {
     expect(discoverWorkspaceDirs(root)).toEqual([join(root, 'packages/agents')]);
   });
 
-  it('discovers nothing when the root does not declare a pnpm workspace', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'resolve-scopes-'));
+  it('discovers nothing when the root does not declare a pnpm workspace', () => {
+    const root = makeScratchDir('resolve-scopes-');
 
     expect(discoverWorkspaceDirs(root)).toEqual([]);
   });
@@ -222,7 +222,7 @@ async function writeWorkspaceRoot(
   patterns: readonly string[] = ["  - 'packages/*'"],
   rootName?: string,
 ): Promise<string> {
-  const base = await mkdtemp(join(tmpdir(), 'resolve-scopes-'));
+  const base = makeScratchDir('resolve-scopes-');
   const root = rootName === undefined ? base : join(base, rootName);
   for (const dir of ['.', 'packages/agents', 'packages/kb']) {
     await mkdir(join(root, dir), { recursive: true });

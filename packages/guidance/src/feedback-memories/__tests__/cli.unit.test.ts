@@ -1,10 +1,10 @@
-import { access, mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { access, mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runFeedbackMemories } from '../cli.ts';
 import type { FeedbackMemoriesResult, RenderedResult } from '../types.ts';
 
@@ -39,7 +39,7 @@ function textValue(result: RenderedResult): string {
 
 /** Builds a fixture home with one feedback memory under `<home>/.claude/projects/<store>/memory/`. */
 async function makeHomeWithMemory(): Promise<{ home: string; memoryPath: string }> {
-  const home = await mkdtemp(join(tmpdir(), 'fm-cli-home-'));
+  const home = makeScratchDir('fm-cli-home-');
   const memoryDir = join(home, '.claude', 'projects', '-store-a', 'memory');
   await mkdir(memoryDir, { recursive: true });
   const memoryPath = join(memoryDir, 'feedback-example.md');
@@ -121,7 +121,7 @@ describe(runFeedbackMemories, () => {
   });
 
   it('scopes enumeration to one store with --memory-store', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'fm-cli-home-'));
+    const home = makeScratchDir('fm-cli-home-');
     await writeStoreMemory(home, '-store-a', 'feedback-a.md');
     await writeStoreMemory(home, '-store-b', 'feedback-b.md');
 
@@ -141,7 +141,7 @@ describe(runFeedbackMemories, () => {
   });
 
   it('accepts the --memory-store=<name> form', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'fm-cli-home-'));
+    const home = makeScratchDir('fm-cli-home-');
     await writeStoreMemory(home, '-store-a', 'feedback-a.md');
     await writeStoreMemory(home, '-store-b', 'feedback-b.md');
 
@@ -195,7 +195,7 @@ describe(runFeedbackMemories, () => {
   });
 
   it('lists feedback-memory counts per project as a human-readable table', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'fm-cli-home-'));
+    const home = makeScratchDir('fm-cli-home-');
     await writeStoreMemory(home, '-store-a', 'feedback-a.md');
     await writeStoreMemory(home, '-store-b', 'feedback-b.md');
 
@@ -236,7 +236,7 @@ describe(runFeedbackMemories, () => {
   });
 
   it('scopes list to one store with --memory-store', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'fm-cli-home-'));
+    const home = makeScratchDir('fm-cli-home-');
     await writeStoreMemory(home, '-store-a', 'feedback-a.md');
     await writeStoreMemory(home, '-store-b', 'feedback-b.md');
 

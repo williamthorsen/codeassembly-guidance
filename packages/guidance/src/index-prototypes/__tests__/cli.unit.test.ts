@@ -1,9 +1,9 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runIndexPrototypes } from '../cli.ts';
 import { COPY_PROBE_SCRIPT } from '../copy-probe.ts';
 import { buildPng } from '../test-utils/build-png.ts';
@@ -29,7 +29,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('creates the manifest on the first registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await runIndexPrototypes({
       argv: [
@@ -79,7 +79,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('increments the version when a slug is re-registered and keeps the earlier entry', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
 
     const result = await register(setDir, 'dense', LATER, ['--title', 'Dense header, revised']);
@@ -96,7 +96,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('numbers each new slug in registration order and keeps the number across versions', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
     await register(setDir, 'airy', NOW, []);
 
@@ -113,7 +113,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('takes a requested number for a new slug and keeps it on a later registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
 
     await register(setDir, 'bold', NOW, ['--number', '3']);
@@ -128,7 +128,7 @@ describe(runIndexPrototypes, () => {
     ['bold', '0', /must be a positive integer/],
     ['bold', 'x', /must be a positive integer/],
   ])('refuses --number %s for slug %s', async (slug, number, message) => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
 
     const result = await register(setDir, slug, LATER, ['--number', number]);
@@ -139,7 +139,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('resolves the ids that registering the slugs in order would assign, without writing', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
     await register(setDir, 'airy', NOW, []);
 
@@ -160,7 +160,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('resolves ids for a set that does not have a manifest yet', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     await expect(
       runIndexPrototypes({ argv: ['resolve-ids', '--set-dir', setDir, '--slugs', 'a,b'], now: NOW }),
@@ -172,7 +172,7 @@ describe(runIndexPrototypes, () => {
     ['a,a', 'invalid-args'],
     [' , ', 'invalid-args'],
   ])('refuses resolve-ids --slugs %j', async (slugs, error) => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     await expect(
       runIndexPrototypes({ argv: ['resolve-ids', '--set-dir', setDir, '--slugs', slugs], now: NOW }),
@@ -180,7 +180,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('writes numbers into a manifest that lacks them at the next registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'dense', NOW, ['--set-title', 'Set']);
     await register(setDir, 'airy', NOW, []);
     await stripManifestNumbers(setDir);
@@ -197,7 +197,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('stores the notes on the entry in the order given', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await register(setDir, 'a', NOW, [
       '--set-title',
@@ -220,7 +220,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses a malformed note without writing', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await register(setDir, 'a', NOW, ['--set-title', 'Set', '--note', 'Search']);
 
@@ -229,7 +229,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('keeps the set summary across a later registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
     const summary = { shared: 'Same data.', changes: null, try: ['Search for a title.'] };
     await describeSet(setDir, summary);
@@ -240,7 +240,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('replaces the set title when a later registration gives one', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'First']);
 
     await register(setDir, 'b', NOW, ['--set-title', 'Second']);
@@ -249,13 +249,13 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses the first registration without a set title', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     await expect(register(setDir, 'a', NOW, [])).resolves.toMatchObject({ ok: false, error: 'missing-set-title' });
   });
 
   it('refuses an invalid slug without writing', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     await expect(register(setDir, 'Bad_Slug', NOW, ['--set-title', 'Set'])).resolves.toMatchObject({
       ok: false,
@@ -265,7 +265,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses a URL that is not http or https', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await runIndexPrototypes({
       argv: [
@@ -288,7 +288,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it("stores a screenshot under the registration's version and records it on the entry", async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     const capture = path.join(setDir, 'capture.png');
     const png = buildPng(1280, 2);
     await writeFile(capture, png);
@@ -301,7 +301,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses a screenshot that is not a PNG without writing the manifest', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     const capture = path.join(setDir, 'capture.jpg');
     await writeFile(capture, 'not a png at all, but long enough');
 
@@ -329,7 +329,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('records the index URL in the manifest', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
 
     const result = await runIndexPrototypes({
@@ -342,7 +342,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('keeps the recorded index URL across a later registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
     await runIndexPrototypes({
       argv: ['record-index', '--set-dir', setDir, '--url', 'https://claude.ai/artifact/index'],
@@ -355,7 +355,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('stores a trimmed summary and replaces an earlier one', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
     await describeSet(setDir, { shared: 'First.', changes: null, try: [] });
 
@@ -379,7 +379,7 @@ describe(runIndexPrototypes, () => {
     ['an absent changes', { shared: 'S', try: [] }],
     ['a blank changes', { shared: 'S', changes: '  ', try: [] }],
   ])('stores %s as null', async (_case, input) => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
 
     const result = await describeSet(setDir, input);
@@ -394,7 +394,7 @@ describe(runIndexPrototypes, () => {
     ['a blank try item', { shared: 'S', changes: null, try: ['ok', ''] }],
     ['a missing try', { shared: 'S', changes: null }],
   ])('refuses %s without writing', async (_case, input) => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
     const before = await readManifestFile(setDir);
 
@@ -405,7 +405,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses a summary file that is not JSON', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
     const filePath = path.join(setDir, 'summary.json');
     await writeFile(filePath, '{', 'utf8');
@@ -419,7 +419,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses a summary file that does not exist', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
     await register(setDir, 'a', NOW, ['--set-title', 'Set']);
 
     const result = await runIndexPrototypes({
@@ -431,7 +431,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses describe-set before any registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await describeSet(setDir, { shared: 'S', changes: null, try: [] });
 
@@ -439,7 +439,7 @@ describe(runIndexPrototypes, () => {
   });
 
   it('refuses record-index before any registration', async () => {
-    const setDir = await makeSetDir();
+    const setDir = makeSetDir();
 
     const result = await runIndexPrototypes({
       argv: ['record-index', '--set-dir', setDir, '--url', 'https://claude.ai/artifact/index'],
@@ -460,8 +460,8 @@ async function describeSet(setDir: string, summary: unknown) {
 }
 
 /** Creates an empty set directory. */
-async function makeSetDir(): Promise<string> {
-  return mkdtemp(path.join(tmpdir(), 'index-prototypes-cli-'));
+function makeSetDir(): string {
+  return makeScratchDir('index-prototypes-cli-');
 }
 
 /** Reads the set's manifest file as parsed JSON. */

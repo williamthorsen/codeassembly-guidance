@@ -1,15 +1,15 @@
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { buildHelp, runCli } from '../cli.ts';
 import { buildCluster, buildRecord } from '../test-utils/build-record.ts';
 
 /** Writes `record` to a temp directory and returns the directory. */
 async function writeRecord(record: unknown): Promise<string> {
-  const dir = await mkdtemp(join(tmpdir(), 'triage-feedback-'));
+  const dir = makeScratchDir('triage-feedback-');
   await writeFile(join(dir, 'record.json'), JSON.stringify(record), 'utf8');
   return dir;
 }
@@ -55,7 +55,7 @@ describe('validate', () => {
   });
 
   it('reports a missing record', async () => {
-    const cwd = await mkdtemp(join(tmpdir(), 'triage-feedback-'));
+    const cwd = makeScratchDir('triage-feedback-');
     await expect(runCli(['validate', '--file', 'record.json'], { cwd })).resolves.toMatchObject({
       ok: false,
       error: 'record-not-found',
@@ -84,6 +84,9 @@ describe('render', () => {
 
 describe('arguments', () => {
   it('refuses an unknown command', async () => {
-    await expect(runCli(['triage'], { cwd: tmpdir() })).resolves.toMatchObject({ ok: false, error: 'invalid-args' });
+    await expect(runCli(['triage'], { cwd: makeScratchDir('triage-feedback-') })).resolves.toMatchObject({
+      ok: false,
+      error: 'invalid-args',
+    });
   });
 });

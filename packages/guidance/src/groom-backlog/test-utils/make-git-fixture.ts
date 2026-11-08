@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, realpathSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 
 const FIXED_CONFIG = [
   '-c',
@@ -27,7 +26,7 @@ export function git(cwd: string, ...args: string[]): string {
 
 /** Creates a repository in a fresh temporary directory, on `main`, with one empty commit. */
 export function makeGitFixture(prefix: string): string {
-  const root = realpathSync(mkdtempSync(path.join(tmpdir(), prefix)));
+  const root = makeScratchDir(prefix);
   git(root, 'init', '--quiet', '--initial-branch=main');
   git(root, 'commit', '--quiet', '--allow-empty', '--message', 'Initial commit');
   return root;

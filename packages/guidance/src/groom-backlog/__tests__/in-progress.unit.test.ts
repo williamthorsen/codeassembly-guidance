@@ -1,11 +1,10 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { makeFakeBacklogGit } from '../../test-utils/make-fake-backlog-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import type { BacklogGit } from '../git.ts';
 import { detectInProgress } from '../in-progress.ts';
 
@@ -18,8 +17,8 @@ describe(detectInProgress, () => {
   let git: BacklogGit;
 
   beforeEach(() => {
-    root = mkdtempSync(path.join(tmpdir(), 'groom-in-progress-'));
-    linked = mkdtempSync(path.join(tmpdir(), 'groom-in-progress-linked-'));
+    root = makeScratchDir('groom-in-progress-');
+    linked = makeScratchDir('groom-in-progress-linked-');
 
     // A worktree whose manifest names ticket 12, on a branch whose name names ticket 11.
     mkdirSync(path.join(linked, '.agents'));
@@ -46,11 +45,6 @@ describe(detectInProgress, () => {
         { branchRef: 'refs/heads/11-feature', path: linked },
       ],
     });
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
-    await rm(linked, { recursive: true, force: true });
   });
 
   it('reads the manifest, then local branches, then remote-tracking branches, with commits ahead', async () => {

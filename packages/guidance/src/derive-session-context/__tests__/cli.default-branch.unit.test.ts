@@ -1,11 +1,11 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { deriveSessionContext } from '../cli.ts';
 
 /** A git adapter for a working directory without any remote. */
@@ -16,12 +16,8 @@ const NOW = new Date('2026-05-26T02:07:41Z');
 describe('default-branch invariant', () => {
   let workDir: string;
 
-  beforeEach(async () => {
-    workDir = await mkdtemp(path.join(tmpdir(), 'derive-session-context-default-branch-'));
-  });
-
-  afterEach(async () => {
-    await rm(workDir, { recursive: true, force: true });
+  beforeEach(() => {
+    workDir = makeScratchDir('derive-session-context-default-branch-');
   });
 
   it.each([

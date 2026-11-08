@@ -1,11 +1,11 @@
-import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeBodyStream } from '../../test-utils/make-body-stream.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runAdd } from '../cli.ts';
 import { makeKb } from '../test-utils/make-kb.ts';
 import { NOW } from '../test-utils/now.ts';
@@ -69,7 +69,7 @@ describe(runAdd, () => {
 
   it('surveys a KB that the registry marks readonly, which refuses only writes', async () => {
     const kbPath = await makeKb();
-    const homeDir = await mkdtemp(join(tmpdir(), 'kb-add-survey-readonly-'));
+    const homeDir = makeScratchDir('kb-add-survey-readonly-');
     await mkdir(join(homeDir, '.agents'), { recursive: true });
     await writeFile(
       join(homeDir, '.agents', 'kb.yaml'),

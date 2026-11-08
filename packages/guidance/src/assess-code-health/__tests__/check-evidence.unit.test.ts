@@ -1,10 +1,9 @@
-import { mkdirSync, realpathSync, writeFileSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { checkEvidence, extractSection } from '../check-evidence.ts';
 import { runCli } from '../cli.ts';
 import { type Evidence, type Proposal, ProposalsSchema, type SenseDocument } from '../schemas.ts';
@@ -24,18 +23,14 @@ const SENSE: SenseDocument = {
 describe('checkEvidence', () => {
   let root: string;
 
-  beforeEach(async () => {
-    root = realpathSync(await mkdtemp(path.join(tmpdir(), 'code-health-evidence-')));
+  beforeEach(() => {
+    root = makeScratchDir('code-health-evidence-');
     mkdirSync(path.join(root, 'src'));
     writeFileSync(path.join(root, 'src', 'a.ts'), 'export function run() {\n  return   doWork();\n}\n');
     writeFileSync(
       path.join(root, 'rules.md'),
       '# Rules\n\n## Errors\n\nNever swallow an\nerror silently.\n\n### Detail\n\nNested text.\n\n## Other\n\nOutside.\n',
     );
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
   });
 
   it('passes a proposal whose evidence all resolves, collapsing whitespace in quotes', () => {

@@ -1,13 +1,12 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { BacklogGit } from '../../groom-backlog/git.ts';
 import { buildFakeRunner, type RunnerCall } from '../../test-utils/fake-runner.ts';
 import { makeFakeBacklogGit } from '../../test-utils/make-fake-backlog-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type CommandContext, runCli } from '../cli.ts';
 
 const NOW = new Date('2026-10-01T12:00:00Z');
@@ -32,13 +31,9 @@ describe(runCli, () => {
   let context: CommandContext;
 
   beforeEach(() => {
-    root = mkdtempSync(path.join(tmpdir(), 'pull-cli-'));
+    root = makeScratchDir('pull-cli-');
     const runner = buildFakeRunner(respond);
     context = { git: makeFakeRepository(root), now: NOW, root, run: runner.run };
-  });
-
-  afterEach(async () => {
-    await rm(root, { recursive: true, force: true });
   });
 
   describe('survey', () => {

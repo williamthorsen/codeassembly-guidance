@@ -1,10 +1,11 @@
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import process from 'node:process';
 
 import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import type { ChangeEntry } from '../change-entries.ts';
 import {
   readChangeRecordBlock,
@@ -279,7 +280,7 @@ describe('amend-entry', () => {
 
 /** Creates a directory standing in for another repository's root, with the given preferences. */
 async function makeRoot(content: string): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'describe-change-root-'));
+  const root = makeScratchDir('describe-change-root-');
   await writeAgentsPreferences(root, content);
   return root;
 }
@@ -291,7 +292,7 @@ async function runAmend(bodyFile: string, flags: readonly string[]): ReturnType<
     cwd: process.cwd(),
     git: makeFakeGit(),
     dataDir: DATA_DIR,
-    home: tmpdir(),
+    home: makeScratchDir('describe-change-home-'),
   });
 }
 
@@ -302,7 +303,7 @@ async function runCheck(bodyFile: string, entryCount: number): ReturnType<typeof
     cwd: process.cwd(),
     git: makeFakeGit(),
     dataDir: DATA_DIR,
-    home: tmpdir(),
+    home: makeScratchDir('describe-change-home-'),
   });
 }
 

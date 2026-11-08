@@ -1,11 +1,11 @@
-import { mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { Readable } from 'node:stream';
 
 import { describe, expect, it } from 'vitest';
 
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { parseArgs, runDecision } from '../cli.ts';
 import { createLedeFixture, FIXTURE_AGENT_LEDE, type LedeFixture } from '../test-utils/create-lede-fixture.ts';
 import type { DecisionResult } from '../types.ts';
@@ -324,10 +324,10 @@ function flagsFor(fixture: Pick<LedeFixture, 'artifactDir' | 'dataDir' | 'proven
  * default that resolves to the helper's own constant from one that resolves to whatever the registry happens to name.
  */
 async function makeStore(name: string = STORE_NAME): Promise<{ storePath: string; home: string }> {
-  const storePath = await mkdtemp(join(tmpdir(), 'lede-decision-store-'));
+  const storePath = makeScratchDir('lede-decision-store-');
   await mkdir(join(storePath, '.kb'), { recursive: true });
 
-  const home = await mkdtemp(join(tmpdir(), 'lede-decision-home-'));
+  const home = makeScratchDir('lede-decision-home-');
   await mkdir(join(home, '.agents'), { recursive: true });
   await writeFile(
     join(home, '.agents', 'kb.yaml'),

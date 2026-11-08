@@ -1,19 +1,18 @@
 import { execFileSync } from 'node:child_process';
-import { realpathSync, writeFileSync } from 'node:fs';
-import { mkdtemp, rm } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { realTrackedDependencies } from '../check-tracked.ts';
 
 describe('realTrackedDependencies.changedSince', () => {
   let scratch: string;
   let first: string;
 
-  beforeEach(async () => {
-    scratch = realpathSync(await mkdtemp(path.join(tmpdir(), 'code-health-tracked-')));
+  beforeEach(() => {
+    scratch = makeScratchDir('code-health-tracked-');
     git('init', '--quiet', '--initial-branch=main');
     writeFileSync(path.join(scratch, 'a.ts'), 'one\n');
     writeFileSync(path.join(scratch, 'b.ts'), 'one\n');
@@ -22,10 +21,6 @@ describe('realTrackedDependencies.changedSince', () => {
     first = git('rev-parse', 'HEAD').trim();
     writeFileSync(path.join(scratch, 'b.ts'), 'two\n');
     git('commit', '--quiet', '--all', '--message', 'second');
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   it('reports whether a path changed after the commit', () => {

@@ -1,9 +1,9 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { collect } from '../collect.ts';
 import { buildFakeDependencies } from '../test-utils/fake-dependencies.ts';
 import { buildCruxRecord, buildPsiResponse, buildReport } from '../test-utils/fixtures.ts';
@@ -12,11 +12,7 @@ describe('collect', () => {
   let out: string;
 
   beforeEach(() => {
-    out = mkdtempSync(path.join(tmpdir(), 'analyze-performance-collect-'));
-  });
-
-  afterEach(() => {
-    rmSync(out, { recursive: true, force: true });
+    out = makeScratchDir('analyze-performance-collect-');
   });
 
   it('measures a public URL with PSI in both form factors and takes its field data from PSI', async () => {

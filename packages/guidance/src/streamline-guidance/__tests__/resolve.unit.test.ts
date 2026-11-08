@@ -1,9 +1,9 @@
-import { mkdir, mkdtemp, realpath, rm, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { runResolve } from '../cli.ts';
 import { RECORD_PATH } from '../record.ts';
 import { makeFakeGit } from '../test-utils/make-fake-git.ts';
@@ -64,7 +64,7 @@ describe(runResolve, () => {
   let scratch: string;
 
   beforeEach(async () => {
-    scratch = await realpath(await mkdtemp(path.join(tmpdir(), 'streamline-resolve-')));
+    scratch = makeScratchDir('streamline-resolve-');
     repository = path.join(scratch, 'repository');
     home = path.join(scratch, 'home');
     await writeFiles(repository, REPOSITORY_FILES);
@@ -79,10 +79,6 @@ describe(runResolve, () => {
     );
     files = Object.keys(REPOSITORY_FILES);
     changed = [];
-  });
-
-  afterEach(async () => {
-    await rm(scratch, { recursive: true, force: true });
   });
 
   it("reports a target's includes, recursively, and the Markdown files to which it and its includes link", async () => {

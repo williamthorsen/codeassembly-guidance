@@ -1,5 +1,4 @@
-import { mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { check } from '@williamthorsen/kb/check';
@@ -7,6 +6,7 @@ import { defaultKbConfig, KbLoaderError } from '@williamthorsen/kb/config';
 import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { parseArgs, runCurate } from '../cli.ts';
 
 // Mock `check` with a passthrough to the real implementation so that most tests run
@@ -27,8 +27,8 @@ const VALID =
  * `.kb/` is written at the store root so that config/schema/alias files are placed where the loaders read them.
  */
 async function makeVault(files: Record<string, string>): Promise<{ kbPath: string; home: string }> {
-  const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
-  const kbPath = await mkdtemp(join(tmpdir(), 'kb-curate-vault-'));
+  const home = makeScratchDir('kb-curate-home-');
+  const kbPath = makeScratchDir('kb-curate-vault-');
   await mkdir(join(kbPath, '.kb'), { recursive: true });
   for (const [relativePath, content] of Object.entries(files)) {
     const full = relativePath.startsWith('.kb/') ? join(kbPath, relativePath) : join(kbPath, 'content', relativePath);
@@ -71,8 +71,8 @@ describe(runCurate, () => {
   });
 
   it("returns missing-destination when the lookup doesn't find any KB and argv doesn't request one", async () => {
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
-    const startDir = await mkdtemp(join(tmpdir(), 'kb-curate-empty-'));
+    const home = makeScratchDir('kb-curate-home-');
+    const startDir = makeScratchDir('kb-curate-empty-');
 
     const result = await runCurate({ argv: [], startDir, now: NOW, home });
 
@@ -84,8 +84,8 @@ describe(runCurate, () => {
   });
 
   it('returns no-kb-resolvable when --kb names an unregistered KB', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
-    const startDir = await mkdtemp(join(tmpdir(), 'kb-curate-empty-'));
+    const home = makeScratchDir('kb-curate-home-');
+    const startDir = makeScratchDir('kb-curate-empty-');
 
     const result = await runCurate({ argv: ['--kb', 'ghost'], startDir, now: NOW, home });
 
@@ -93,14 +93,14 @@ describe(runCurate, () => {
   });
 
   it('names the registered KBs and points to --kb @default when run outside a vault', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
+    const home = makeScratchDir('kb-curate-home-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
       `default_kb: primary\nkbs:\n  primary:\n    path: ${home}/primary\n`,
       'utf8',
     );
-    const startDir = await mkdtemp(join(tmpdir(), 'kb-curate-empty-'));
+    const startDir = makeScratchDir('kb-curate-empty-');
 
     const result = await runCurate({ argv: [], startDir, now: NOW, home });
 
@@ -115,14 +115,14 @@ describe(runCurate, () => {
   });
 
   it('reports the registry error when --kb @default names an unresolvable default', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
+    const home = makeScratchDir('kb-curate-home-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(
       join(home, '.agents', 'kb.yaml'),
       `default_kb: ghost\nkbs:\n  real:\n    path: ${home}/real\n`,
       'utf8',
     );
-    const startDir = await mkdtemp(join(tmpdir(), 'kb-curate-empty-'));
+    const startDir = makeScratchDir('kb-curate-empty-');
     // resolveWritableKb logs the unresolvable-default registry error to stderr; capture it so that it does not appear
     // in the test output.
     using _stdio = captureStdio();
@@ -138,10 +138,10 @@ describe(runCurate, () => {
   });
 
   it('returns no-default when --kb @default is given but kb.yaml does not configure default_kb', async () => {
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
+    const home = makeScratchDir('kb-curate-home-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(join(home, '.agents', 'kb.yaml'), `kbs:\n  real:\n    path: ${home}/real\n`, 'utf8');
-    const startDir = await mkdtemp(join(tmpdir(), 'kb-curate-empty-'));
+    const startDir = makeScratchDir('kb-curate-empty-');
 
     const result = await runCurate({ argv: ['--kb', '@default'], startDir, now: NOW, home });
 
@@ -153,9 +153,9 @@ describe(runCurate, () => {
   });
 
   it('refuses --apply against a readonly KB', async () => {
-    const kbPath = await mkdtemp(join(tmpdir(), 'kb-curate-ro-'));
+    const kbPath = makeScratchDir('kb-curate-ro-');
     await mkdir(join(kbPath, '.kb'), { recursive: true });
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
+    const home = makeScratchDir('kb-curate-home-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(join(home, '.agents', 'kb.yaml'), `kbs:\n  ro:\n    path: ${kbPath}\n    readonly: true\n`, 'utf8');
 
@@ -212,11 +212,11 @@ describe(runCurate, () => {
   });
 
   it('curates a readonly KB in report mode without refusing', async () => {
-    const kbPath = await mkdtemp(join(tmpdir(), 'kb-curate-ro-'));
+    const kbPath = makeScratchDir('kb-curate-ro-');
     await mkdir(join(kbPath, 'content'), { recursive: true });
     await mkdir(join(kbPath, '.kb'), { recursive: true });
     await writeFile(join(kbPath, 'content', 'Note.md'), VALID, 'utf8');
-    const home = await mkdtemp(join(tmpdir(), 'kb-curate-home-'));
+    const home = makeScratchDir('kb-curate-home-');
     await mkdir(join(home, '.agents'), { recursive: true });
     await writeFile(join(home, '.agents', 'kb.yaml'), `kbs:\n  ro:\n    path: ${kbPath}\n    readonly: true\n`, 'utf8');
 
