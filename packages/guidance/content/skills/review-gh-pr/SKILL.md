@@ -98,7 +98,7 @@ Apply this cascade in order and use the first match:
    node {harness_home_dir}/skills/review-gh-pr/select-pr-ticket.mjs < {pr_json}
    ```
 
-   It prints `{"number": <n or null>, "source": "<source>"}`. `source` is `closing-reference` (the first entry in `closingIssuesReferences`), `body-keyword` or `body-bare` (the earliest issue reference in the body outside code), or `none`, with `number` null. When `number` is not null, fetch the issue via `gh issue view --json number,title,body,labels,updatedAt {number}` and use it. When the helper exits non-zero, report its stderr and stop.
+   It prints `{"number": <n or null>, "source": "<source>"}`. `source` is `closing-reference` (the first entry in `closingIssuesReferences`), `body-keyword` or `body-bare` (the earliest issue reference in the body outside code), or `none`, with `number` null. When `number` is not null, fetch the issue per [platform-specific fetch](../_data/ticket-source-resolution.md#platform-specific-fetch) and use it. When the helper exits non-zero, report its stderr and stop.
 
 3. **No ticket**: When `source` is `none`, proceed with the PR description as the only spec source.
 
