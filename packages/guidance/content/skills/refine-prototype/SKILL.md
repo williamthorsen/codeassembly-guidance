@@ -29,7 +29,7 @@ Off:
 On:
 
 - The page is self-contained and opens from `file://`, with its demo chrome in a band whose every part is inside an element that has `data-demo`, as the brief that built it required.
-- The band's first line is the page's id and title, `{number}.{version} {title}`, so that the developer reads which version they have open without returning to the index.
+- The band's first line is the page's id and title, `{number}.{version} {title}`, so that the developer reads which version they have open without returning to the index, and the page's `<title>` follows the rule in {skill:index-prototypes} "The set". Every step that sets a new id on the working file sets both.
 - {rulebook:accessibility-conventions} is the floor: Check contrast and size when a command changes a colour or a text size, apply its placement, toggle, and button-at-rest rules when a command adds or moves a control, and apply its glanceable-state rule when a command adds or changes a list.
 - A new string on the product surface follows {rulebook:ui-copy-conventions}.
 - One working file. A batch edits it in place; a fork is written next to it and is deleted once the developer picks.
@@ -48,7 +48,7 @@ node {harness_home_dir}/skills/index-prototypes/index-prototypes.mjs resolve-ids
   --slugs {slug}
 ```
 
-Copy the base's latest source to `{scratch_dir}/{slug}-v{n}.html`, the working file, and set the band's first line to the new id. A base reconstructed from a built product takes a new slug and starts at version 1, and its band's first line names the source after the id, such as `6.1 Start from as tabs, from the api-tokens page`.
+Copy the base's latest source to `{scratch_dir}/{slug}-v{n}.html`, the working file, and set the band's first line and the `<title>` to the new id. A base reconstructed from a built product takes a new slug and starts at version 1, and its band's first line names the source after the id, such as `6.1 Start from as tabs, from the api-tokens page`. When the manifest does not have a set title yet, choose one per {skill:index-prototypes} "The set", and pass it as `--set-title` when the first snapshot is registered.
 
 ### 2. Serve the working file
 
@@ -78,7 +78,7 @@ Each turn, take every command in the developer's message as one batch:
 4. Append each applied command to the session's log, under the id of the version that it will enter, with the developer's reason when they gave one and the source id when it was a transplant.
 5. Reply with one line per command (applied, forked with its letters and their URLs, or refused with the reason), and nothing else. The developer looks at the browser, not at a description of it.
 
-Propose a new number when a batch replaces the layout or the model to the point that the earlier version's verdicts and notes no longer describe the page. On yes, the working file takes a new slug and the id that `resolve-ids` gives it, and its band names the version from which it came. The old slug keeps its last snapshot.
+Propose a new number when a batch replaces the layout or the model to the point that the earlier version's verdicts and notes no longer describe the page. On yes, the working file takes a new slug and the id that `resolve-ids` gives it in its band and its `<title>`, and its band names the version from which it came. The old slug keeps its last snapshot.
 
 ### 5. Snapshot
 
@@ -88,7 +88,7 @@ Snapshot when the developer asks for one, in any words ("snapshot", "keep this",
 2. Publish it with the Artifact tool: to the slug's existing artifact URL when the manifest's latest entry for the slug has one, so that the index card's link stays current, or as a new artifact for a new slug.
 3. Capture its screenshots per {skill:index-prototypes} step 3, and register it per its step 4 with `--number {number}`, `--source`, the set's note labels (copied from the latest entry, with any change that the batches made to them), and, for a new slug, a `--description` that names the version from which it came.
 4. Update the set's summary per {skill:index-prototypes} step 5, naming the version in `changes`, then render and republish the index per its step 6.
-5. The next batch opens the next version: Copy the snapshot to `{scratch_dir}/{slug}-v{n+1}.html` and set the band's id.
+5. The next batch opens the next version: Copy the snapshot to `{scratch_dir}/{slug}-v{n+1}.html` and set the band's id and the `<title>`.
 
 ### 6. Close
 
