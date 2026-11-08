@@ -9,7 +9,7 @@ supported-harnesses: [claude]
 
 Find the code and tests in one unit of a codebase that would be written differently if they were written afresh today, and propose one change for each. Each lens is a {subagent:code-health-assessor} that reads the unit without seeing any other lens's report. You run the sensors, write the brief that every lens reads, dispatch the lenses, check every proposal's evidence against the tree, and merge the proposals into one findings artifact.
 
-The skill does not grade anything: The findings artifact is the input of `triage-spike-findings`, which grades each proposal, has a challenger argue against every grade, and decides what becomes a ticket. Its one remote write is the [closing post](../_data/spike-conventions.md#closing-post) on the ticket, made on the developer's consent.
+The skill does not grade anything: The findings artifact is the input of `triage-spike-findings`, which grades each proposal, has a challenger argue against every grade, and decides what becomes a ticket. When the findings leave nothing to triage, its one remote write is the [closing post](../_data/spike-conventions.md#closing-post) on the ticket, made on the developer's consent; otherwise the triage round makes the post.
 
 ## Inputs
 
@@ -120,8 +120,10 @@ Save the document with {skill:save-artifact} as a ticket-level `code-health-find
 
 ### 7. Report
 
-Give the developer the findings artifact's path and one line of counts: proposals ranked, tracked, and dropped. Name `triage-spike-findings` as the next step, with the findings artifact's path as its input.
+Give the developer the findings artifact's path and one line of counts: proposals ranked, tracked, and dropped.
 
-In the same response's action-items block, offer the closing post on the ticket, whose contents, consent, and duplicate check are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the counts and the top ranked proposals, and its groupings are the proposed groupings of step 5.
+When the findings rank any proposal, name `triage-spike-findings` as the next step, with the findings artifact's path as its input, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
+
+Otherwise, offer the closing post on the ticket in the same response's action-items block. Its contents, consent, and duplicate check are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the counts, and the post names the proposals that a prior disposition or an issue already tracks.
 
 <!-- guidance-hook: implementation-preferences -->
