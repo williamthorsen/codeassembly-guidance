@@ -1,6 +1,6 @@
 ---
 name: prepare-prototype-brief
-description: Compose the shared brief and the lens sections for a round of competing prototypes, check the brief against the rules that builders over-apply, dispatch one builder per lens, and once the round is judged, take the developer through a decision on every prototype idea. Use when a ticket calls for two or more prototypes of one idea built in parallel, or when the developer has judged such a round.
+description: Compose the shared brief and the lens sections for a round of competing prototypes, check the brief against the rules that builders over-apply, dispatch one builder per lens, and once the round is judged, take the developer through a decision on every prototype idea. Use when a ticket calls for two or more competing prototypes of one idea, or when the developer has judged such a round.
 user-invocable: true
 supported-harnesses: [claude]
 ---
@@ -65,6 +65,12 @@ Require a salience order in every working view: the current state in one place, 
 
 The failure that this prevents: a page in one colour, in which the operator hunts for the control, "Hidden from the players." written out on every hidden row, and an expiry column in plain text, in which the operator reads every row to find the expired ones.
 
+### Bound every loop
+
+Require that every iterative loop in a prototype, such as layout fitting, animation, simulation, or retry, stop after a fixed number of iterations or a time limit.
+
+The failure that this prevents: one page whose loop does not end hangs its renderer, and every browser call queued behind it stalls, including the screenshots of the round.
+
 ### Write the brief in plain speech
 
 The brief is documentation, so apply the plain-speech rules to it. Test each sentence by asking whether a builder would reproduce the phrase: A builder reproduces a figure as a figure, and a loaded word (cost, price, free, cheap) as a theme. Write the literal statement.
@@ -79,7 +85,7 @@ Write the brief in this order, with these headings:
 
 1. **Context.** The ticket, quoted. The developer's motivating picture, restated in plain speech.
 2. **Settled intent.** Bullets. Each is a decision, with its reason when the reason constrains the design.
-3. **Deliverable.** The file and its path per {skill:index-prototypes}; the constraints (self-contained, opens from `file://`, inline CSS and JavaScript, no framework, readable with JavaScript off, phone width); the mechanism that must run; the demo control that plays the written scene; a full-screen mode when the product has an audience view. The demo chrome (the demo control, scene captions, the lens note, the data-model note, the API list) is in a band visibly distinct from the product surface, and every part of it is inside an element that has the `data-demo` attribute. The band's first line is the id and the title from the dispatch block, `{id} {title}`.
+3. **Deliverable.** The file and its path per {skill:index-prototypes}; the constraints (self-contained, opens from `file://`, inline CSS and JavaScript, no framework, readable with JavaScript off, phone width, every loop bounded by an iteration count or a time limit); the mechanism that must run; the demo control that plays the written scene; a full-screen mode when the product has an audience view. The demo chrome (the demo control, scene captions, the lens note, the data-model note, the API list) is in a band visibly distinct from the product surface, and every part of it is inside an element that has the `data-demo` attribute. The band's first line is the id and the title from the dispatch block, `{id} {title}`.
 4. **Sections.** Numbered, each a noun phrase plus what it contains and a length bound. None asks for persuasion; one is the scene, exhibited; one is the data-model note when the product stores data; one is the API list when the product has an API.
 5. **Quality bar.** Works, legible, accessible, and within the copy rules, with {rulebook:accessibility-conventions} and {rulebook:ui-copy-conventions} named, the design skill to invoke before markup, and the salience order required.
 6. **How this round is judged.** The criteria, in the reviewer's voice, with the divergence between lenses named as the point of the round. One criterion is the copy: "Read every string on the product surface as its user opening the page for the tenth time. A string that explains the page, reassures, or repeats the brief, and any copy over the budget in {rulebook:ui-copy-conventions}, is a defect." Another is the glanceable state: "A list in which the reader must read each item to find a state for which the reader scans, such as expired or failing, is a defect, whatever restraint the lens asks for."
@@ -131,6 +137,7 @@ Write the brief to `{scratch_dir}/brief.md`. Then check it against each rule abo
 - Every `state`, `say`, `tell`, `explain` in a requirement: rewritten as what the viewer can learn and at what moment.
 - Salience order, the accessibility floor, and the copy rules: named in the quality bar, and the copy rules and the glanceable state named again in "How this round is judged".
 - The `data-demo` band: required in the deliverable.
+- Bounded loops: required in the deliverable's constraints.
 - The write allowance: stated in the rules of engagement.
 - The note labels: listed in the rules of engagement.
 
@@ -144,7 +151,7 @@ Save the brief with {skill:save-artifact} as a ticket-level `brief` artifact, an
 
 ### 5. Dispatch the builders
 
-Send one {tool:Task} call per lens in one message, `subagent_type: general-purpose`, each with this prompt and nothing else composed into it:
+Each builder is a {subagent:prototype-builder}, which checks its page in a headless browser apart from this session's. Dispatch the builders one at a time, in the order of the lens sections, and wait for each reply before the next dispatch: Builders that run at once share one browser, and a page that hangs there stalls every builder. Send one {tool:Task} call per lens, `subagent_type: prototype-builder`, with this block and nothing else composed into it:
 
 ```dispatch
 brief: {path to the saved brief}
@@ -155,11 +162,7 @@ id: {number}.{n}
 output: {set_dir}/{slug}-v{n}.html
 ```
 
-followed by:
-
-> Read the brief in full and build the prototype for the lens named above. Write only the files that the brief's rules of engagement allow. Put the id above and the prototype's title on the first line of the page's `data-demo` band. Invoke the design skill that the brief names before writing markup. Publish the output with the Artifact tool. When done, reply with the artifact URL, a short title, the lens, the inputs that you drew on, a one-sentence description, one line per note label in the brief as `{label}: {value}`, and five lines of the system's distinctive ideas. Nothing else.
-
-Dispatch a builder once more with the same block when it returns without the file, with a file that does not open, or without an artifact URL. Report a second failure in the summary and leave the lens out of the round.
+Dispatch a builder once more with the same block when it returns without the file, with a file that does not open, without an artifact URL, or with a page that it reports as still not responding. A builder whose browser call hangs on its own page cannot return, so stop a builder that has not replied 30 minutes after its dispatch, and count that as a failed attempt. Report a second failure in the summary and leave the lens out of the round.
 
 ### 6. Index and compare
 

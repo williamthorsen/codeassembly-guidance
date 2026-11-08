@@ -21,5 +21,8 @@ plan-reviser:
 prose-reviser:
   model: inherit
 
+prototype-builder:
+  model: inherit
+
 usability-assessor:
   model: inherit

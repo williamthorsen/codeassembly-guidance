@@ -54,6 +54,7 @@ export interface Manifest {
 
 /** Categorical error codes that the helper returns without an unexpected throw. */
 export type IndexPrototypesErrorCode =
+  | 'endpoint-unreachable'
   | 'invalid-args'
   | 'invalid-manifest'
   | 'invalid-slug'
@@ -97,6 +98,20 @@ export interface DescribeSetSuccess {
   summary: SetSummary;
 }
 
+/** A page target that `probe-targets` probed. */
+export interface ProbedTarget {
+  id: string;
+  url: string;
+}
+
+/** The stdout payload of a successful `probe-targets`: the targets closed for not answering, and those that answered. */
+export interface ProbeTargetsSuccess {
+  ok: true;
+  command: 'probe-targets';
+  closed: ProbedTarget[];
+  answered: ProbedTarget[];
+}
+
 /** The stdout payload of a successful `record-index`. */
 export interface RecordIndexSuccess {
   ok: true;
@@ -131,6 +146,7 @@ export type IndexPrototypesResult =
   | CopyProbeSuccess
   | DescribeSetSuccess
   | IndexPrototypesFailure
+  | ProbeTargetsSuccess
   | RecordIndexSuccess
   | RegisterSuccess
   | RenderSuccess
