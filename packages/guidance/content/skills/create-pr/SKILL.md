@@ -125,16 +125,16 @@ If the change summary's body does not end with a block, append the closing line 
 
 Pass the following inputs to the selected delegate per the delegate interface:
 
-| Input               | Value                                                                                               |
-| ------------------- | --------------------------------------------------------------------------------------------------- |
-| `title`             | Rendered `pr_title` from step 6 (or bare `title` if the script was unavailable)                     |
-| `body`              | Content from `## What` onward in the change summary, with the closing line inserted per step 9      |
-| `labels`            | Resolved label names (may be empty list)                                                            |
-| `base_branch`       | Bare branch name derived from `default_branch` (strip remote prefix, e.g., `origin/main` -> `main`) |
-| `ticket_id`         | From session context                                                                                |
-| `project_slug`      | From session context                                                                                |
-| `artifact_base_dir` | From session context                                                                                |
-| `initial_state`     | `pr_initial_state` from session context: `draft` or `ready`                                         |
+| Input               | Value                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`             | Rendered `pr_title` from step 6 (or bare `title` if the script was unavailable)                                                                   |
+| `body`              | Content from `## What` onward in the change summary, `## How to test` included when the summary has it, with the closing line inserted per step 9 |
+| `labels`            | Resolved label names (may be empty list)                                                                                                          |
+| `base_branch`       | Bare branch name derived from `default_branch` (strip remote prefix, e.g., `origin/main` -> `main`)                                               |
+| `ticket_id`         | From session context                                                                                                                              |
+| `project_slug`      | From session context                                                                                                                              |
+| `artifact_base_dir` | From session context                                                                                                                              |
+| `initial_state`     | `pr_initial_state` from session context: `draft` or `ready`                                                                                       |
 
 ### 11. Persist the PR URL
 
@@ -148,4 +148,4 @@ node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs
 
 - The orchestrator makes all decisions (scope, type, title rendering, labels). Delegates only make the platform API calls.
 - Strip the remote prefix from `default_branch` (e.g., `origin/main` -> `main`) before passing to the delegate.
-- Never list automated checks (formatting, linting, typechecking, unit tests) in a test plan. They run automatically in CI.
+- The body's manual test steps come from the change summary's `## How to test`, which `summarize-change` writes; never add a test plan of your own.
