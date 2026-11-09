@@ -1,6 +1,6 @@
 {
   "name": "codeassembly-guidance",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "The CodeAssembly library of agent guidance: rulebooks, skills, and subagents that the codeassembly CLI deploys",
   "keywords": [
     "agents",

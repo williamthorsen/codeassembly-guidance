@@ -1,5 +1,311 @@
 [
   {
+    "version": "0.6.0",
+    "date": "2026-11-09",
+    "sections": [
+      {
+        "title": "🎉 Features",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Adds the `analyze-performance` skill, which measures each page of a site for mobile and desktop through the PageSpeed Insights API or the Lighthouse CLI, reports field data from real users apart from lab data, and writes a `performance-findings` artifact that ranks improvements by expected effect, with the evidence, the metric, and the effort of each. (#5)",
+            "hash": "ebcf89f2442d1f44cc5de53aea0b31fa3efaf54e",
+            "entry": 1
+          },
+          {
+            "description": "Lets `triage-spike-findings` take a `performance-findings` artifact as input, so that it can create tickets for the improvements that `analyze-performance` ranks. (#5)",
+            "hash": "ebcf89f2442d1f44cc5de53aea0b31fa3efaf54e",
+            "entry": 2
+          },
+          {
+            "description": "Adds the `dead-code`, `duplication`, and `dependency-graph` sensors to `assess-code-health`'s `sense` command, which runs knip, jscpd, and dependency-cruiser on every invocation and limits their rows to the unit's tracked, non-excluded files. (#92)",
+            "hash": "0ff4ae50d9a9bce4cdac85e7d4f0dc6bdb7c67c3",
+            "entry": 1
+          },
+          {
+            "description": "Adds an `importers` count to each hotspot row in the sense document, taken from the dependency graph and null when the graph does not list the file. (#92)",
+            "hash": "0ff4ae50d9a9bce4cdac85e7d4f0dc6bdb7c67c3",
+            "entry": 2
+          },
+          {
+            "description": "Adds an \"Unexpected crashes\" section to the `cli-conventions` rulebook, which directs a tool to report a crash as `<bin>: internal error: <message>` followed by the stack frames, printed without a debug flag, and to exit 1, so that a reader can tell a bug in the tool from a handled error. (#94)",
+            "hash": "8503764bac043917d2556a8fef220a94ee3897f0",
+            "entry": 1
+          },
+          {
+            "description": "Adds the `machine-readable-output-conventions` rulebook, delivered as the `consult-machine-readable-output-conventions` skill, which requires a result shown to a person to be available as structured data rendered from the same object and states rules for canonical values, data embedded in a page, redaction of sensitive fields, and a journal of domain events. (#103)",
+            "hash": "69e953bbdb62cff9260ef19601300ce8f98310b9",
+            "entry": 1
+          },
+          {
+            "description": "Adds `machine-readable-output-conventions` to the `recommended` collection, which deploys it to every project that declares the collection. (#103)",
+            "hash": "69e953bbdb62cff9260ef19601300ce8f98310b9",
+            "entry": 2
+          },
+          {
+            "description": "Adds a \"Time-driven behavior\" section to the `testing-conventions` skill, which directs a test author to fake the clock and advance it explicitly, to wait on a condition with a deadline when the timer runs in another process, and to run a changed test repeatedly under CPU load before committing it. (#107)",
+            "hash": "3fc483b3011481c0dd099991d90f63a7d54b196c",
+            "entry": 1
+          },
+          {
+            "description": "Adds a matching \"Time-driven behavior\" section to `typescript-testing-conventions`, which shows a fake-timer Vitest test that moves time with `vi.advanceTimersByTimeAsync` and describes how to run several copies of `vitest run <file> --repeats <n>` at once to put the machine under CPU load. (#107)",
+            "hash": "3fc483b3011481c0dd099991d90f63a7d54b196c",
+            "entry": 2
+          },
+          {
+            "description": "Adds a \"Findings batches\" section to `spike-conventions.md`, which caps a triage batch at 10 items, gives each batch a ticket of its own, and shapes an assessment of several units as an umbrella with one child per unit, each blocked by the one before it. (#108)",
+            "hash": "eeb7aa01958ab2f763d2e9b4efc9a520c8b42310",
+            "entry": 1
+          },
+          {
+            "description": "Limits `triage-spike-findings` to one batch per triage ticket and has it create a follow-up triage ticket for each later batch, each blocked by the one before it and linked back to the triage ticket, so that every item still receives a disposition. (#108)",
+            "hash": "eeb7aa01958ab2f763d2e9b4efc9a520c8b42310",
+            "entry": 2
+          },
+          {
+            "description": "Lowers the default per-lens proposal cap of `assess-code-health` from 10 to 2, so that its five lenses produce at most 10 proposals for one unit. (#108)",
+            "hash": "eeb7aa01958ab2f763d2e9b4efc9a520c8b42310",
+            "entry": 3
+          },
+          {
+            "description": "Directs `plan`, `design-and-plan`, and `create-ticket` to scope a ticket or task that schedules an assessment or a triage of findings to one batch. (#108)",
+            "hash": "eeb7aa01958ab2f763d2e9b4efc9a520c8b42310",
+            "entry": 4
+          },
+          {
+            "description": "Changes the grade definitions shared by `triage-spike-findings` and `disposition-challenger` to grade an item from `assess-code-health` by the code that the change leaves, so that the one-time cost of the change no longer lowers the item's confidence or value. (#109)",
+            "hash": "0c1125ecd3660586c7341971cb4e1a04ec6a8228",
+            "entry": 1
+          },
+          {
+            "description": "Adds a working-directory argument to `create-commit`, which runs every git call, the ticket-ref lookup, and the title rendering against that worktree. (#110)",
+            "hash": "8b60780756d5a14cf70049ced34be9a45400a0eb",
+            "entry": 2
+          },
+          {
+            "description": "Adds a rule to `williamthorsen-workflow-preferences` that directs a session working in a worktree other than its cwd to pass that worktree to every skill that takes a working directory, or to commit inline with `git -C`. (#110)",
+            "hash": "8b60780756d5a14cf70049ced34be9a45400a0eb",
+            "entry": 3
+          },
+          {
+            "description": "Adds a \"TypeScript packages\" section to the `machine-readable-output-conventions` rulebook that names `@williamthorsen/readout`, `@williamthorsen/readout-journal`, and `@williamthorsen/readout-react` and the rules that each one implements, and states that the rules remain the contract whether or not an implementation uses them. (#113)",
+            "hash": "94412886b892a3a88828a718036fc1dc95dba60e",
+            "entry": 1
+          },
+          {
+            "description": "Adds a \"Machine-readable results\" section to the `williamthorsen-typescript-preferences` rulebook that directs an agent to build a result or a journal on the readout packages rather than by hand. (#113)",
+            "hash": "94412886b892a3a88828a718036fc1dc95dba60e",
+            "entry": 2
+          },
+          {
+            "description": "Adds a `--resweep` flag to `revise-prose`, which dispatches every versioned rule to every file whatever coverage `.agents/revise-prose.yaml` records, while recorded rejections still suppress their sites. (#114)",
+            "hash": "3a381d5f95de6d0792d40b995f723922fc52ac43",
+            "entry": 1
+          },
+          {
+            "description": "Adds the optional `provenance.parent` field to plan provenance, which `refine-plan` sets on every revised plan to the file name, without its directory, of the plan that it revised. (#117)",
+            "hash": "c0feb049f62fc602e2acfab801941ab1408dff14",
+            "entry": 1
+          },
+          {
+            "description": "Adds rules to `accessibility-conventions` that have an agent follow the established model that a feature resembles, place a control that opens or closes a region at that region's edge or in a persistent toolbar, and give a toggle a visible on state, an `aria-expanded` or `aria-pressed` attribute, and one label for both states, and adds toggling each toggle to the rulebook's browser check. (#118)",
+            "hash": "16d8c010485f374b372390ed149542adf1d11cc6",
+            "entry": 1
+          },
+          {
+            "description": "Exempts a toggle from the `ui-copy-conventions` rule that buttons are verbs, since a toggle's label names what it governs and stays the same in both states. (#118)",
+            "hash": "16d8c010485f374b372390ed149542adf1d11cc6",
+            "entry": 2
+          },
+          {
+            "description": "Has `design-and-plan`, `prepare-prototype-brief`, `refine-prototype`, and the shared plan template apply the new control rules when a design is chosen or a control is added or moved, with any departure from the named model recorded together with its reason. (#118)",
+            "hash": "16d8c010485f374b372390ed149542adf1d11cc6",
+            "entry": 3
+          },
+          {
+            "description": "Adds a \"Glanceable state\" section to the `accessibility-conventions` rulebook, which requires that a state for which a reader scans a list or table be marked by colour with a second cue, a symbol, grouping, or sort order rather than by text alone, and which states that a restraint on colour never excuses hiding such a state. (#120)",
+            "hash": "6d7ecb7fe02aa9c1ca475eb54eaf37c6cf56de8f",
+            "entry": 1
+          },
+          {
+            "description": "Adds a rule to `accessibility-conventions` that a button outside a toolbar has a border or fill at rest that meets 3:1 contrast against its surface, and extends the rulebook's browser check to cover this rule and the glanceable-state rule. (#120)",
+            "hash": "6d7ecb7fe02aa9c1ca475eb54eaf37c6cf56de8f",
+            "entry": 2
+          },
+          {
+            "description": "Names both rules in `prepare-prototype-brief`, `refine-prototype`, and the `usability-assessor` subagent, names the glanceable-state rule in `review-criteria` and the plan template's interface guidance, and adds a criterion to the judging section of every prototype brief that treats a list whose items must each be read to find a scanned state as a defect. (#120)",
+            "hash": "6d7ecb7fe02aa9c1ca475eb54eaf37c6cf56de8f",
+            "entry": 3
+          },
+          {
+            "description": "Adds the `prototype-builder` subagent, which builds one prototype for one lens of a brief and checks its page in a headless Playwright browser apart from the dispatching session's, and makes `prepare-prototype-brief` and `index-prototypes` dispatch it for each prototype that a subagent builds. (#126)",
+            "hash": "d66d565798e91ed3e6db2984022c92a9452165df",
+            "entry": 1
+          },
+          {
+            "description": "Adds the `index-prototypes probe-targets --endpoint <url>` command, which closes each page target of a browser's DevTools endpoint that does not answer a probe within 5 seconds, and directs `index-prototypes` to run it when a Playwright call times out and to report each closed page's prototype as defective. (#126)",
+            "hash": "d66d565798e91ed3e6db2984022c92a9452165df",
+            "entry": 3
+          },
+          {
+            "description": "Makes the brief composed by `prepare-prototype-brief` require every iterative loop in a prototype, such as an animation or a retry, to stop after a fixed number of iterations or a time limit, because a loop that does not end hangs the page's renderer. (#126)",
+            "hash": "d66d565798e91ed3e6db2984022c92a9452165df",
+            "entry": 4
+          },
+          {
+            "description": "Sets the browser title of the index page to `{set title} - Prototypes` and directs `prototype-builder` and `/refine-prototype` to title each prototype page `{set title} - {id} {title}`, so that a developer judging a round can tell its tabs apart. (#130)",
+            "hash": "560c8be1dcc6b9aa0f12c9566eb0388d052aef56",
+            "entry": 1
+          },
+          {
+            "description": "Makes the `index-prototypes` helper's `register` command fail with `title-mismatch` when the `--source` page's `<title>` is missing or differs from `{set title} - {id} {title}`, and with `source-not-found` when the source is not a readable file. (#130)",
+            "hash": "560c8be1dcc6b9aa0f12c9566eb0388d052aef56",
+            "entry": 2
+          },
+          {
+            "description": "Adds the `investigate-spike` skill, which works a spike plan's investigation steps within its timebox, saves the answers and recommendations as a `spike-findings` artifact that `triage-spike-findings` accepts, and offers the closing post on the ticket. (#132)",
+            "hash": "5e37d0d5f6007091f076337bf9628d1a12809881",
+            "entry": 1
+          },
+          {
+            "description": "Changes the post-plan menu's 🔬 Investigate option, which previously left the agent to work a spike plan without a skill, to invoke `investigate-spike` with the plan and the ticket. (#132)",
+            "hash": "5e37d0d5f6007091f076337bf9628d1a12809881",
+            "entry": 2
+          },
+          {
+            "description": "Adds the `start-ticket` skill, which chooses the skill that opens the work in a ticket's worktree (such as `design-and-plan`, `plan`, `refine-plan`, `implement-plan`, `investigate-spike`, or `triage-spike-findings`) from the ticket's state, its pull request, and its saved artifacts, and then invokes that skill. (#134)",
+            "hash": "5068d3fb2d372d13d5a883d5b6fe6c28fd9223b0",
+            "entry": 1
+          },
+          {
+            "description": "Changes the launch prompts of a plan-time split to invoke `start-ticket` without arguments instead of naming an entry-point skill chosen at split time, so that the choice reflects the piece's artifacts when its session starts. (#134)",
+            "hash": "5068d3fb2d372d13d5a883d5b6fe6c28fd9223b0",
+            "entry": 2
+          },
+          {
+            "description": "Adds a `start-ticket` line to the completion output of `create-ticket` to show how to start the new ticket in its worktree, and omits the line for a ticket created in another repository. (#134)",
+            "hash": "5068d3fb2d372d13d5a883d5b6fe6c28fd9223b0",
+            "entry": 3
+          },
+          {
+            "description": "Adds a `## How to test` section to the change summary, in which `summarize-change` lists the steps that a reviewer follows to exercise a changed page, UI component, or command output by hand, and has `create-pr` include that section in the pull-request body. (#140)",
+            "hash": "95b535e732b4c7bd50a69f162be1455af808ad0b",
+            "entry": 1
+          },
+          {
+            "description": "Adds the `convert-agent-prompt` skill, which converts an agent's prompt file into an agent-logic file, an XState v5 machine config that an agent-logic viewer renders as a statechart, by running version 0.1.0 of the `codeassembly-agent-logic` package through `pnpm dlx`. (#141)",
+            "hash": "6549396c7db0e6f7ba2efe9bce1c997b4872066f",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "🐛 Bug fixes",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Fixes the issue that `create-commit` wrote the change itself, in the wrong checkout, when the checkout in which it ran did not contain the change, and makes the skill stop without staging and report the directory and its `git status --short` output instead. (#110)",
+            "hash": "8b60780756d5a14cf70049ced34be9a45400a0eb",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `resolve-scopes` resolved every path in a root package (`packages: ['.']` in `pnpm-workspace.yaml`) to the checkout directory's name, such as `app` or `app.106`, rather than to `root`, while nested packages keep their own scopes. (#111)",
+            "hash": "949cd390c6a84eb0c54219443faa218ce257ed05",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that a `project.scopes` entry naming the repository root without a `name` took the checkout directory's name as its scope, by making `resolve-scopes` skip such an entry with a warning and keep reading one that declares a `name`. (#111)",
+            "hash": "949cd390c6a84eb0c54219443faa218ce257ed05",
+            "entry": 2
+          },
+          {
+            "description": "Fixes the issue that rulebooks and skills such as the collaboration preferences, the writing preferences, the content specification, `review-branch`, and `action-items.md` still contained cleft constructions, figurative verbs, and overused words forbidden by the plain-speech rule, and bumps the three rulebooks to versions 17, 12, and 33 without changing what they direct. (#114)",
+            "hash": "3a381d5f95de6d0792d40b995f723922fc52ac43",
+            "entry": 2
+          },
+          {
+            "description": "Fixes the issue that skills and subagents that resolved a ticket read its body and skipped its comments, on GitHub, on Jira, and for a ticket artifact whose frontmatter names a `ticket_ref`. (#121)",
+            "hash": "3d2438ea27a1e00e36a4a15d7fbea250db9f98f2",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `prepare-prototype-brief` dispatched every builder at once, so that one page that hung its renderer stalled the browser calls of every builder; the skill now dispatches builders one at a time and stops a builder that has not replied 30 minutes after its dispatch. (#126)",
+            "hash": "d66d565798e91ed3e6db2984022c92a9452165df",
+            "entry": 2
+          },
+          {
+            "description": "Fixes the issue that `assess-code-health` dropped each proposal whose change creates a file, by limiting `paths` in `code-health-assessor` to files that exist at assessment time and directing the assessor to name a created file in `change`. (#131)",
+            "hash": "057967a61ca0b1cd25fd1e39ae7a02082ab5184f",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `assess-code-health`, `assess-usability`, and `investigate-spike` offered a spike's closing post before the `triage-spike-findings` round, when the post could not yet answer the ticket's decisions to enable. (#133)",
+            "hash": "8e77b7c4de59a0010fe8991d930fde247eb6ba62",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `triage-spike-findings` never offered the closing post, although its round ends the spike when the findings leave items to triage. (#133)",
+            "hash": "8e77b7c4de59a0010fe8991d930fde247eb6ba62",
+            "entry": 2
+          },
+          {
+            "description": "Fixes the issue that the Rovo harness's `AGENTS.md` included a personal interaction preference, which forbade `ask_user_questions`, in the guidance that every Rovo user received. (#136)",
+            "hash": "a2d9af1de691ec1acff5c5f05a8d7b9e59c814b5",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that the rule against interactive selectors in `williamthorsen-collaboration-preferences` did not name the tools that present those selectors, by naming Claude Code's `AskUserQuestion` and Rovo's `ask_user_questions`. (#136)",
+            "hash": "a2d9af1de691ec1acff5c5f05a8d7b9e59c814b5",
+            "entry": 2
+          },
+          {
+            "description": "Fixes the issue that `assess-code-health.mjs sense` reported a `dead-code` unused-dependency row for a `package.json` matched by an `--exclude` glob, although every other sensor drops the paths that an `--exclude` glob matches. (#138)",
+            "hash": "9500a54327a69f09be08525c1f3e5709ce99c73d",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "♻️ Refactoring",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Moves the CrUX field-data logic of the `analyze-performance` helper (`collectField` and the CrUX API queries that it makes) from `collect.ts` into a new `field.ts` module, which brings `collect.ts` under the 300-line `max-lines` limit. (#91)",
+            "hash": "c8da606ebe9e908d5f54f119b4d06f391d21d1a3",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "🧪 Tests",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Adds the `makeScratchDir` test helper and replaces the direct `mkdtemp` calls and hand-written teardown in the tests of `packages/guidance` and in the repo-root `codeassembly-sync-live` test with it or with `createTempTree` and `disposeOnTestFinished`, which remove each scratch directory when its test finishes, failure included. (#123)",
+            "hash": "c6ab9113eded09aea72ce8affad9e26e090d2d88",
+            "entry": 1
+          },
+          {
+            "description": "Makes the smoke-test runner in `scripts/__tests__/smoke-test-skill-helpers.ts` remove the fixture directories that its builders create through the new `makeSmokeScratchDir`, whether the smoke tests pass, fail, or a builder throws. (#123)",
+            "hash": "c6ab9113eded09aea72ce8affad9e26e090d2d88",
+            "entry": 2
+          }
+        ]
+      },
+      {
+        "title": "📦 Dependencies",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Upgrade eslint-config-typescript to 20.2.0 (#98)",
+            "body": "Upgrades `@williamthorsen/eslint-config-typescript` from 20.1.3 to 20.2.0, which updates `eslint-plugin-unicorn` from 78 to 79, and edits the guidance package's sources and tests to pass the two rules that now report code accepted by 20.1.3: `unicorn/numeric-separators-style`, which no longer allows a separator in a number of fewer than 5 digits, and `unicorn/prefer-smaller-scope`.",
+            "hash": "24084122b518b38df84c7f063d49193b66669efc"
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.5.0",
     "date": "2026-11-02",
     "sections": [
