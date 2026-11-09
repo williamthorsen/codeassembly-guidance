@@ -84,7 +84,9 @@ Both are optional, and each is recorded as an override beside the consolidated r
 3. **Compose title**: Compose the change string per [`title-voice.md`](../_data/title-voice.md).
    - The change summary's own heading prefixes that string with the ticket reference for identification: `{ticket_ref} {title}`, or just `{title}` when `ticket_ref` is null.
 
-4. **Compose `## Why`** per the output format below. `## What` and `## Details` both come from what step 5 draws, so neither exists until step 8. Step 6's writing-rules check reads `## Why` with the drafted passages.
+4. **Compose `## Why`, and `## How to test` when the change has a surface to exercise**, per the output format below. `## What` and `## Details` both come from what step 5 draws, so neither exists until step 8. Step 6's writing-rules check reads `## Why` and `## How to test` with the drafted passages.
+
+   Write `## How to test` only when the diff changes a surface that a person sees or operates: a page, a UI component, or a command's output. Otherwise omit the section, heading included. Compose it from the diff and the ticket as numbered steps, each stating where to go (the route, the page, or the command, and how to start the app when the repository does not make that obvious), what to do there, and what the reviewer should observe. Cover only what CI does not assert: Never list automated checks, such as formatting, linting, typechecking, or tests.
 
 5. **Draft the lede and the entries via `entry-drafter`**: Resolve the tier by looking up the effective type from step 2 in [work-types.json](../_data/work-types.json); if there is none, use `internal`. Then dispatch the `{subagent:entry-drafter}` subagent via the {tool:Task} tool with this block:
 
@@ -106,19 +108,19 @@ Both are optional, and each is recorded as an override beside the consolidated r
 
    On a first dispatch, take the drafter's `## Lede` section as it stands; step 9 makes it `## What`, and later steps do not rewrite it. A redispatch returns every replacement under `## Entries` and does not return a `## Lede` section at all, so the lede that it keeps is whichever text the placement above left in the lede's place. Parse the `## Entries` fence as YAML. Each entry declares `type`, `scopes`, `breaking`, and `text`, and `migration` when the entry calls for one. Read the `## Report` for any source that the drafter could not access. Step 6 checks each entry's `type`.
 
-6. **Audit the lede and the entries.** The first three checks apply to the lede, to each entry's `text`, and to each entry's `migration` alike, except as the subject check states, and each names the rejection code that its failure raises, for which a redispatch is the repair rather than an edit of your own. The type check applies to each entry, and raises its code against the entry's `text` alone. `scopes` and `breaking` are not prose and are never rejected; `type` is corrected by the type check and never rejected. The writing-rules check runs last, and it also reads `## Why`.
+6. **Audit the lede and the entries.** The first three checks apply to the lede, to each entry's `text`, and to each entry's `migration` alike, except as the subject check states, and each names the rejection code that its failure raises, for which a redispatch is the repair rather than an edit of your own. The type check applies to each entry, and raises its code against the entry's `text` alone. `scopes` and `breaking` are not prose and are never rejected; `type` is corrected by the type check and never rejected. The writing-rules check runs last, and it also reads `## Why` and `## How to test`.
 
    - **Verification.** Read the lede, each entry's `text`, and each `migration` against the diff from step 2. Strike a claim that the diff contradicts, and correct one that it states differently. Never add: A fact omitted from the draft was left out by the reader of the change, and supplying it here restores the weighting that the fresh-context dispatch removed. The drafter read the diff, so this check no longer supplies the draft's grounding; it catches a sentence claiming more than the diff supports, such as one that only the commit log, the ticket, or this session supports, which the diff does not contradict and which is not one to strike: `rejection: unsupported-claim`.
    - **Subject.** Read the lede's each sentence, and each entry's `text`, with "This pull request" in front of it. If that sentence is false, the verb names what the system does rather than what the change did: `rejection: subject`. This check fails most often on a change that adds something which itself acts, such as a command, a check, a rule, or a hook, because the added thing's behavior is true, interesting, and reads as a correct entry while standing in for the change. A `migration` is exempt: It is an imperative addressed to the consumer, not a sentence whose subject is the pull request.
    - **Voice.** A figurative verb, or an invented term when a plain one exists: `rejection: voice`.
    - **Type.** Apply [Work type test](#work-type-test) to the entry's outcome. When the test's type differs from the drafted `type`, or the drafted `type` does not name a key in [work-types.json](../_data/work-types.json), set `type` to the test's result and state the correction in one line with its reason. A type is a determination that you make by applying a test, not prose, so the correction is never a redispatch and never an ask. The entry's `text` is prose: When it is still written in the form that the replaced type takes, such as a `fix` entry's opening on an entry now typed `feat`, that passage fails: `rejection: type-mismatch`.
-   - **Writing rules.** Run this check over the passages that passed every check above, and over `## Why`, so that a redispatch names one code. Write them to a scratch file, created per the path rules of [gh body file](#gh-body-file) and named `prose-check-{timestamp}.md`, as bare paragraphs separated by blank lines, without headings or list markers: the lede, each entry's `text` and each `migration` as paragraphs of their own, and each paragraph of `## Why`. Write it with a file-writing tool rather than a shell heredoc, as step 7 does. Then run:
+   - **Writing rules.** Run this check over the passages that passed every check above, and over `## Why` and `## How to test`, so that a redispatch names one code. Write them to a scratch file, created per the path rules of [gh body file](#gh-body-file) and named `prose-check-{timestamp}.md`, as bare paragraphs separated by blank lines, without headings or list markers: the lede, each entry's `text` and each `migration` as paragraphs of their own, each paragraph of `## Why`, and each step of `## How to test`. Write it with a file-writing tool rather than a shell heredoc, as step 7 does. Then run:
 
      ```bash
      node {harness_home_dir}/scripts/check-prose.mjs --file "{absolute path of the scratch file}" --json
      ```
 
-     The helper runs every `revise-prose` detector over the file, reading it as Markdown, and prints one JSON document, `{ file, rules, candidates }`, in which each candidate names its `rule` and the `sentence` that contains the site. It exits 0 without candidates, 1 with candidates, and 2 on a usage error or when it cannot read the file. Read exit 1 as candidates found, not as a failure. Map each candidate to its passage by its `sentence`, and to every passage containing that sentence when more than one does. Judge each against the rule that it names, as your plain-speech and writing guidance states that rule; a watchlist word used in the sense that names its relation, such as a promise that holds, is not a violation. State a candidate judged legitimate in one line with its reason. A confirmed violation in the lede, an entry's `text`, or a `migration` fails that passage: `rejection: writing-rule`. Rewrite a confirmed violation in `## Why` yourself, since this session wrote it. Run the check again over every replaced passage.
+     The helper runs every `revise-prose` detector over the file, reading it as Markdown, and prints one JSON document, `{ file, rules, candidates }`, in which each candidate names its `rule` and the `sentence` that contains the site. It exits 0 without candidates, 1 with candidates, and 2 on a usage error or when it cannot read the file. Read exit 1 as candidates found, not as a failure. Map each candidate to its passage by its `sentence`, and to every passage containing that sentence when more than one does. Judge each against the rule that it names, as your plain-speech and writing guidance states that rule; a watchlist word used in the sense that names its relation, such as a promise that holds, is not a violation. State a candidate judged legitimate in one line with its reason. A confirmed violation in the lede, an entry's `text`, or a `migration` fails that passage: `rejection: writing-rule`. Rewrite a confirmed violation in `## Why` or `## How to test` yourself, since this session wrote it. Run the check again over every replaced passage.
 
      If the helper is unavailable or the call fails, relay its error, say that the summary was saved without the writing-rules check, and continue.
 
@@ -126,7 +128,7 @@ Both are optional, and each is recorded as an override beside the consolidated r
 
    Repeat step 5 with `rejection:` set to the code that the failed check names, and with the passages that failed in the `rejected` fence that step describes.
 
-   Redispatch at most twice. After a second redispatch fails, the passages still failing are the ones that you last sent. Present those to the developer with the code, and ask for a replacement or for an explicit acceptance of each passage as it stands; place the answer, then continue to step 7 with the verified entries. If you could never place a return, show the developer each passage as the fence contained it. Take a passage rejected by the audit past step 6 only after asking the developer. Rewrite `## Why` at most twice for the writing-rules check; a confirmed violation that remains after the second rewrite goes to the developer the same way.
+   Redispatch at most twice. After a second redispatch fails, the passages still failing are the ones that you last sent. Present those to the developer with the code, and ask for a replacement or for an explicit acceptance of each passage as it stands; place the answer, then continue to step 7 with the verified entries. If you could never place a return, show the developer each passage as the fence contained it. Take a passage rejected by the audit past step 6 only after asking the developer. Rewrite `## Why` and `## How to test` at most twice each for the writing-rules check; a confirmed violation that remains after the second rewrite goes to the developer the same way.
 
 7. **Consolidate the change's record from the entries.** Do this before step 8, and before the frontmatter call: Step 8 reads the entries file that this step writes, and the title and the labels read the record that it produces.
    - **Write the verified entries** to a scratch file, created per the path rules of [gh body file](#gh-body-file) and named `entries-{timestamp}.yaml`. The file is a top-level YAML list of mappings, one per entry, each declaring `type`, `scopes`, `breaking`, and `text`, and `migration` when the entry has one, as the drafter returned them, with the corrections that step 6 made. Write each `text` and `migration` double-quoted, and quote any value that the drafter returned unquoted: Unquoted, a space followed by `#` opens a YAML comment, and the parse drops the rest of the text. Write it with a file-writing tool rather than a shell heredoc: `text` and `migration` are arbitrary prose containing backticks and quotes. Keep its path; steps 8 and 10 read the same file.
@@ -172,7 +174,7 @@ Both are optional, and each is recorded as an override beside the consolidated r
 
     Pass the overrides resolved in step 2, never the effective record: `resolve-merge` ranks the entries and applies the overrides itself. Omit each override flag whose field is absent, and pass `--override-breaking` only if that field is `true`.
 
-    [`render-block`](../_data/title-templates.md#render-block) states the output, which is JSON; the last command decodes it and prints the `block` field. Render and decode in one Bash invocation, and write the printed block verbatim below `## Details`, separated by one blank line. Never copy the block out of the raw JSON: `text` is arbitrary prose, and JSON escapes its quotes and backslashes a second time.
+    [`render-block`](../_data/title-templates.md#render-block) states the output, which is JSON; the last command decodes it and prints the `block` field. Render and decode in one Bash invocation, and write the printed block verbatim below `## How to test`, or below `## Details` when the body does not contain that section, separated by one blank line. Never copy the block out of the raw JSON: `text` is arbitrary prose, and JSON escapes its quotes and backslashes a second time.
 
     `create-pr` copies this block into the pull-request body rather than rendering one of its own, so if the body is saved without one, the pull request does not contain one either. If the helper is unavailable or the call fails, relay its error, say that the summary does not contain a block, and save the body without one.
 
@@ -216,6 +218,13 @@ Good: "Heavy-upload sessions were intermittently failing as users hit the upstre
 - 🚨 **Breaking:** Stops `kb check` resolving a bare wikilink against every store. #kb
   - Migration: Qualify each wikilink that names a note outside its own store as `[[store:Note title]]`.
 
+## How to test
+
+{Only when the change alters a page, a UI component, or a command's output.}
+
+1. In a vault whose `work` store contains `Roadmap`, run `kb check` on a note in another store that links `[[work:Roadmap]]`, and confirm that it reports the link as resolved.
+2. Change the link to `[[Roadmap]]` and run `kb check` again; confirm that it reports the link as unresolved.
+
 ```change-record
 title: Add the store-qualified wikilink
 entries_commit: e5029924
@@ -229,13 +238,12 @@ entries:
 ## Guidance
 
 - When `ticket_ref` is null (the branch does not have a ticket), omit the `{ticket_ref} ` portion of the heading and the title so that they read naturally without it.
-- The change summary follows **newspaper style**, progressive disclosure from most to least essential: `## What` is the lede, `## Why` is the purpose that the change serves, `## Details` is every outcome that the change contains
+- The change summary follows **newspaper style**, progressive disclosure from most to least essential: `## What` is the lede, `## Why` is the purpose that the change serves, `## Details` is every outcome that the change contains, and `## How to test`, when present, is how a reviewer exercises the change by hand
 - Both `## What` and `## Details` come from the drafter, so neither is composed in this session
 - `## What` contains none of the `## Details` bullets: The two sections cover the change at different lengths rather than repeating one list
 - Ignore auto-formatter and lint-fix changes
-- `## What` and `## Why` are required
+- `## What` and `## Why` are required; `## How to test` appears only when the change alters a surface that a person sees or operates, per step 4
 - The rendered `change-record` block is the body's last element, per [the change record](../_data/change-record.md)
-- Never list automated checks (formatting, linting, typechecking, unit tests) in a test plan. They run automatically in CI.
 
 <!-- include: ../../_partials/prose-line-breaks.md / -->
 
