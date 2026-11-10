@@ -49,7 +49,7 @@ The plan artifact is read-only. It is a record of what was decided at plan time,
 
 ## Fact routing
 
-The audience decides where a fact goes. A fact that the user acts on, such as a decision that is theirs or a divergence that they must weigh, belongs in the response. A fact that a reviewer acts on belongs in the commit body, the pull-request description, or a comment in the source. A fact needed by both goes in the artifact and may be summarized in the response; the artifact is never skipped.
+The audience decides where a fact goes. A fact that the user acts on, such as a decision that is theirs or a divergence that they must weigh, belongs in the response. A fact that a reviewer acts on belongs in the commit body or a comment in the source; `summarize-change` carries a commit-body fact into the pull-request description's `## Notes for reviewers` when it passes that skill's reader test. A fact needed by both goes in the artifact and may be summarized in the response; the artifact is never skipped.
 
 The failure that this prevents is visible in the phrasing: Any wording that treats the reader as an intermediary, such as "worth a reviewer's attention", "flag this in review", or "mention that...", marks a fact that belongs in an artifact. When one is found after the artifact is written, amend the artifact rather than narrate the gap.
 
