@@ -19,6 +19,7 @@ export const HANDLED_KEYWORDS: readonly string[] = [
   'items',
   'minimum',
   'minLength',
+  'minProperties',
   'properties',
   'required',
   'type',
@@ -149,6 +150,12 @@ function walkValue(value: unknown, schema: unknown, segments: readonly (string |
   }
   if (typeof schema['minimum'] === 'number' && typeof value === 'number' && value < schema['minimum']) {
     report(findings, 'error', segments, `must be at least ${schema['minimum']} (got ${value})`);
+  }
+  if (typeof schema['minProperties'] === 'number' && isRecord(value)) {
+    const count = Object.keys(value).length;
+    if (count < schema['minProperties']) {
+      report(findings, 'error', segments, `must have at least ${schema['minProperties']} keys (got ${count})`);
+    }
   }
   if (isRecord(value)) {
     walkObject(value, schema, segments, findings);

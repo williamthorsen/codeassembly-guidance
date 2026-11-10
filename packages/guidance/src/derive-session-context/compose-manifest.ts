@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import { parseRemoteToOwnerRepo } from '../shared/parse-remote-url.ts';
 import { extractPrNumber, extractTicketId, isPrIdentifier } from './extract-ticket-id.ts';
-import type { ProjectStage } from './read-project-stage.ts';
+import type { ProjectStage, SubdirectoryStage } from './read-project-stage.ts';
 import type { BranchManifest, MergeApproval, PrInitialState, ResolvedPreferences } from './types.ts';
 
 const DEFAULT_SCM = 'github';
@@ -28,13 +28,14 @@ const PR_URL_SHAPES: Readonly<Record<'github' | 'bitbucket', { host: string; prP
 export function composeManifest(input: {
   preferences: ResolvedPreferences;
   projectStage: ProjectStage;
+  subdirectoryStages: readonly SubdirectoryStage[];
   branchName: string;
   cwd: string;
   home: string;
   now: Date;
   remoteUrl?: string | null;
 }): BranchManifest {
-  const { preferences, projectStage, branchName, cwd, home, now, remoteUrl = null } = input;
+  const { preferences, projectStage, subdirectoryStages, branchName, cwd, home, now, remoteUrl = null } = input;
 
   const ticketRefPrefix = preferences.project?.ticket_ref_prefix;
   const ticketResult = extractTicketId(
@@ -70,6 +71,7 @@ export function composeManifest(input: {
     project_maturity: projectStage.maturity,
     project_sensitivity: projectStage.sensitivity,
     project_audience: projectStage.audience,
+    project_stages: subdirectoryStages,
     scm,
     default_branch: defaultBranch,
     branch_name: branchName,

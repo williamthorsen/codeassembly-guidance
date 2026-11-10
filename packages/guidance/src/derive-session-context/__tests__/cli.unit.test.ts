@@ -343,6 +343,23 @@ describe(deriveSessionContext, () => {
     expect(manifest).toMatchObject({ project_maturity: 'hobby', project_sensitivity: null, project_audience: 'owner' });
   });
 
+  it('reports the subdirectory stages with values inherited from the project stage', async () => {
+    await writeProjectPrefs(
+      workDir,
+      'project:\n  maturity: early\n  audience: public\n  stages:\n    - path: experiments/poc\n      maturity: exploration\n',
+    );
+    const manifest = await deriveSessionContext({
+      git: NO_REMOTE_GIT,
+      cwd: workDir,
+      branch: WORKING_BRANCH,
+      now: NOW,
+      home: workDir,
+    });
+    expect(manifest.project_stages).toEqual([
+      { path: 'experiments/poc', maturity: 'exploration', sensitivity: null, audience: 'public' },
+    ]);
+  });
+
   it('ignores a project stage declared only in the global preferences file', async () => {
     const projectDir = path.join(workDir, 'project');
     const homeDir = path.join(workDir, 'home');
@@ -362,7 +379,7 @@ describe(deriveSessionContext, () => {
     await writeProjectPrefs(workDir, 'project:\n  maturity: prod\n');
     await expect(
       deriveSessionContext({ git: NO_REMOTE_GIT, cwd: workDir, branch: WORKING_BRANCH, now: NOW, home: workDir }),
-    ).rejects.toThrow(/'project\.maturity' must be one of "hobby", "early", "production"/);
+    ).rejects.toThrow(/'project\.maturity' must be one of "exploration", "hobby", "early", "production"/);
   });
 
   it('returns ticket_base_url and constructs ticket_url from preferences', async () => {

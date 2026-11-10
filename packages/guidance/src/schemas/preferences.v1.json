@@ -141,7 +141,7 @@
     },
     "project": {
       "type": "object",
-      "description": "Project identification configuration, and the project's declared stage (`maturity`, `sensitivity`, `audience`), which design guidance treats as premises.",
+      "description": "Project identification configuration, and the project's declared stage (`maturity`, `sensitivity`, `audience`, and the `stages` of its subdirectories), which design guidance treats as premises.",
       "properties": {
         "audience": {
           "type": "string",
@@ -150,8 +150,8 @@
         },
         "maturity": {
           "type": "string",
-          "enum": ["hobby", "early", "production"],
-          "description": "How far the project has come. `hobby`: built for the owner's own use or learning; breakage costs only the owner's time. `early`: in use by others, but the shape is still changing; downtime is tolerated. `production`: others depend on it; downtime and data loss have real costs. Read from the project preferences file only."
+          "enum": ["exploration", "hobby", "early", "production"],
+          "description": "How far the project has come. `exploration`: the output's shape is still being found, and nothing depends on it yet. `hobby`: built for the owner's own use or learning; breakage costs only the owner's time. `early`: in use by others, but the shape is still changing; downtime is tolerated. `production`: others depend on it; downtime and data loss have real costs. Read from the project preferences file only."
         },
         "scopes": {
           "type": "array",
@@ -182,6 +182,38 @@
         "slug": {
           "type": "string",
           "description": "Project identifier used for namespacing artifacts under `{base_dir}/projects/{slug}/`."
+        },
+        "stages": {
+          "type": "array",
+          "description": "Stages that subdirectories declare, overriding the project's for work under them. Each value that an entry leaves undeclared is inherited from the project. When entries are nested, the longest containing path wins. Read from the project preferences file only.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "audience": {
+                "type": "string",
+                "enum": ["owner", "team", "public"],
+                "description": "Who uses the subdirectory's output, as `project.audience` defines the values."
+              },
+              "maturity": {
+                "type": "string",
+                "enum": ["exploration", "hobby", "early", "production"],
+                "description": "How far the subdirectory's work has come, as `project.maturity` defines the values."
+              },
+              "path": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Directory relative to the repository root."
+              },
+              "sensitivity": {
+                "type": "string",
+                "enum": ["low", "personal", "confidential"],
+                "description": "The most sensitive data that the subdirectory holds, as `project.sensitivity` defines the values."
+              }
+            },
+            "required": ["path"],
+            "minProperties": 2,
+            "additionalProperties": false
+          }
         },
         "ticket_ref_prefix": {
           "type": "string",
