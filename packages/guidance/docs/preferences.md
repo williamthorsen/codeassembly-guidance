@@ -169,7 +169,7 @@ The project and global values resolve per the [cascade](../README.md#preferences
 
 ### `merge.approval`
 
-Whether `merge-pr` asks before merging. Under `auto`, it still asks when the run made a decision of its own or the platform does not report the pull request clean; `merge-pr`'s approval gate (step 6) states those conditions. `--confirm` shows the gate for one run whatever the value.
+Whether `merge-pr` asks before merging. Under `auto`, it merges without asking only when the run is clean: no notice, no decision of its own, not breaking, and a clean merge state on GitHub; `merge-pr`'s approval gate (step 6) states the conditions. `--confirm` shows the gate for one run whatever the value.
 
 | Key              | Type            | Default | Description                                                                                         |
 | ---------------- | --------------- | ------- | --------------------------------------------------------------------------------------------------- |

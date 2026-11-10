@@ -103,7 +103,7 @@
         "approval": {
           "type": "string",
           "enum": ["ask", "auto"],
-          "description": "Whether `merge-pr` asks before merging: `ask`, or `auto` to merge without asking when the run decided nothing of its own and the platform reports the PR clean. Defaults to `ask`."
+          "description": "Whether `merge-pr` asks before merging: `ask`, or `auto` to merge without asking only when the run is clean: no notice, no decision of its own, not breaking, and a clean merge state on GitHub. Defaults to `ask`."
         },
         "title_format": {
           "type": "string",
