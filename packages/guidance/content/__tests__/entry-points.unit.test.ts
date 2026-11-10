@@ -31,7 +31,7 @@ const RETIRED_ROUTE_LIST = "Choose each ticket's entry point";
 describe('entry points', () => {
   it.each(ROUTES)('routes to $skill', async ({ skill, condition }) => {
     const content = await readContentFile(ENTRY_POINTS);
-    const skillName = new RegExp(`(?<![\\w-])${skill}(?![\\w-])`);
+    const skillName = new RegExp(String.raw`(?<![\w-])${skill}(?![\w-])`);
     const routeLines = content.split('\n').filter((line) => line.includes(condition));
     expect(routeLines, `no route states "${condition}"`).not.toHaveLength(0);
     expect(routeLines.some((line) => skillName.test(line))).toBe(true);
