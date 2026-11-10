@@ -22,7 +22,7 @@ Merge a pull request on the appropriate platform. `describe-change.mjs` resolves
 
 ## Reserved preference keys
 
-`merge.strategy` and `merge.deletion_strategy` are **reserved keys** in `.agents/preferences.yaml` and `~/.agents/preferences.yaml`. They are not yet honored: This iteration uses the hard-coded defaults above. Setting them in preferences does not change the merge; CLI overrides are the only way to change the values today.
+`merge.approval` is honored, per step 6. `merge.strategy` and `merge.deletion_strategy` are **reserved keys** in `.agents/preferences.yaml` and `~/.agents/preferences.yaml`. They are not yet honored: This iteration uses the hard-coded defaults above. Setting them in preferences does not change the merge; CLI overrides are the only way to change the values today.
 
 ## Process
 
