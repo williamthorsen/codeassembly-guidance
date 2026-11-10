@@ -62,7 +62,7 @@ const READER_TEST_PHRASES: ReadonlyArray<string> = [
   '`## what` and `## details` come from `entry-drafter` and follow its contract',
   'what the diff already shows',
   "the author's own follow-ups or checklists",
-  'falls to the author rather than to a reviewer',
+  'a step for the author rather than for a reviewer',
   'ownership or approval routing that tooling already reports',
   'the history of how the approach was chosen',
   '## notes for reviewers',
