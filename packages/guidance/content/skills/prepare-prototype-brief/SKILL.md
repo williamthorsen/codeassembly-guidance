@@ -145,7 +145,9 @@ Report what the check changed, in one line per rule that fired.
 
 ### 4. Checkpoint
 
-Save the brief with {skill:save-artifact} as a ticket-level `brief` artifact, and show it to the developer. Do not post it to the ticket without their approval: Posting is remote state. Ask in one action-items block: approve the brief, and post it as a ticket comment or not.
+Save the brief with {skill:save-artifact} as a ticket-level `brief` artifact, and show it to the developer. Ask for approval in one confirmation whose wording says that approval also posts the brief on the ticket as a comment: Posting is remote state, and the approval is the developer's consent to it. When the developer redirects, revise the brief, save it again, and show it again; post only the version that the developer approves.
+
+Once the developer approves the brief, post it on the ticket without a further ask. The comment opens with a one-line summary that names the lenses and the brief artifact's path, written `~/`-relative as in the [closing post](../_data/spike-conventions.md#closing-post), and contains the full brief in a `<details>` block below the summary, so that the ticket stays readable. Pass the body through a file, per [gh body file](../_data/ticket-source-resolution.md#gh-body-file). Before posting, read the ticket's comments, and skip the post when a comment already opens with the summary line, so that a rerun does not post the brief twice. When the session does not have a remote ticket, skip the post and say so in one line. When the post fails, report the failure and continue with step 5.
 
 <!-- include: ../_partials/action-items.md / -->
 
