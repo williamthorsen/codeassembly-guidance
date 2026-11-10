@@ -200,6 +200,33 @@ describe(readPreferences, () => {
     );
   });
 
+  it('takes merge.approval from the project file over the global file', async () => {
+    await writeGlobalYaml(homeDir, 'merge:\n  approval: auto\n');
+    await writeProjectYaml(projectDir, 'merge:\n  approval: ask\n');
+    const result = await readPreferences({ cwd: projectDir, home: homeDir });
+    expect(result.preferences.merge).toEqual({ approval: 'ask' });
+  });
+
+  it('keeps a global merge.approval when the project merge section sets other keys only', async () => {
+    await writeGlobalYaml(homeDir, 'merge:\n  approval: auto\n');
+    await writeProjectYaml(projectDir, "merge:\n  title_format: '{title}'\n");
+    const result = await readPreferences({ cwd: projectDir, home: homeDir });
+    expect(result.preferences.merge).toEqual({ approval: 'auto' });
+  });
+
+  it('omits merge when neither file sets merge.approval', async () => {
+    await writeProjectYaml(projectDir, "merge:\n  title_format: '{title}'\n");
+    const result = await readPreferences({ cwd: projectDir, home: homeDir });
+    expect(result.preferences.merge).toBeUndefined();
+  });
+
+  it('throws with the offending key path when merge.approval is outside the allowed enum', async () => {
+    await writeProjectYaml(projectDir, 'merge:\n  approval: never\n');
+    await expect(readPreferences({ cwd: projectDir, home: homeDir })).rejects.toThrow(
+      /'merge\.approval' must be "ask" or "auto"/,
+    );
+  });
+
   it('takes pr.initial_state from the project file over the global file', async () => {
     await writeGlobalYaml(homeDir, 'pr:\n  initial_state: draft\n');
     await writeProjectYaml(projectDir, 'pr:\n  initial_state: ready\n');

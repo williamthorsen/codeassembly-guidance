@@ -4,9 +4,10 @@ import path from 'node:path';
 import { parseRemoteToOwnerRepo } from '../shared/parse-remote-url.ts';
 import { extractPrNumber, extractTicketId, isPrIdentifier } from './extract-ticket-id.ts';
 import type { ProjectStage } from './read-project-stage.ts';
-import type { BranchManifest, PrInitialState, ResolvedPreferences } from './types.ts';
+import type { BranchManifest, MergeApproval, PrInitialState, ResolvedPreferences } from './types.ts';
 
 const DEFAULT_SCM = 'github';
+const DEFAULT_MERGE_APPROVAL = 'ask';
 const DEFAULT_PR_INITIAL_STATE = 'draft';
 export const DEFAULT_ARTIFACT_BASE_DIR = '~/ai-artifacts';
 export const DEFAULT_REMOTE_NAME = 'origin';
@@ -79,6 +80,7 @@ export function composeManifest(input: {
     ticket_base_url: ticketBaseUrl,
     pr_url: prUrl,
     pr_initial_state: resolvePrInitialState(preferences),
+    merge_approval: resolveMergeApproval(preferences),
   };
 }
 
@@ -123,6 +125,11 @@ function resolveTicketUrls(
  */
 function joinTicketUrl(baseUrl: string, ticketId: string): string {
   return `${baseUrl.replace(/\/+$/, '')}/${ticketId}`;
+}
+
+/** Resolves whether `merge-pr` asks before merging, defaulting to `ask`. */
+function resolveMergeApproval(preferences: ResolvedPreferences): MergeApproval {
+  return preferences.merge?.approval ?? DEFAULT_MERGE_APPROVAL;
 }
 
 /** Resolves the state in which `create-pr` opens a pull request, defaulting to `draft`. */

@@ -167,6 +167,16 @@ The state in which `create-pr` opens a pull request. It applies only when the pu
 
 The project and global values resolve per the [cascade](../README.md#preferences). `derive-session-context` reports the resolved value as `pr_initial_state`.
 
+### `merge.approval`
+
+Whether `merge-pr` asks before merging. Under `auto`, it merges without asking only when the run is clean: no notice, no decision of its own, not breaking, and a clean merge state on GitHub; `merge-pr`'s approval gate (step 6) states the conditions. `--confirm` shows the gate for one run whatever the value.
+
+| Key              | Type            | Default | Description                                                                                         |
+| ---------------- | --------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `merge.approval` | `ask` \| `auto` | `ask`   | `ask` shows the approval gate on every merge; `auto` merges without asking when the gate allows it. |
+
+The project and global values resolve per the [cascade](../README.md#preferences). `derive-session-context` reports the resolved value as `merge_approval`.
+
 ### `ticket.pull`
 
 Settings of the `pull-from-backlog` skill, read from the project preferences file only. See the [next-ticket helper](pull-from-backlog-helper.md).
@@ -256,6 +266,7 @@ pr:
   initial_state: draft
   title_format: '[{ticket_ref} ][[{scope}|]{type}: ]{title}'
 merge:
+  approval: ask
   title_format: '[{ticket_ref} ][[{scope}|]{type}: ]{title}[ (#{pr_number})]'
 
 integrations:

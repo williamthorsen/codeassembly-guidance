@@ -25,6 +25,10 @@ export interface ResolvedPreferences {
     /** The org-stable base to which a bare ticket id is appended (e.g. Jira `https://org.atlassian.net/browse/`). */
     readonly base_url?: string;
   };
+  readonly merge?: {
+    /** Whether `merge-pr` asks before merging, or merges a clean run without asking. */
+    readonly approval?: MergeApproval;
+  };
   readonly pr?: {
     /** The state in which `create-pr` opens a pull request. */
     readonly initial_state?: PrInitialState;
@@ -34,6 +38,9 @@ export interface ResolvedPreferences {
     readonly defer_days?: number;
   };
 }
+
+/** Whether `merge-pr` asks before merging, or merges a clean run without asking. */
+export type MergeApproval = 'ask' | 'auto';
 
 /** The state in which `create-pr` opens a pull request. */
 export type PrInitialState = 'draft' | 'ready';
@@ -87,6 +94,8 @@ export interface BranchManifest {
   readonly pr_url?: string | null;
   /** The state in which `create-pr` opens a pull request: the `pr.initial_state` preference, or `draft`. */
   readonly pr_initial_state?: PrInitialState;
+  /** Whether `merge-pr` asks before merging: the `merge.approval` preference, or `ask`. */
+  readonly merge_approval?: MergeApproval;
   /**
    * The `ticket_url` and `pr_url` values written by the mutation flags. A present key overrides the composed value,
    * `null` included; an absent one leaves the field to composition.

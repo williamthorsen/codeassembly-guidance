@@ -113,6 +113,18 @@ describe('preferences.v1.json schema', () => {
     expect(output).toMatchObject({ valid: false });
   });
 
+  it('accepts a `merge` section that sets only `approval`, for each declared value', async () => {
+    for (const value of ['ask', 'auto']) {
+      const output = await validate(schemaId, { merge: { approval: value } }, FLAG);
+      expect(output, value).toMatchObject({ valid: true });
+    }
+  });
+
+  it('rejects a `merge.approval` value outside the allowed enum', async () => {
+    const output = await validate(schemaId, { merge: { approval: 'never' } }, FLAG);
+    expect(output).toMatchObject({ valid: false });
+  });
+
   it('accepts a `pr` section that sets only `initial_state`, for each declared value', async () => {
     for (const value of ['draft', 'ready']) {
       const output = await validate(schemaId, { pr: { initial_state: value } }, FLAG);

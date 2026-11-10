@@ -98,8 +98,13 @@
     },
     "merge": {
       "type": "object",
-      "description": "Squash-merge title rendering configuration for the `merge-pr` skill family.",
+      "description": "Merge configuration for the `merge-pr` skill family: approval and squash-merge title rendering.",
       "properties": {
+        "approval": {
+          "type": "string",
+          "enum": ["ask", "auto"],
+          "description": "Whether `merge-pr` asks before merging: `ask`, or `auto` to merge without asking only when the run is clean: no notice, no decision of its own, not breaking, and a clean merge state on GitHub. Defaults to `ask`."
+        },
         "title_format": {
           "type": "string",
           "description": "Template string used to render the squash-merge commit title. Supports the same token vocabulary as `commit.title_format`, plus `{pr_number}`."
