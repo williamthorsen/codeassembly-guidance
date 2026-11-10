@@ -51,6 +51,24 @@ const LEDE_SOURCE_PHRASES: ReadonlyArray<string> = [
 ];
 
 /**
+ * Phrases stating the reader test for the sections that this session composes: who the reader is, the test that each
+ * line meets, the sections to which it applies, and the content that fails it. Without them, the session writes the
+ * description for the author, as notes that compare the change with a ticket that the reviewer has not read.
+ * Lowercased, so that a sentence's opening capital still matches.
+ */
+const READER_TEST_PHRASES: ReadonlyArray<string> = [
+  "a reviewer who hasn't read the ticket",
+  'must change what the reviewer checks or decides',
+  '`## what` and `## details` come from `entry-drafter` and follow its contract',
+  'what the diff already shows',
+  "the author's own follow-ups or checklists",
+  'a step for the author rather than for a reviewer',
+  'ownership or approval routing that tooling already reports',
+  'the history of how the approach was chosen',
+  '## notes for reviewers',
+];
+
+/**
  * Phrases that a restored type ask contains. The ask passed a close call under the work-type test to the developer,
  * who has less of the evidence than the session that applied the test. Lowercased, so that a sentence's opening
  * capital still matches.
@@ -146,6 +164,17 @@ describe('summarize-change contract', () => {
       'The session reads the whole ticket, and a staged ticket explains why the work is split across pull requests. ' +
       'Purpose framing alone admits that explanation as the reason for the change.';
     expect((await EXPANDED).toLowerCase(), message).toContain(STAGING_WHY_PHRASE);
+  });
+
+  it('holds the composed sections to the reader test', async () => {
+    const text = (await EXPANDED).toLowerCase();
+    const missing = READER_TEST_PHRASES.filter((phrase) => !text.includes(phrase));
+
+    const message =
+      'A description is read by a reviewer, who acts only on what changes what they check. Without the test, the ' +
+      'session restates the diff, lists its own follow-ups, and compares the change with the ticket. These phrases ' +
+      `are gone:\n  ${missing.join('\n  ')}`;
+    expect(missing, message).toEqual([]);
   });
 
   it('decides each type rather than asking the developer', async () => {
