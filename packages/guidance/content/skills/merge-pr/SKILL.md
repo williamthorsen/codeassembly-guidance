@@ -18,6 +18,7 @@ Merge a pull request on the appropriate platform. `describe-change.mjs` resolves
 | `--breaking`, `--no-breaking` | Merge as breaking, or as not breaking. Outranks the PR's `change-record` block and every other source.                                                     | resolved in step 3        |
 | `--strategy {s}`              | Override the merge strategy: `squash`, `merge`, or `rebase`.                                                                                               | `squash`                  |
 | `--delete {v}`                | Override branch deletion: `both`, `remote`, or `none`. `both` is GitHub-only.                                                                              | `remote`                  |
+| `--confirm`                   | Show the approval gate even when `merge.approval` is `auto`.                                                                                               | per `merge_approval`      |
 
 ## Reserved preference keys
 
@@ -27,7 +28,7 @@ Merge a pull request on the appropriate platform. `describe-change.mjs` resolves
 
 ### 1. Get session context
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `project_slug`, `ticket_id`, `artifact_base_dir`, and `pr_url` from it.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `project_slug`, `ticket_id`, `artifact_base_dir`, `pr_url`, and `merge_approval` from it.
 
 ### 2. Resolve the PR
 
@@ -38,15 +39,15 @@ Read the PR's metadata for the steps below, dispatching on `scm`:
 - **`"github"`**:
 
   ```bash
-  gh pr view {pr} --json number,title,body,labels,headRefName,headRefOid,baseRefName,isCrossRepository,url
+  gh pr view {pr} --json number,title,body,labels,headRefName,headRefOid,baseRefName,isCrossRepository,mergeStateStatus,url
   ```
 
-- **`"bitbucket"`**: Issue an `action: "get"` call per [Bitbucket pull-request access](../_data/bitbucket-pr-access.md), then map its fields onto the same names that the steps below use: `description` to `body`, `source.branch.name` to `headRefName`, `source.commit.hash` to `headRefOid`, `destination.branch.name` to `baseRefName`, `links.html.href` to `url`, and an empty array to `labels`. `isCrossRepository` is true when `source.repository.full_name` names a repository other than the PR's own.
+- **`"bitbucket"`**: Issue an `action: "get"` call per [Bitbucket pull-request access](../_data/bitbucket-pr-access.md), then map its fields onto the same names that the steps below use: `description` to `body`, `source.branch.name` to `headRefName`, `source.commit.hash` to `headRefOid`, `destination.branch.name` to `baseRefName`, `links.html.href` to `url`, and an empty array to `labels`. `isCrossRepository` is true when `source.repository.full_name` names a repository other than the PR's own. Bitbucket does not report a counterpart to `mergeStateStatus`, so leave it unset.
 - **Unknown or missing**: Ask the user which platform to use, matching step 7's behavior.
 
 If this step cannot resolve or discover a PR, stop with: "No open PR found for branch `{branch_name}`. Create one with `{skill:create-pr}` first."
 
-Capture `title` (PR title), `body` (PR body), `labels` (label objects), `number`, `headRefName` (head branch), `headRefOid` (head commit), `baseRefName` (base branch), and `isCrossRepository` from the response. The steps below use them.
+Capture `title` (PR title), `body` (PR body), `labels` (label objects), `number`, `headRefName` (head branch), `headRefOid` (head commit), `baseRefName` (base branch), `isCrossRepository`, and `mergeStateStatus` from the response. The steps below use them.
 
 Then fetch the PR's base branch and head, so that step 3 reads the PR's own commits whichever branch is checked out. `{remote}` is the remote that `default_branch` names (`origin` in `origin/main`):
 
@@ -221,6 +222,17 @@ When asking option-style questions, follow [option format](#option-format). (Rei
 
 Re-run step 3 after each amendment and each override, with every override added to the override set, until `defects` is empty. Never offer the merge while `defects` contains an item. If an override or an amendment moves the effective record to another tier and step 5 drafted the body, re-run step 5's drafting against the new tier.
 
+**Decide whether to ask.** The gate asks unless every one of these holds, in which case the run merges without asking:
+
+- `merge_approval` is `auto`, and `--confirm` was not passed.
+- `scm` is `"github"`. Bitbucket does not report merge state, so the gate fails closed there.
+- The report's `notices` is empty.
+- The run did not decide anything of its own: It did not amend an entry in this step, did not add an override in this step on its own decision, and step 5 did not dispatch the drafter. An override passed as a flag and an answer that the developer gave are not the run's decisions, and a work-type test that agrees with the record adds nothing.
+- `effective_record.breaking` is false.
+- `mergeStateStatus` is `CLEAN` or `HAS_HOOKS`. Any other value, or a missing one, means that a check is pending or failing, or that the state is unknown.
+
+When the gate asks because one of these failed, do not add a line saying which: The notice, the decision, the `!` in the title, or the merge state already appears in the report.
+
 Render the proposed merge to the user:
 
 ```
@@ -263,6 +275,12 @@ Render `{confirmation}` so that the ask itself names every destructive side effe
 - `remote` → `Merge PR #{pr_number} and delete the remote branch {headRefName}? 👍🏼👎🏼`
 - `both` → `Merge PR #{pr_number} and delete the local and remote branch {headRefName}? 👍🏼👎🏼`
 
+When the run merges without asking, render the authorization line in place of the ask, naming the same side effects, and continue to step 7:
+
+- `none` → `Merging PR #{pr_number} without confirmation, as merge.approval: auto authorizes.`
+- `remote` → `Merging PR #{pr_number} and deleting the remote branch {headRefName} without confirmation, as merge.approval: auto authorizes.`
+- `both` → `Merging PR #{pr_number} and deleting the local and remote branch {headRefName} without confirmation, as merge.approval: auto authorizes.`
+
 Under a `stale-entries` notice, open the ask with `The change record is stale. ` so that the approval names what it accepts: `The change record is stale. Merge PR #{pr_number}? 👍🏼👎🏼`. Under an `absent-block` notice, open it with `The pull request does not contain a change record. ` in the same way.
 
 If the user declines, stop without making an API call or writing an artifact. If they approve, continue.
@@ -296,6 +314,8 @@ The lede comparison keys on the report's `body` rather than on the composed lede
 The merge block takes a comparison of its own because `body` excludes the `change-record` block: An edit confined to that block leaves `body` identical while changing what the merge publishes, and `merge_title` catches only the subset of such edits that move the record ranked from the entries. Because `merge_block` is rendered by the helper rather than drafted, comparing it has the fixed point that the lede comparison needs `body` to supply.
 
 The window that this step closes is an edit to the PR's title or description. New commits pushed to the branch are not in scope: The re-run reads the commits up to the head commit read in step 2, and a generated body is not recomposed on account of later commits. The delegate's own branch-sync check reports local and remote divergence.
+
+When step 6 merged without asking, the approved values are the ones that it rendered: its `merge_title`, the report's `body` and `merge_block`, and the published body. A change then shows the gate, and the rest of the run proceeds as if `merge_approval` were `ask`.
 
 If every re-read value matches the approved one, continue to step 9 without saying anything. If any differs, re-render step 6's gate with the new values and ask again, and repeat this step after each approval until the values stop changing. Merging the newest version silently would publish text that the user never approved, which is the same defect from the other direction. If the user declines, stop without merging or writing an artifact, exactly as step 6 does.
 

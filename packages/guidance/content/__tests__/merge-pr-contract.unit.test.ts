@@ -42,6 +42,35 @@ describe('merge-pr contract', () => {
     expect(text).toContain('a type that the developer named, through `--type` or in an answer at the gate, stands');
   });
 
+  it('merges without asking only when every guardrail of merge.approval: auto holds', async () => {
+    const text = await EXPANDED;
+
+    expect(text).toContain('| `--confirm`');
+    expect(text).toContain('`merge_approval` is `auto`, and `--confirm` was not passed.');
+    expect(text).toContain('`scm` is `"github"`.');
+    expect(text).toContain("The report's `notices` is empty.");
+    expect(text).toContain('step 5 did not dispatch the drafter');
+    expect(text).toContain('`effective_record.breaking` is false.');
+    expect(text).toContain('`mergeStateStatus` is `CLEAN` or `HAS_HOOKS`.');
+  });
+
+  it('names every side effect in the authorization line that replaces the ask', async () => {
+    const text = await EXPANDED;
+
+    expect(text).toContain(
+      '`remote` → `Merging PR #{pr_number} and deleting the remote branch {headRefName} without confirmation, as merge.approval: auto authorizes.`',
+    );
+    expect(text).toContain(
+      '`both` → `Merging PR #{pr_number} and deleting the local and remote branch {headRefName} without confirmation, as merge.approval: auto authorizes.`',
+    );
+  });
+
+  it('shows the gate when the re-read after an unasked merge decision finds a change', async () => {
+    const text = await EXPANDED;
+
+    expect(text).toContain('When step 6 merged without asking, the approved values are the ones that it rendered');
+  });
+
   it('invokes nothing after the merge but the offer to close the parent', async () => {
     const text = (await EXPANDED).toLowerCase();
 
