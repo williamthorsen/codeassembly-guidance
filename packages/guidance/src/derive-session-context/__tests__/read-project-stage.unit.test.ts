@@ -80,6 +80,21 @@ describe(readSubdirectoryStages, () => {
       `'project.stages[0].path' must be`,
     ],
     [
+      'has an entry whose path is absolute',
+      { stages: [{ path: '/srv/exp/', maturity: 'hobby' }] },
+      `'project.stages[0].path' must be relative to the repository root`,
+    ],
+    [
+      'has two entries for one directory',
+      {
+        stages: [
+          { path: 'a', maturity: 'hobby' },
+          { path: 'a/', maturity: 'early' },
+        ],
+      },
+      `'project.stages[1].path' repeats 'project.stages[0].path'`,
+    ],
+    [
       'has an entry with a value outside its set',
       {
         stages: [

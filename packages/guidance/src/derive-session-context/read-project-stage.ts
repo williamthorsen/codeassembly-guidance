@@ -41,8 +41,8 @@ export function readProjectStage(projectPreferences: Record<string, unknown>): P
 
 /**
  * Narrows `project.stages` to the declared subdirectory stages, each undeclared value taken from `repositoryStage`.
- * Throws, naming the indexed key path, on an entry without a path, on a value outside its set, and on an entry that
- * does not declare any stage key.
+ * Throws, naming the indexed key path, on an entry without a path or with an absolute one, on a path that repeats an
+ * earlier entry's, on a value outside its set, and on an entry that does not declare any stage key.
  */
 export function readSubdirectoryStages(
   projectPreferences: Record<string, unknown>,
@@ -56,7 +56,21 @@ export function readSubdirectoryStages(
   if (!Array.isArray(entries)) {
     throw new TypeError(`preferences: 'project.stages' must be an array (got ${JSON.stringify(entries)})`);
   }
-  return entries.map((entry, index) => readSubdirectoryStage(entry, `project.stages[${index}]`, repositoryStage));
+  const stages = entries.map((entry, index) =>
+    readSubdirectoryStage(entry, `project.stages[${index}]`, repositoryStage),
+  );
+  // Reject a repeated path, which would leave the longest containing path without a single winner
+  const firstIndexByPath = new Map<string, number>();
+  for (const [index, stage] of stages.entries()) {
+    const firstIndex = firstIndexByPath.get(stage.path);
+    if (firstIndex !== undefined) {
+      throw new Error(
+        `preferences: 'project.stages[${index}].path' repeats 'project.stages[${firstIndex}].path' (${JSON.stringify(stage.path)})`,
+      );
+    }
+    firstIndexByPath.set(stage.path, index);
+  }
+  return stages;
 }
 
 // region | Helpers
@@ -85,6 +99,11 @@ function readSubdirectoryStage(entry: unknown, keyPath: string, repositoryStage:
   if (directory === '') {
     throw new Error(
       `preferences: '${keyPath}.path' must be a non-empty directory path (got ${JSON.stringify(rawPath)})`,
+    );
+  }
+  if (directory.startsWith('/')) {
+    throw new Error(
+      `preferences: '${keyPath}.path' must be relative to the repository root (got ${JSON.stringify(rawPath)})`,
     );
   }
   const maturity = expectOneOf(entry['maturity'], MATURITY_VALUES, `${keyPath}.maturity`);
