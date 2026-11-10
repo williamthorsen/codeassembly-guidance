@@ -11,7 +11,7 @@ import { chainError } from '@williamthorsen/toolbelt.errors/candidate';
 import { parse as parseYaml } from 'yaml';
 
 import { isEnoent, isRecord } from '../lib/type-guards.ts';
-import type { PreferencesReadResult, PrInitialState, ResolvedPreferences } from './types.ts';
+import type { MergeApproval, PreferencesReadResult, PrInitialState, ResolvedPreferences } from './types.ts';
 
 /**
  * Reads the project and global preferences files, merges them with the project's values taking precedence, and projects
@@ -176,9 +176,22 @@ function projectPreferences(merged: Record<string, unknown>): ResolvedPreference
     }
   }
 
+  Object.assign(result, projectMerge(merged['merge']));
   Object.assign(result, projectTriageFeedback(merged['triage_feedback']));
 
   return result;
+}
+
+/** Projects the `merge` section, returning an empty object when the section does not set a consumed key. */
+function projectMerge(value: unknown): Pick<WritablePreferences, 'merge'> {
+  if (value === undefined) {
+    return {};
+  }
+  const section = expectRecord(value, 'merge');
+  if (section['approval'] === undefined) {
+    return {};
+  }
+  return { merge: { approval: expectMergeApproval(section['approval']) } };
 }
 
 /** Projects the `triage_feedback` section, returning an empty object when the section does not set a consumed key. */
@@ -213,6 +226,9 @@ interface WritablePreferences {
     base_dir?: string;
     paths?: Record<string, string>;
   };
+  merge?: {
+    approval?: MergeApproval;
+  };
   pr?: {
     initial_state?: PrInitialState;
   };
@@ -222,6 +238,17 @@ interface WritablePreferences {
   triage_feedback?: {
     defer_days?: number;
   };
+}
+
+/**
+ * Narrows `value` to the `merge.approval` enum. Throws with the offending key path when the value is neither `"ask"` nor
+ * `"auto"`.
+ */
+function expectMergeApproval(value: unknown): MergeApproval {
+  if (value === 'ask' || value === 'auto') {
+    return value;
+  }
+  throw new Error(`preferences: 'merge.approval' must be "ask" or "auto" (got ${formatValue(value)})`);
 }
 
 /**

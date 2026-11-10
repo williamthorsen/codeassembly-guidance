@@ -218,6 +218,30 @@ describe(composeManifest, () => {
       expect(manifest.scm).toBe('github');
     });
 
+    it('defaults merge_approval to ask when the preferences do not set merge.approval', () => {
+      const manifest = composeManifest({
+        preferences: { project: { slug: 'x' } },
+        projectStage: NO_STAGE,
+        branchName: 'main',
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.merge_approval).toBe('ask');
+    });
+
+    it('takes merge_approval from merge.approval', () => {
+      const manifest = composeManifest({
+        preferences: { merge: { approval: 'auto' } },
+        projectStage: NO_STAGE,
+        branchName: 'main',
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.merge_approval).toBe('auto');
+    });
+
     it('defaults pr_initial_state to draft when the preferences do not set pr.initial_state', () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
