@@ -24,7 +24,7 @@ describe(validatePreferences, () => {
 
   it('reports a known key with an invalid value as an error', () => {
     expect(validatePreferences({ project: { maturity: 'prod' } }, preferencesSchema).map(formatFinding)).toEqual([
-      'error project.maturity: must be one of "hobby", "early", "production" (got "prod")',
+      'error project.maturity: must be one of "exploration", "hobby", "early", "production" (got "prod")',
     ]);
   });
 
@@ -67,6 +67,13 @@ describe(validatePreferences, () => {
     expect(validatePreferences(document, preferencesSchema).map(formatFinding)).toEqual([
       'error ticket.pull.now: must be at least 1 characters long',
       'error ticket.pull.staleBranchDays: must be at least 1 (got 0)',
+    ]);
+  });
+
+  it('reports an invalid `project.stages` entry by its indexed key path', () => {
+    const document = { project: { stages: [{ path: 'apps/a', maturity: 'early' }, { path: 'apps/b' }] } };
+    expect(validatePreferences(document, preferencesSchema).map(formatFinding)).toEqual([
+      'error project.stages[1]: must have at least 2 keys (got 1)',
     ]);
   });
 

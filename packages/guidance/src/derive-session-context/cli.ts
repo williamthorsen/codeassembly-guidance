@@ -28,7 +28,7 @@ import { realGit, type SharedGit } from '../shared/git.ts';
 import { resolveProjectRoot } from '../shared/resolve-project-root.ts';
 import { composeManifest, DEFAULT_REMOTE_NAME } from './compose-manifest.ts';
 import { readPreferences, readProjectPreferences } from './read-preferences.ts';
-import { readProjectStage } from './read-project-stage.ts';
+import { readProjectStage, readSubdirectoryStages } from './read-project-stage.ts';
 import type { BranchManifest, ExplicitUrls } from './types.ts';
 
 /** The manifest fields written by the mutation flags, and the ones that the default-branch invariant governs. */
@@ -164,12 +164,15 @@ async function composeFromPreferences(input: {
   now: Date;
 }): Promise<BranchManifest> {
   const readResult = await readPreferences({ cwd: input.cwd, home: input.home });
-  const projectStage = readProjectStage(await readProjectPreferences(input.cwd));
+  const projectPreferences = await readProjectPreferences(input.cwd);
+  const projectStage = readProjectStage(projectPreferences);
+  const subdirectoryStages = readSubdirectoryStages(projectPreferences, projectStage);
   const remoteName = readResult.preferences.repository?.default_remote?.name ?? DEFAULT_REMOTE_NAME;
   const remoteUrl = await resolveRemoteUrl(input.git, input.cwd, remoteName);
   return composeManifest({
     preferences: readResult.preferences,
     projectStage,
+    subdirectoryStages,
     branchName: input.branch,
     cwd: input.cwd,
     home: input.home,

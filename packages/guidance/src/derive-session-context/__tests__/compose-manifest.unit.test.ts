@@ -21,6 +21,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: prefs,
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'MAC-130/agents/feat/branch-manifest',
       cwd: CWD,
       home: HOME,
@@ -33,7 +34,7 @@ describe(composeManifest, () => {
   });
 
   it('reports the project stage, null for each undeclared value', () => {
-    const base = { preferences: {}, branchName: 'main', cwd: CWD, home: HOME, now: NOW };
+    const base = { preferences: {}, subdirectoryStages: [], branchName: 'main', cwd: CWD, home: HOME, now: NOW };
     const undeclared = composeManifest({ ...base, projectStage: NO_STAGE });
     expect(undeclared).toMatchObject({ project_maturity: null, project_sensitivity: null, project_audience: null });
     const declared = composeManifest({
@@ -47,10 +48,18 @@ describe(composeManifest, () => {
     });
   });
 
+  it('reports the subdirectory stages, as an empty list when none is declared', () => {
+    const base = { preferences: {}, projectStage: NO_STAGE, branchName: 'main', cwd: CWD, home: HOME, now: NOW };
+    expect(composeManifest({ ...base, subdirectoryStages: [] }).project_stages).toEqual([]);
+    const stages = [{ path: 'experiments', maturity: 'exploration', sensitivity: null, audience: null }] as const;
+    expect(composeManifest({ ...base, subdirectoryStages: stages }).project_stages).toEqual(stages);
+  });
+
   it('2: simple branch with description', () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'PT-456/fix/login-redirect',
       cwd: CWD,
       home: HOME,
@@ -64,6 +73,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'configs-macos' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'mac-147',
       cwd: CWD,
       home: HOME,
@@ -77,6 +87,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'experiment/try-new-parser',
       cwd: CWD,
       home: HOME,
@@ -90,6 +101,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'configs-macos' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'MAC-130_agents_feat_branch-manifest',
       cwd: CWD,
       home: HOME,
@@ -102,6 +114,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'NMR-567.2/fix/regression',
       cwd: CWD,
       home: HOME,
@@ -115,6 +128,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'MAC-200',
       cwd: CWD,
       home: HOME,
@@ -128,6 +142,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'a-1-test',
       cwd: CWD,
       home: HOME,
@@ -141,6 +156,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'configs-macos', ticket_ref_prefix: 'MAC-' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: '147/feat/improve-parser',
       cwd: CWD,
       home: HOME,
@@ -154,6 +170,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'example-project' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: '42_fix_login-redirect',
       cwd: CWD,
       home: HOME,
@@ -167,6 +184,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'codeassembly', ticket_ref_prefix: '#' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: '152',
       cwd: CWD,
       home: HOME,
@@ -180,6 +198,7 @@ describe(composeManifest, () => {
     const manifest = composeManifest({
       preferences: { project: { slug: 'configs-macos' } },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'wt/mac-130',
       cwd: CWD,
       home: HOME,
@@ -197,6 +216,7 @@ describe(composeManifest, () => {
         artifacts: { base_dir: 'ai-artifacts' },
       },
       projectStage: NO_STAGE,
+      subdirectoryStages: [],
       branchName: 'MAC-200/feat/new-feature',
       cwd,
       home: HOME,
@@ -210,6 +230,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -222,6 +243,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -234,6 +256,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { merge: { approval: 'auto' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -246,6 +269,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -258,6 +282,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { pr: { initial_state: 'ready' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -270,6 +295,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -285,6 +311,7 @@ describe(composeManifest, () => {
           repository: { default_remote: { name: 'upstream', default_branch: 'trunk' } },
         },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -297,6 +324,7 @@ describe(composeManifest, () => {
       const fromRepo = composeManifest({
         preferences: { repository: { slug: 'repo-slug' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: '/anything',
         home: HOME,
@@ -307,6 +335,7 @@ describe(composeManifest, () => {
       const fromCwd = composeManifest({
         preferences: {},
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: '/Users/test/repos/codeassembly',
         home: HOME,
@@ -319,6 +348,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' }, artifacts: { base_dir: '~/custom-artifacts' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: '/Users/test',
@@ -331,6 +361,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: '/Users/test',
@@ -343,6 +374,7 @@ describe(composeManifest, () => {
       const withDefaults = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -356,6 +388,7 @@ describe(composeManifest, () => {
           artifacts: { paths: { chats: 'transcripts' } },
         },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -368,6 +401,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,
@@ -380,6 +414,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'main',
         cwd: CWD,
         home: HOME,

@@ -15,6 +15,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' }, ticket: { base_url: 'https://org.atlassian.net/browse/' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'MAC-130/feat/x',
         cwd: CWD,
         home: HOME,
@@ -31,6 +32,7 @@ describe(composeManifest, () => {
           ticket: { base_url: 'https://github.com/owner/repo/issues/' },
         },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: '152',
         cwd: CWD,
         home: HOME,
@@ -44,6 +46,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' }, ticket: { base_url: 'https://org.atlassian.net/browse' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'MAC-130',
         cwd: CWD,
         home: HOME,
@@ -56,6 +59,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'MAC-130',
         cwd: CWD,
         home: HOME,
@@ -69,6 +73,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' }, ticket: { base_url: 'https://org.atlassian.net/browse/' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'experiment/no-ticket',
         cwd: CWD,
         home: HOME,
@@ -83,6 +88,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' }, ticket: { base_url: 'https://org.atlassian.net/browse/' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-123',
         cwd: CWD,
         home: HOME,
@@ -99,6 +105,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-950',
         cwd: CWD,
         home: HOME,
@@ -113,6 +120,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-42',
         cwd: CWD,
         home: HOME,
@@ -126,6 +134,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { scm: 'bitbucket', project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-7',
         cwd: CWD,
         home: HOME,
@@ -139,6 +148,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'MAC-130',
         cwd: CWD,
         home: HOME,
@@ -152,6 +162,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-950',
         cwd: CWD,
         home: HOME,
@@ -165,6 +176,7 @@ describe(composeManifest, () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },
         projectStage: NO_STAGE,
+        subdirectoryStages: [],
         branchName: 'PR-950',
         cwd: CWD,
         home: HOME,

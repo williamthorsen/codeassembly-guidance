@@ -43,7 +43,7 @@ describe(runValidatePreferences, () => {
           {
             level: 'error',
             path: 'project.maturity',
-            message: 'must be one of "hobby", "early", "production" (got "prod")',
+            message: 'must be one of "exploration", "hobby", "early", "production" (got "prod")',
           },
           { level: 'warning', path: 'project.maturty', message: "unrecognized key; did you mean 'maturity'?" },
           { level: 'error', path: 'commit', message: "missing required key 'title_format'" },
@@ -60,7 +60,7 @@ describe(runValidatePreferences, () => {
     expect(stdio.stdoutChunks.join('')).toBe(
       [
         "good.yaml: projct: warning: unrecognized key; did you mean 'project'?",
-        'bad.yaml: project.maturity: error: must be one of "hobby", "early", "production" (got "prod")',
+        'bad.yaml: project.maturity: error: must be one of "exploration", "hobby", "early", "production" (got "prod")',
         'validate-preferences: 1 of 2 file(s) invalid',
         '',
       ].join('\n'),

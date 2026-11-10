@@ -138,7 +138,7 @@ describe('preferences.v1.json schema', () => {
   });
 
   it.each([
-    ['maturity', ['hobby', 'early', 'production']],
+    ['maturity', ['exploration', 'hobby', 'early', 'production']],
     ['sensitivity', ['low', 'personal', 'confidential']],
     ['audience', ['owner', 'team', 'public']],
   ])('accepts each declared `project.%s` value and rejects any other', async (key, values) => {
@@ -147,6 +147,32 @@ describe('preferences.v1.json schema', () => {
       expect(output, `${key}: ${value}`).toMatchObject({ valid: true });
     }
     const output = await validate(schemaId, { project: { [key]: 'enterprise' } }, FLAG);
+    expect(output).toMatchObject({ valid: false });
+  });
+
+  it('accepts `project.stages` entries that declare a path and at least one stage key', async () => {
+    const output = await validate(
+      schemaId,
+      {
+        project: {
+          stages: [
+            { path: 'experiments/a', maturity: 'exploration' },
+            { path: 'apps/b', audience: 'team' },
+          ],
+        },
+      },
+      FLAG,
+    );
+    expect(output).toMatchObject({ valid: true });
+  });
+
+  it.each([
+    ['without a `path`', { maturity: 'hobby' }],
+    ['with only a `path`', { path: 'apps/a' }],
+    ['with an unknown key', { path: 'apps/a', maturity: 'hobby', owner: 'x' }],
+    ['with a value outside its enum', { path: 'apps/a', maturity: 'enterprise' }],
+  ])('rejects a `project.stages` entry %s', async (_label, entry) => {
+    const output = await validate(schemaId, { project: { stages: [entry] } }, FLAG);
     expect(output).toMatchObject({ valid: false });
   });
 

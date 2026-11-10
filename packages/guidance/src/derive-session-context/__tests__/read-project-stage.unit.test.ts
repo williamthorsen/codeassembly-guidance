@@ -5,7 +5,16 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 
 import { isRecord } from '../../lib/type-guards.ts';
-import { AUDIENCE_VALUES, MATURITY_VALUES, readProjectStage, SENSITIVITY_VALUES } from '../read-project-stage.ts';
+import {
+  AUDIENCE_VALUES,
+  MATURITY_VALUES,
+  type ProjectStage,
+  readProjectStage,
+  readSubdirectoryStages,
+  SENSITIVITY_VALUES,
+} from '../read-project-stage.ts';
+
+const REPOSITORY_STAGE: ProjectStage = { maturity: 'early', sensitivity: 'low', audience: null };
 
 const schemaPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../schemas/preferences.v1.json');
 
@@ -40,12 +49,95 @@ describe(readProjectStage, () => {
   });
 });
 
+describe(readSubdirectoryStages, () => {
+  it('returns an empty list when the project does not declare any stages', () => {
+    expect(readSubdirectoryStages({}, REPOSITORY_STAGE)).toEqual([]);
+    expect(readSubdirectoryStages({ project: { maturity: 'early' } }, REPOSITORY_STAGE)).toEqual([]);
+  });
+
+  it("inherits each undeclared value from the repository's stage and trims a trailing slash", () => {
+    const preferences = {
+      project: {
+        stages: [
+          { path: 'experiments/', maturity: 'exploration' },
+          { path: 'apps/web', audience: 'public' },
+        ],
+      },
+    };
+    expect(readSubdirectoryStages(preferences, REPOSITORY_STAGE)).toEqual([
+      { path: 'experiments', maturity: 'exploration', sensitivity: 'low', audience: null },
+      { path: 'apps/web', maturity: 'early', sensitivity: 'low', audience: 'public' },
+    ]);
+  });
+
+  it.each([
+    ['is not an array', { stages: 'x' }, `'project.stages' must be an array`],
+    ['has an entry that is not an object', { stages: ['x'] }, `'project.stages[0]' must be an object`],
+    ['has an entry without a path', { stages: [{ maturity: 'hobby' }] }, `'project.stages[0].path' must be`],
+    [
+      'has an entry whose path is only a slash',
+      { stages: [{ path: '/', maturity: 'hobby' }] },
+      `'project.stages[0].path' must be`,
+    ],
+    [
+      'has an entry whose path is absolute',
+      { stages: [{ path: '/srv/exp/', maturity: 'hobby' }] },
+      `'project.stages[0].path' must be relative to the repository root`,
+    ],
+    [
+      'has two entries for one directory',
+      {
+        stages: [
+          { path: 'a', maturity: 'hobby' },
+          { path: 'a/', maturity: 'early' },
+        ],
+      },
+      `'project.stages[1].path' repeats 'project.stages[0].path'`,
+    ],
+    [
+      'has an entry with a value outside its set',
+      {
+        stages: [
+          { path: 'a', maturity: 'hobby' },
+          { path: 'b', maturity: 'enterprise' },
+        ],
+      },
+      `'project.stages[1].maturity' must be one of`,
+    ],
+    [
+      'has an entry that does not declare any stage key',
+      { stages: [{ path: 'a' }] },
+      `'project.stages[0]' must declare at least one of "maturity", "sensitivity", "audience"`,
+    ],
+  ])('throws, naming the key path, when `project.stages` %s', (_label, project, message) => {
+    expect(() => readSubdirectoryStages({ project }, REPOSITORY_STAGE)).toThrow(message);
+  });
+
+  it('accepts exactly the values that the schema declares for a `project.stages` entry', () => {
+    const entryProperties = readSchemaStageEntryProperties();
+    expect(MATURITY_VALUES).toEqual(entryProperties['maturity']);
+    expect(SENSITIVITY_VALUES).toEqual(entryProperties['sensitivity']);
+    expect(AUDIENCE_VALUES).toEqual(entryProperties['audience']);
+  });
+});
+
 // region | Helpers
 
 /** Reads the `enum` of each stage key under the schema's `project.properties`. */
 function readSchemaProjectProperties(): Record<string, unknown> {
   const schema: unknown = JSON.parse(readFileSync(schemaPath, 'utf8'));
   const properties = readPath(schema, ['properties', 'project', 'properties']);
+  const result: Record<string, unknown> = {};
+  for (const key of ['maturity', 'sensitivity', 'audience']) {
+    result[key] = readPath(properties, [key, 'enum']);
+  }
+  return result;
+}
+
+/** Reads the `enum` of each stage key under the schema's `project.stages` entry. */
+function readSchemaStageEntryProperties(): Record<string, unknown> {
+  const schema: unknown = JSON.parse(readFileSync(schemaPath, 'utf8'));
+  const properties = readPath(schema, ['properties', 'project', 'properties', 'stages', 'items', 'properties']);
   const result: Record<string, unknown> = {};
   for (const key of ['maturity', 'sensitivity', 'audience']) {
     result[key] = readPath(properties, [key, 'enum']);
