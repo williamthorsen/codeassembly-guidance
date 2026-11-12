@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { type GhResult, mergePullRequest, type MergeRequest } from '../merge.ts';
+import { formatRefusalSummary, type GhResult, mergePullRequest, type MergeRequest } from '../merge.ts';
 
 const MERGED_VIEW = {
   state: 'MERGED',
-  mergeCommit: { oid: 'abc123' },
+  mergeCommit: { oid: 'abc1234def' },
   url: 'https://github.com/acme/widgets/pull/42',
   mergedAt: '2026-09-28T22:00:00Z',
+  baseRefName: 'main',
   headRefName: 'feature/cache',
   headRepository: { name: 'widgets' },
   headRepositoryOwner: { login: 'acme' },
@@ -19,6 +20,17 @@ const SQUASH_REQUEST: MergeRequest = {
   strategy: 'squash',
   title: 'agents|feat: Add cache',
 };
+
+describe(formatRefusalSummary, () => {
+  it('names the PR when its number is known, and the PR alone otherwise', () => {
+    expect(formatRefusalSummary(42, 'Body file missing or empty: /tmp/body.md')).toBe(
+      '---\n\n## ❌ Did not merge PR #42\n\nBody file missing or empty: /tmp/body.md',
+    );
+    expect(formatRefusalSummary(undefined, '--pr is required')).toBe(
+      '---\n\n## ❌ Did not merge the PR\n\n--pr is required',
+    );
+  });
+});
 
 describe(mergePullRequest, () => {
   describe('merge arguments', () => {
@@ -61,7 +73,12 @@ describe(mergePullRequest, () => {
 
     const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
 
-    expect(outcome).toEqual({ ok: false, exitCode: 1, stderr: 'GraphQL: Pull request is not mergeable\n' });
+    expect(outcome).toEqual({
+      ok: false,
+      exitCode: 1,
+      stderr: 'GraphQL: Pull request is not mergeable\n',
+      summary: '---\n\n## ❌ Did not merge PR #42\n\nGraphQL: Pull request is not mergeable',
+    });
     expect(gh.calls).toHaveLength(1);
   });
 
@@ -70,7 +87,14 @@ describe(mergePullRequest, () => {
 
     const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
 
-    expect(outcome).toEqual({ ok: false, exitCode: 1, stderr: 'PR #42 is OPEN after merge; branch not deleted.\n' });
+    expect(outcome).toEqual({
+      ok: false,
+      exitCode: 1,
+      stderr: 'PR #42 is OPEN after merge; branch not deleted.\n',
+      summary:
+        '---\n\n## ❌ Did not merge PR #42\n\n' +
+        'PR #42 is OPEN after the merge command, so a merge queue may hold it. The branch was not deleted.',
+    });
     expect(gh.calls.some((args) => args[0] === 'api')).toBe(false);
   });
 
@@ -79,8 +103,67 @@ describe(mergePullRequest, () => {
 
     const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
 
-    expect(outcome.ok).toBe(false);
+    expect(outcome).toMatchObject({
+      ok: false,
+      summary:
+        '---\n\n## ⚠️ Could not confirm the merge of PR #42\n\n' +
+        "The merge command succeeded, but the PR's state could not be read. The branch was not deleted.",
+    });
     expect(gh.calls.some((args) => args[0] === 'api')).toBe(false);
+  });
+
+  it('reports an unconfirmed merge with the view diagnostic when the post-merge view fails', async () => {
+    const gh = makeFakeGh({ view: fail('gh: Bad gateway (HTTP 502)\n') });
+
+    const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      exitCode: 1,
+      summary:
+        '---\n\n## ⚠️ Could not confirm the merge of PR #42\n\n' +
+        "The merge command succeeded, but the PR's state could not be read. The branch was not deleted.\n\n" +
+        'gh: Bad gateway (HTTP 502)',
+    });
+  });
+
+  describe('summary', () => {
+    it.each([
+      ['deleted', 'remote', undefined, '🗑️ Deleted remote branch feature/cache'],
+      [
+        'already-deleted',
+        'remote',
+        fail('gh: Reference does not exist (HTTP 422)\n'),
+        '🗑️ Remote branch feature/cache was already deleted',
+      ],
+      ['by-gh', 'both', undefined, '🗑️ Deleted local and remote branch feature/cache'],
+      ['not-requested', 'none', undefined, '⏸️ Kept branch feature/cache'],
+      [
+        'failed',
+        'remote',
+        fail('gh: Server Error (HTTP 500)\n'),
+        '⚠️ Did not delete remote branch feature/cache: gh: Server Error (HTTP 500)',
+      ],
+    ] as const)('reports a %s deletion on its own line', async (_branchDeletion, deletionStrategy, api, line) => {
+      const gh = makeFakeGh(api === undefined ? {} : { api });
+
+      const outcome = await mergePullRequest({ ...SQUASH_REQUEST, deletionStrategy }, gh.run);
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        result: {
+          summary: `---\n\n## 🔀 Merged PR #42 into main\n\n${line}\nsquash · abc1234 · https://github.com/acme/widgets/pull/42`,
+        },
+      });
+    });
+
+    it('omits the base branch from the heading when the view does not name it', async () => {
+      const gh = makeFakeGh({ view: ok(JSON.stringify({ ...MERGED_VIEW, baseRefName: undefined })) });
+
+      const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+      expect(outcome.ok && outcome.result.summary.split('\n', 3)[2]).toBe('## 🔀 Merged PR #42');
+    });
   });
 
   describe('branch deletion', () => {
@@ -95,8 +178,11 @@ describe(mergePullRequest, () => {
         result: {
           branchDeletion: 'deleted',
           headRefName: 'feature/cache',
-          mergeCommit: { oid: 'abc123' },
+          mergeCommit: { oid: 'abc1234def' },
           mergedAt: '2026-09-28T22:00:00Z',
+          summary:
+            '---\n\n## 🔀 Merged PR #42 into main\n\n' +
+            '🗑️ Deleted remote branch feature/cache\nsquash · abc1234 · https://github.com/acme/widgets/pull/42',
           url: 'https://github.com/acme/widgets/pull/42',
         },
         warnings: [],
@@ -137,7 +223,7 @@ describe(mergePullRequest, () => {
 
       expect(outcome).toMatchObject({
         ok: true,
-        result: { branchDeletion: 'failed', mergeCommit: { oid: 'abc123' } },
+        result: { branchDeletion: 'failed', mergeCommit: { oid: 'abc1234def' } },
         warnings: [
           "warning: Failed to delete remote branch 'feature/cache': gh: Resource not accessible by integration (HTTP 403)",
         ],
