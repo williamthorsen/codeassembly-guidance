@@ -178,6 +178,26 @@ Whether `merge-pr` asks before merging. Under `auto`, it merges without asking o
 
 The project and global values resolve per the [cascade](../README.md#preferences). `derive-session-context` reports the resolved value as `merge_approval`.
 
+### `merge.strategy`
+
+How `merge-pr` merges a pull request. Its `--strategy` flag outranks the value for one run.
+
+| Key              | Type                            | Default  | Description                                                                                         |
+| ---------------- | ------------------------------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `merge.strategy` | `squash` \| `merge` \| `rebase` | `squash` | `squash` writes one commit from the composed title and body; `merge` and `rebase` keep the commits. |
+
+The project and global values resolve per the [cascade](../README.md#preferences). `derive-session-context` reports the resolved value as `merge_strategy`.
+
+### `merge.deletion_strategy`
+
+Which branches `merge-pr` deletes after merging. Its `--delete` flag outranks the value for one run.
+
+| Key                       | Type                         | Default  | Description                                                                                                                |
+| ------------------------- | ---------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `merge.deletion_strategy` | `both` \| `remote` \| `none` | `remote` | `both` deletes the local and the remote branch, and is GitHub-only; `remote` deletes the remote branch; `none` keeps both. |
+
+The project and global values resolve per the [cascade](../README.md#preferences). `derive-session-context` reports the resolved value as `merge_deletion_strategy`.
+
 ### `ticket.pull`
 
 Settings of the `pull-from-backlog` skill, read from the project preferences file only. See the [next-ticket helper](pull-from-backlog-helper.md).
@@ -268,6 +288,8 @@ pr:
   title_format: '[{ticket_ref} ][[{scope}|]{type}: ]{title}'
 merge:
   approval: ask
+  deletion_strategy: remote
+  strategy: squash
   title_format: '[{ticket_ref} ][[{scope}|]{type}: ]{title}[ (#{pr_number})]'
 
 integrations:
