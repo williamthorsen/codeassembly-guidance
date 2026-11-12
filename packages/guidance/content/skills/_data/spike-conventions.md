@@ -39,7 +39,7 @@ The concision and content-placement doctrines for feature tickets and plans appl
 
 - [ ] {A decision that the findings must make possible.}
 
-Deliverable: a findings & recommendation artifact, and the closing post, which closes this ticket.
+Deliverable: a findings & recommendation artifact, and the closing post on this ticket, followed by the ticket's close.
 ```
 
 `Context` and `Scope` are opt-in: Include either only when it adds signal on which the reader must act.
@@ -81,7 +81,7 @@ Differences from the feature ticket: `Question` replaces `Problem`; `Timebox` is
 
 ## Deliverable
 
-{The findings & recommendation artifact (the answers reached, a recommendation, and residual unknowns), and the closing post, which closes the ticket, offered at the closing checkpoint and made on consent, per `spike-conventions.md` § Closing post.}
+{The findings & recommendation artifact (the answers reached, a recommendation, and residual unknowns), and the closing post on the ticket, followed by the ticket's close, offered at the closing checkpoint and made on consent, per `spike-conventions.md` § Closing post.}
 ```
 
 Differences from the feature plan: Investigation steps, each framed by the question that it probes, replace tasks with create/modify/test file lists; `Timebox` is first-class; `Deliverable` replaces `Verification`, since a spike produces findings rather than verifiable behavior, and it names the [closing post](#closing-post); a step does not have a test or documentation criterion.
