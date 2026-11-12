@@ -89,21 +89,20 @@ describe('preferences.v1.json schema', () => {
     expect(legacyOutput).toMatchObject({ valid: true });
   });
 
-  it('accepts the documented reserved keys under `merge`', async () => {
-    // Guards `merge.strategy` and `merge.delete_branch`, recorded in the schema as reserved: The `merge-pr` skill
-    // family does not read them, and declaring them keeps a project that sets them schema-valid.
-    const output = await validate(
-      schemaId,
-      {
-        merge: {
-          strategy: 'squash',
-          delete_branch: true,
-          title_format: '[{ticket_ref} ][{scope}|{type}: ]{title}',
-        },
-      },
-      FLAG,
-    );
-    expect(output).toMatchObject({ valid: true });
+  it('accepts each declared `merge.strategy` and `merge.deletion_strategy` value', async () => {
+    for (const strategy of ['squash', 'merge', 'rebase']) {
+      const output = await validate(schemaId, { merge: { strategy } }, FLAG);
+      expect(output, strategy).toMatchObject({ valid: true });
+    }
+    for (const deletion of ['both', 'remote', 'none']) {
+      const output = await validate(schemaId, { merge: { deletion_strategy: deletion } }, FLAG);
+      expect(output, deletion).toMatchObject({ valid: true });
+    }
+  });
+
+  it('rejects a `merge.strategy` or `merge.deletion_strategy` value outside its enum', async () => {
+    expect(await validate(schemaId, { merge: { strategy: 'fast' } }, FLAG)).toMatchObject({ valid: false });
+    expect(await validate(schemaId, { merge: { deletion_strategy: 'all' } }, FLAG)).toMatchObject({ valid: false });
   });
 
   it('rejects an empty `commit` object missing the required `title_format`', async () => {

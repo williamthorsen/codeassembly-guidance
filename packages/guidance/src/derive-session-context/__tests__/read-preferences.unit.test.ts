@@ -157,6 +157,14 @@ describe(readPreferences, () => {
     expect(stdio.stderr).toContain("'platform' key is deprecated");
   });
 
+  it('warns once about the legacy `platform` key when both files set it', async () => {
+    using stdio = captureStdio();
+    await writeGlobalYaml(homeDir, 'platform: github\n');
+    await writeProjectYaml(projectDir, 'platform: bitbucket\n');
+    await readPreferences({ cwd: projectDir, home: homeDir });
+    expect(stdio.stderr.split("'platform' key is deprecated")).toHaveLength(2);
+  });
+
   it('prefers `scm` over the legacy `platform` key and does not warn', async () => {
     using stdio = captureStdio();
     await writeProjectYaml(projectDir, 'scm: bitbucket\nplatform: github\n');
@@ -224,6 +232,30 @@ describe(readPreferences, () => {
     await writeProjectYaml(projectDir, 'merge:\n  approval: never\n');
     await expect(readPreferences({ cwd: projectDir, home: homeDir })).rejects.toThrow(
       /'merge\.approval' must be "ask" or "auto"/,
+    );
+  });
+
+  it('takes merge.strategy and merge.deletion_strategy from the project file over the global file', async () => {
+    await writeGlobalYaml(homeDir, 'merge:\n  strategy: rebase\n  deletion_strategy: none\n');
+    await writeProjectYaml(projectDir, 'merge:\n  strategy: merge\n');
+    const result = await readPreferences({ cwd: projectDir, home: homeDir });
+    expect(result.preferences.merge).toEqual({ strategy: 'merge', deletion_strategy: 'none' });
+  });
+
+  it('throws with the file, the key path, and the accepted values when merge.strategy is invalid', async () => {
+    await writeProjectYaml(projectDir, 'merge:\n  strategy: fast\n');
+    const projectPath = path.join(projectDir, '.agents', 'preferences.yaml');
+    await expect(readPreferences({ cwd: projectDir, home: homeDir })).rejects.toThrow(
+      `${projectPath}: preferences: 'merge.strategy' must be "merge", "rebase", or "squash" (got "fast")`,
+    );
+  });
+
+  it('names the global file when its merge.deletion_strategy is invalid, even under a valid project value', async () => {
+    await writeGlobalYaml(homeDir, 'merge:\n  deletion_strategy: all\n');
+    await writeProjectYaml(projectDir, 'merge:\n  deletion_strategy: none\n');
+    const globalPath = path.join(homeDir, '.agents', 'preferences.yaml');
+    await expect(readPreferences({ cwd: projectDir, home: homeDir })).rejects.toThrow(
+      `${globalPath}: preferences: 'merge.deletion_strategy' must be "both", "none", or "remote" (got "all")`,
     );
   });
 

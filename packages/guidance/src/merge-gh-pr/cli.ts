@@ -16,13 +16,12 @@ import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { type FlagSpec, scanFlags, valueFlagMap } from '../lib/parse-flags.ts';
 import { isEnoent, isRecord } from '../lib/type-guards.ts';
 import {
+  DELETION_STRATEGIES,
   type DeletionStrategy,
-  formatRefusalSummary,
-  type GhResult,
-  mergePullRequest,
-  type MergeRequest,
+  MERGE_STRATEGIES,
   type MergeStrategy,
-} from './merge.ts';
+} from '../shared/merge-options.ts';
+import { formatRefusalSummary, type GhResult, mergePullRequest, type MergeRequest } from './merge.ts';
 
 const execFileAsync = promisify(execFile);
 
@@ -33,10 +32,6 @@ const FLAGS = [
   { name: 'strategy', takesValue: true },
   { name: 'title-file', takesValue: true },
 ] as const satisfies readonly FlagSpec[];
-
-const DELETION_STRATEGIES: readonly DeletionStrategy[] = ['both', 'none', 'remote'];
-
-const STRATEGIES: readonly MergeStrategy[] = ['merge', 'rebase', 'squash'];
 
 /** Parsed argv, before the title and body files are read. */
 interface ParsedArgs {
@@ -109,7 +104,7 @@ function parseArgs(argv: readonly string[]): ParsedArgs {
     bodyFile: values['body-file'],
     deletionStrategy: requireMember(values, 'delete', DELETION_STRATEGIES),
     prNumber: Number(pr),
-    strategy: requireMember(values, 'strategy', STRATEGIES),
+    strategy: requireMember(values, 'strategy', MERGE_STRATEGIES),
     titleFile: values['title-file'],
   };
 }

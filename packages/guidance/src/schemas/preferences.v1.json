@@ -98,7 +98,7 @@
     },
     "merge": {
       "type": "object",
-      "description": "Merge configuration for the `merge-pr` skill family: approval and squash-merge title rendering.",
+      "description": "Merge configuration for the `merge-pr` skill family: approval, merge strategy, branch deletion, and squash-merge title rendering.",
       "properties": {
         "approval": {
           "type": "string",
@@ -111,11 +111,13 @@
         },
         "strategy": {
           "type": "string",
-          "description": "Reserved key. Not yet honored by the `merge-pr` skill family — the skill currently performs squash merges unconditionally. Recorded here so the schema does not flag the key as unknown when projects opt to set it in anticipation of future support."
+          "enum": ["squash", "merge", "rebase"],
+          "description": "How `merge-pr` merges a pull request. Its `--strategy` flag outranks this value. Defaults to `squash`."
         },
-        "delete_branch": {
-          "type": "boolean",
-          "description": "Reserved key. Not yet honored by the `merge-pr` skill family — branch deletion is currently controlled by command-line flags and platform defaults. Recorded here so the schema does not flag the key as unknown when projects opt to set it in anticipation of future support."
+        "deletion_strategy": {
+          "type": "string",
+          "enum": ["both", "remote", "none"],
+          "description": "Which branches `merge-pr` deletes after merging: `both` (GitHub only), `remote`, or `none`. Its `--delete` flag outranks this value. Defaults to `remote`."
         }
       }
     },

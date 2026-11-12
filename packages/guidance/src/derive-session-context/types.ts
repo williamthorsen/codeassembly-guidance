@@ -1,4 +1,5 @@
 /** Shared types for the session-context deriver. */
+import type { DeletionStrategy, MergeStrategy } from '../shared/merge-options.ts';
 import type { ProjectStage, SubdirectoryStage } from './read-project-stage.ts';
 
 /** A narrow projection of `src/schemas/preferences.v1.json` covering the fields that the deriver consumes. */
@@ -28,6 +29,10 @@ export interface ResolvedPreferences {
   readonly merge?: {
     /** Whether `merge-pr` asks before merging, or merges a clean run without asking. */
     readonly approval?: MergeApproval;
+    /** Which branches `merge-pr` deletes after merging. */
+    readonly deletion_strategy?: DeletionStrategy;
+    /** How `merge-pr` merges a pull request. */
+    readonly strategy?: MergeStrategy;
   };
   readonly pr?: {
     /** The state in which `create-pr` opens a pull request. */
@@ -98,6 +103,10 @@ export interface BranchManifest {
   readonly pr_initial_state?: PrInitialState;
   /** Whether `merge-pr` asks before merging: the `merge.approval` preference, or `ask`. */
   readonly merge_approval?: MergeApproval;
+  /** Which branches `merge-pr` deletes after merging: the `merge.deletion_strategy` preference, or `remote`. */
+  readonly merge_deletion_strategy?: DeletionStrategy;
+  /** How `merge-pr` merges a pull request: the `merge.strategy` preference, or `squash`. */
+  readonly merge_strategy?: MergeStrategy;
   /**
    * The `ticket_url` and `pr_url` values written by the mutation flags. A present key overrides the composed value,
    * `null` included; an absent one leaves the field to composition.
