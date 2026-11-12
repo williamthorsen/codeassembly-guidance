@@ -11,16 +11,16 @@ codeassembly-sync-live 5bab2e28   # advance the branch to a specific commit and 
 
 ## Developer machine
 
-The deployed guidance comes from this repository's worktree checked out on the `live` branch (`~/repos/projects/codeassembly-guidance.live` beside the main worktree), and the command advances `live`.
+The deployed guidance comes from this repository's worktree checked out on the `live` branch (`~/repos/oss/codeassembly-guidance.live` beside the main worktree), and the command advances `live`.
 
 ### Setup
 
-The command deploys with the `codeassembly` CLI built in the `live` worktree of [williamthorsen/codeassembly](https://github.com/williamthorsen/codeassembly). It looks for that worktree at `codeassembly.live` beside this repository's worktrees (`~/repos/projects/codeassembly.live`), or at the path that `CODEASSEMBLY_LIVE_DIR` names.
+The command deploys with the `codeassembly` CLI built in the `live` worktree of [williamthorsen/codeassembly](https://github.com/williamthorsen/codeassembly). It looks for that worktree at `codeassembly.live` beside this repository's worktrees (`~/repos/oss/codeassembly.live`), or at the path that `CODEASSEMBLY_LIVE_DIR` names.
 
 Link the command onto `PATH` once:
 
 ```bash
-ln -s ~/repos/projects/codeassembly-guidance.live/scripts/codeassembly-sync-live.sh ~/.local/bin/codeassembly-sync-live
+ln -s ~/repos/oss/codeassembly-guidance.live/scripts/codeassembly-sync-live.sh ~/.local/bin/codeassembly-sync-live
 ```
 
 The link points into the `live` worktree, so the command updates itself whenever `live` advances.
@@ -37,14 +37,14 @@ Because the command passes `--link` to `install`, the deployed scripts point int
 
 ## Consumer machine
 
-A machine that consumes guidance without developing it keeps a clone of this repository on `main` at `~/repos/projects/codeassembly-guidance`, without a `live` worktree or a `live` branch, and the command advances `main` in that clone's main worktree.
+A machine that consumes guidance without developing it keeps a clone of this repository on `main` at `~/repos/oss/codeassembly-guidance`, without a `live` worktree or a `live` branch, and the command advances `main` in that clone's main worktree.
 
 ### Setup
 
 Link the command onto `PATH` once:
 
 ```bash
-ln -s ~/repos/projects/codeassembly-guidance/scripts/codeassembly-sync-live.sh ~/.local/bin/codeassembly-sync-live
+ln -s ~/repos/oss/codeassembly-guidance/scripts/codeassembly-sync-live.sh ~/.local/bin/codeassembly-sync-live
 ```
 
 The link points into the main clone, so the command updates itself whenever `main` advances.
