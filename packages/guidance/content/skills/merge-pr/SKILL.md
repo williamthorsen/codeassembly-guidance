@@ -363,10 +363,13 @@ Every stop after the merge is approved, at step 6's gate or by `merge_approval: 
 ```
 ---
 
-## ❌ Did not merge PR #{pr_number}
+## ❌ Not merged
 
-{reason}
+PR: {url}
+Reason: {reason}
 ```
+
+`{url}` is the PR's URL from step 2. Keep the lines single-spaced: When the reason spans several lines, drop its blank lines.
 
 A decline at step 6's gate, or at the gate that step 8 re-renders, is the developer's own choice, and keeps the form that those steps state. The merge flow does not record a lede decision or offer to record one; a capture is the author's own request, made whenever they choose.
 
