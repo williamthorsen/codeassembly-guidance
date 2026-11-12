@@ -10,25 +10,25 @@ Merge a pull request on the appropriate platform. `describe-change.mjs` resolves
 
 ## Optional arguments
 
-| Flag                          | Effect                                                                                                                                                     | Default                   |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `--pr {n}`                    | Merge PR `{n}` instead of the PR for the current branch.                                                                                                   | PR for the current branch |
-| `--scope {scope}`             | Override the scope. Outranks the PR's `change-record` block and every other source; `*` merges without a scope.                                            | resolved in step 3        |
-| `--type {type}`               | Override the work type, spelled bare (`feat`, not `feat!`). Outranks the PR's `change-record` block and every other source, and keeps the resolved marker. | resolved in step 3        |
-| `--breaking`, `--no-breaking` | Merge as breaking, or as not breaking. Outranks the PR's `change-record` block and every other source.                                                     | resolved in step 3        |
-| `--strategy {s}`              | Override the merge strategy: `squash`, `merge`, or `rebase`.                                                                                               | `squash`                  |
-| `--delete {v}`                | Override branch deletion: `both`, `remote`, or `none`. `both` is GitHub-only.                                                                              | `remote`                  |
-| `--confirm`                   | Show the approval gate even when `merge.approval` is `auto`.                                                                                               | per `merge_approval`      |
+| Flag                          | Effect                                                                                                                                                     | Default                       |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| `--pr {n}`                    | Merge PR `{n}` instead of the PR for the current branch.                                                                                                   | PR for the current branch     |
+| `--scope {scope}`             | Override the scope. Outranks the PR's `change-record` block and every other source; `*` merges without a scope.                                            | resolved in step 3            |
+| `--type {type}`               | Override the work type, spelled bare (`feat`, not `feat!`). Outranks the PR's `change-record` block and every other source, and keeps the resolved marker. | resolved in step 3            |
+| `--breaking`, `--no-breaking` | Merge as breaking, or as not breaking. Outranks the PR's `change-record` block and every other source.                                                     | resolved in step 3            |
+| `--strategy {s}`              | Override the merge strategy: `squash`, `merge`, or `rebase`.                                                                                               | per `merge_strategy`          |
+| `--delete {v}`                | Override branch deletion: `both`, `remote`, or `none`. `both` is GitHub-only.                                                                              | per `merge_deletion_strategy` |
+| `--confirm`                   | Show the approval gate even when `merge.approval` is `auto`.                                                                                               | per `merge_approval`          |
 
-## Reserved preference keys
+## Preference keys
 
-`merge.approval` is honored, per step 6. `merge.strategy` and `merge.deletion_strategy` are **reserved keys** in `.agents/preferences.yaml` and `~/.agents/preferences.yaml`. They are not yet honored: This iteration uses the hard-coded defaults above. Setting them in preferences does not change the merge; CLI overrides are the only way to change the values today.
+Three keys in `.agents/preferences.yaml` and `~/.agents/preferences.yaml` set this skill's defaults: `merge.approval` (step 6), `merge.strategy`, and `merge.deletion_strategy` (step 4). Each value resolves from the CLI flag, then the project file, then the user file, then the built-in default (`ask`, `squash`, `remote`). `derive-session-context` resolves the files and reports `merge_approval`, `merge_strategy`, and `merge_deletion_strategy`; it fails on a value outside the accepted set, naming the file, the key, and the accepted values, which stops the run at step 1. The guidance package's `docs/preferences.md` lists the accepted values.
 
 ## Process
 
 ### 1. Get session context
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `project_slug`, `ticket_id`, `artifact_base_dir`, `pr_url`, and `merge_approval` from it.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `project_slug`, `ticket_id`, `artifact_base_dir`, `pr_url`, `merge_approval`, `merge_strategy`, and `merge_deletion_strategy` from it.
 
 ### 2. Resolve the PR
 
@@ -131,8 +131,8 @@ On no, and when `{skill:add-change-record}` stopped for any of its own reasons, 
 ### 4. Resolve strategy and deletion strategy
 
 ```
-resolveStrategy(cliOverride):          return cliOverride ?? 'squash'
-resolveDeletionStrategy(cliOverride):  return cliOverride ?? 'remote'
+resolveStrategy(cliOverride):          return cliOverride ?? merge_strategy
+resolveDeletionStrategy(cliOverride):  return cliOverride ?? merge_deletion_strategy
 ```
 
 `--delete both|remote|none` map directly to the same string values.

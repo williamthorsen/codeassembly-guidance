@@ -137,4 +137,11 @@ describe.each(['merge-bb-pr', 'merge-gh-pr'])('%s completion', (skill) => {
     expect(text).not.toContain('Branch deletion:');
     expect(text).not.toMatch(/^Merged: /m);
   });
+
+  it('resolves the strategy and the deletion strategy from session context below the CLI override', async () => {
+    const text = await EXPANDED;
+    expect(text).toContain('return cliOverride ?? merge_strategy');
+    expect(text).toContain('return cliOverride ?? merge_deletion_strategy');
+    expect(text).not.toContain('not yet honored');
+  });
 });
