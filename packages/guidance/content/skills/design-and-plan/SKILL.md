@@ -191,3 +191,5 @@ Follow the options, output format, and recommendation rules in [next-steps optio
 <!-- include: ../_partials/next-steps-after-plan.md / -->
 
 <!-- include: ../_partials/option-format.md / -->
+
+<!-- include: ../_partials/implementation-order-list.md / -->

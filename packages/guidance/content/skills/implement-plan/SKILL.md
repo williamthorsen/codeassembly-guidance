@@ -139,3 +139,5 @@ Never push, force-push, or delete a remote branch, never create a worktree, and 
 <!-- include: ../_partials/split-launch-prompts.md / -->
 
 <!-- include: ../_partials/option-format.md / -->
+
+<!-- include: ../_partials/implementation-order-list.md / -->
