@@ -332,7 +332,10 @@ describe(mergePullRequest, () => {
 
 // region | Helpers
 
-/** A canned response per call; `api` answers the branch deletion and `commit` the commit read. An `Error` makes the runner throw it. */
+/**
+ * A canned response per call; `api` answers the branch deletion and `commit` the commit read. An `Error` makes the
+ * runner throw it.
+ */
 interface FakeGhResponses {
   api?: Error | GhResult;
   commit?: Error | GhResult;
