@@ -11,8 +11,8 @@ import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
  * another repository, `acme/core-lib#1`. The stand-in answers `issue view` for both, so the run exercises a fetch, a
  * cross-repository blocker, and the tree without contacting GitHub.
  */
-export function makeListImplementationOrderSmokeTest(): SmokeTestInvocation {
-  const binDir = makeSmokeScratchDir('list-implementation-order-bin-');
+export function makeImplementationOrderSmokeTest(): SmokeTestInvocation {
+  const binDir = makeSmokeScratchDir('implementation-order-bin-');
   const ghPath = path.join(binDir, 'gh');
   const blocker = '{"number":1,"state":"OPEN","title":"Blocker","url":"https://github.com/acme/core-lib/issues/1"}';
   const script = [

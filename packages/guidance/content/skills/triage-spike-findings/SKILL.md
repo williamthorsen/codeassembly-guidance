@@ -121,6 +121,8 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
 
 Report the umbrella when one was created, each child with its grades and blockers in the order in which step 7 created them, each follow-up triage ticket with its batch, each issue commented on, and the artifact's path.
 
+When the record names two or more tickets among the children and the follow-up triage tickets, print the list for them after the report, per [implementation-order list](#implementation-order-list), leaving out the umbrella. They include a ticket that an earlier run of the same record created.
+
 The triage round ends the spike, so offer to close the triage ticket with the [closing post](../_data/spike-conventions.md#closing-post) in the same response's action-items block, showing the post's body, and on consent post it and close the ticket with that section's checks. When the developer declines the offer, the triage ticket stays open. Do not offer it when the run was given **The batch**: A follow-up triage ticket's dispositions comment is its record. The post contains:
 
 - The answer to each question to answer and the recommendation on each decision to enable that the triage ticket's body lists, taken from the findings and the approved dispositions. A body that lists neither leaves the post with the items below alone.
@@ -130,3 +132,5 @@ The triage round ends the spike, so offer to close the triage ticket with the [c
 It does not repeat the dispositions, which the dispositions comment records.
 
 <!-- include: ../_partials/gh-body-file.md / -->
+
+<!-- include: ../_partials/implementation-order-list.md / -->

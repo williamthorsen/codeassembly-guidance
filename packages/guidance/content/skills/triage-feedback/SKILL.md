@@ -132,4 +132,8 @@ Run `triage-feedback validate` on the final record, then `triage-feedback render
 
 Report each filed ticket with its repository, each deferred or rated cluster, each declined cluster, the remainder line, and the artifact's path.
 
+When the record names two or more filed tickets, print the list for them after the report, per [implementation-order list](#implementation-order-list). They include a ticket that an earlier run of the same record filed.
+
 <!-- include: ../_partials/gh-body-file.md / -->
+
+<!-- include: ../_partials/implementation-order-list.md / -->
