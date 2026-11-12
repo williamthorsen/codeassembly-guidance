@@ -399,6 +399,8 @@ Insights, applied drive-by fixes, and devlog references do not appear in the bod
 
 Omit empty sections. The "Artifacts saved" section is omitted when the skill did not write any artifacts (Step 1 did not produce a deferred-findings artifact, and Phase 3 did not generate a devlog). Filename suffixes (`_devlog.md`, `_deferred-findings.md`) state the artifact type; the report does not need separate sub-headings. Use the item's original ID (F1, L1, I2) so that the developer can cross-reference with the inventory.
 
+When "Tickets created" lists two or more tickets, print the list for them after the report, per [implementation-order list](#implementation-order-list). Pass a ticket kept in a file as `--external "{ticket-id}={title}"`; its path stays in the report line alone.
+
 ### Phase 5: PR prompt
 
 After the results report, check whether the branch has commits ahead of the default branch (`git log --oneline {default_branch}..HEAD`). If there are commits (whether from the session's earlier work, drive-by fixes applied in Phase 2a, or both), prompt the user to create a PR:
@@ -429,3 +431,5 @@ Compose the title of a deferred-item ticket per [`title-voice.md`](../_data/titl
 - **Conversation is primary source**: Deferred items and insights appear in the dialogue, not just in git state
 - **Graceful when empty**: If the assessment finds nothing actionable, say so and end: "No wrap-up items identified for this session."
 - **Fresh numbering**: Always assign new sequential IDs within the wrap-up; never reuse IDs from source artifacts
+
+<!-- include: ../_partials/implementation-order-list.md / -->
