@@ -91,7 +91,8 @@ describe('merge-pr contract', () => {
     const text = await EXPANDED;
 
     expect(text).toContain('Every stop after the merge is approved');
-    expect(text).toContain('## ❌ Did not merge PR #{pr_number}');
+    expect(text).toContain('## ❌ Not merged\n\nPR: {url}\nReason: {reason}');
+    expect(text).not.toContain('Did not merge PR');
   });
 
   it('offers to close the parent after reporting the outcome and before the closing notes', async () => {
@@ -133,7 +134,10 @@ describe.each(['merge-bb-pr', 'merge-gh-pr'])('%s completion', (skill) => {
 
     expect(text).toContain('as the last element of the reply');
     expect(text.toLowerCase()).toContain('do not write any sentence before');
-    expect(text).toContain('## ❌ Did not merge PR #{pr_number}');
+    expect(text).toContain('## ❌ Not merged\n\nPR: ');
+    expect(text).toContain('## 🔀 Merged into ');
+    expect(text).not.toContain('Did not merge PR');
+    expect(text).not.toContain('Merged PR #');
     expect(text).not.toContain('Branch deletion:');
     expect(text).not.toMatch(/^Merged: /m);
   });

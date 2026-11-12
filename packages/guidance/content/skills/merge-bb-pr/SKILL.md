@@ -132,13 +132,14 @@ Report `Artifact saved: {artifact path}` on a line of its own, then print these 
 ```
 ---
 
-## 🔀 Merged PR #{pr_number} into {destination.branch.name}
+## 🔀 Merged into {destination.branch.name} · {strategy name} · {first 7 characters of merge_commit.hash, or unavailable}
 
-{deletion line}
-{strategy} · {first 7 characters of merge_commit.hash, or unavailable} · {links.html.href}
+{title line}
+PR: {links.html.href}
+Remote branch {source.branch.name}: {🗑️ Deleted for deletion_strategy: remote, ⏸️ Kept for none}
 ```
 
-The deletion line is `🗑️ Deleted remote branch {source.branch.name}` for `deletion_strategy: remote`, and `⏸️ Kept branch {source.branch.name}` for `none`. Print the lines exactly as this template renders them, and do not write any sentence before them that restates the outcome: The heading states it, and the bottom of the reply is the part that the terminal shows first. `merge-pr` places them directly above an action-items block when its turn has an ask.
+The strategy name is the result's name: `squash`, `merge commit` for `merge`, and `rebase`. The title line is `Commit title: {title}` for `squash` and `merge`, whose `message` step 4 composes from `title`, and `Last commit title: unavailable` for `rebase`, which submits no message; the tool does not expose a read of the commit. Separate the lines with single newlines, and keep the blank line below the rule and the one below the heading. Print the lines exactly as this template renders them, and do not write any sentence before them that restates the outcome: The heading states it, and the bottom of the reply is the part that the terminal shows first. `merge-pr` places them directly above an action-items block when its turn has an ask.
 
 ### Refusal summary
 
@@ -147,9 +148,12 @@ A refusal in steps 1 to 4 means that the PR was not merged. End the reply with t
 ```
 ---
 
-## ❌ Did not merge PR #{pr_number}
+## ❌ Not merged
 
-{reason}
+PR: {links.html.href, or #{pr_number} when step 2 did not read it}
+Reason: {reason}
 ```
+
+Keep the lines single-spaced: When the reason spans several lines, drop its blank lines.
 
 Local state is intentionally left untouched; removing the merged branch is left to the user. Do not append local-branch cleanup steps or advice. Do not report this state to the user.
