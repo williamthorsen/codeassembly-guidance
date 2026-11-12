@@ -78,6 +78,22 @@ describe('merge-pr contract', () => {
     expect(text).not.toContain('ripple');
   });
 
+  it('ends the reply with the outcome summary, verbatim and without a restating sentence', async () => {
+    const text = await EXPANDED;
+
+    expect(text).toContain(
+      "Print the summary verbatim, as the last element of the reply, or directly above step 12's action-items block",
+    );
+    expect(text).toContain('Do not write any sentence of your own before it that restates the outcome');
+  });
+
+  it('ends every stop after the merge is approved with the refusal summary', async () => {
+    const text = await EXPANDED;
+
+    expect(text).toContain('Every stop after the merge is approved');
+    expect(text).toContain('## ❌ Did not merge PR #{pr_number}');
+  });
+
   it('offers to close the parent after reporting the outcome and before the closing notes', async () => {
     const text = await EXPANDED;
     const reportIndex = text.indexOf('### 11. Report the outcome');
@@ -106,5 +122,19 @@ describe('merge-pr contract', () => {
     expect(text).toContain('close nothing without a clear yes');
     expect(text).toContain('`parent.uncheckedCriteria`');
     expect(text).toContain('gh issue close {P} --reason completed');
+  });
+});
+
+describe.each(['merge-bb-pr', 'merge-gh-pr'])('%s completion', (skill) => {
+  const expanded = readContentFile(`skills/${skill}/SKILL.md`);
+
+  it('ends the reply with the outcome summary rather than key-value lines', async () => {
+    const text = await expanded;
+
+    expect(text).toContain('as the last element of the reply');
+    expect(text.toLowerCase()).toContain('do not write any sentence before');
+    expect(text).toContain('## ❌ Did not merge PR #{pr_number}');
+    expect(text).not.toContain('Branch deletion:');
+    expect(text).not.toMatch(/^Merged: /m);
   });
 });

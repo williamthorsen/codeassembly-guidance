@@ -33,9 +33,11 @@ gh pr view {pr_number} --json state,isDraft,mergeable,mergeStateStatus,reviewDec
 
 Parse the JSON with a real parser (`python3 -c "import sys,json; ..."` or `jq`). Do not regex-extract.
 
+If the call fails, stop, and end the reply with the [refusal summary](#refusal-summary), with `gh`'s stderr as the reason.
+
 ### 2. Run pre-merge checks
 
-Refuse the merge with a specific reason on any of the following. On each refusal, exit non-zero and print the reason on stderr:
+Refuse the merge with a specific reason on any of the following. On each refusal, stop, and end the reply with the [refusal summary](#refusal-summary), with the reason below as its reason:
 
 | Field              | Failure condition                                            | Refusal reason                                                              |
 | ------------------ | ------------------------------------------------------------ | --------------------------------------------------------------------------- |
@@ -69,13 +71,13 @@ git fetch origin
 git rev-list --left-right --count "origin/{headRefName}...HEAD"
 ```
 
-If the counts differ from `0\t0`, refuse: "Local branch is out of sync with `origin/{headRefName}` (ahead {a}, behind {b}); push or pull before merging."
+If the counts differ from `0\t0`, refuse with the [refusal summary](#refusal-summary): "Local branch is out of sync with `origin/{headRefName}` (ahead {a}, behind {b}); push or pull before merging."
 
 ### 4. Write the title and body to scratch files
 
 Write `body` to a scratch file per [gh body file](#gh-body-file), naming it for the PR (`gh-body-pr{pr_number}-{timestamp}.md`). When `strategy` is `squash`, also write `title` to `gh-title-pr{pr_number}-{timestamp}.txt` in the same directory. Do not inline either into a command.
 
-**Read both files back before step 5.** Read each path that step 5 is about to pass, with the {tool:Read} tool rather than a shell command, and compare its content against the `body` and `title` received by this delegate; a single trailing newline in the title file is ignored. Refuse when either differs, naming the PR and the path: "Body file for PR #{n} at {path} is not the approved merge body." or "Title file for PR #{n} at {path} is not the approved merge title." A squash merge onto a protected default branch publishes a commit message that cannot be amended, so this is the last point at which a wrong message can be caught. Read the paths being passed rather than the ones written earlier in this step, so that a path left over from another PR is caught rather than confirmed.
+**Read both files back before step 5.** Read each path that step 5 is about to pass, with the {tool:Read} tool rather than a shell command, and compare its content against the `body` and `title` received by this delegate; a single trailing newline in the title file is ignored. Refuse with the [refusal summary](#refusal-summary) when either differs, naming the PR and the path: "Body file for PR #{n} at {path} is not the approved merge body." or "Title file for PR #{n} at {path} is not the approved merge title." A squash merge onto a protected default branch publishes a commit message that cannot be amended, so this is the last point at which a wrong message can be caught. Read the paths being passed rather than the ones written earlier in this step, so that a path left over from another PR is caught rather than confirmed.
 
 ### 5. Merge and delete the branch
 
@@ -99,19 +101,22 @@ On success, the helper exits 0 and prints JSON on stdout:
   "headRefName": "feature/cache",
   "mergeCommit": { "oid": "abc123" },
   "mergedAt": "2026-09-28T22:00:00Z",
+  "summary": "---\n\n## 🔀 Merged PR #42 into main\n\n🗑️ Deleted remote branch feature/cache\nsquash · abc1234 · https://github.com/acme/widgets/pull/42",
   "url": "https://github.com/acme/widgets/pull/42"
 }
 ```
+
+`summary` contains the outcome lines that [Completion](#completion) prints.
 
 `branchDeletion` is one of these values:
 
 - `deleted`: The helper deleted the branch.
 - `already-deleted`: The branch or its fork was already gone, for example because the repository deletes branches on merge.
-- `failed`: A warning on stderr gives the reason. The merge still succeeded, so relay the warning and continue.
+- `failed`: A warning on stderr gives the reason, which the summary's deletion line repeats. The merge still succeeded, so continue.
 - `by-gh`: The deletion strategy was `both`, and `gh pr merge --delete-branch` handled the deletion.
 - `not-requested`: The deletion strategy was `none`.
 
-When the helper exits non-zero, print its stderr to the user and stop. This covers a refused input file, a failed `gh pr merge` (whose stderr the helper passes on), and a PR that is not `MERGED` after `gh` accepted the merge, such as a PR placed in a merge queue. Do not retry, and do not bypass with `--admin`.
+When the helper exits non-zero, it still prints JSON on stdout, containing only `summary`. Stop, and end the reply with that `summary`, printed verbatim. Its reason contains the helper's stderr, so do not print the stderr as well. This covers a refused input file, a failed `gh pr merge` (whose stderr the helper passes on), a PR that is not `MERGED` after `gh` accepted the merge, such as a PR placed in a merge queue, and a PR whose state cannot be read after `gh` accepted the merge, whose summary heading reports that the merge could not be confirmed. Do not retry, and do not bypass with `--admin`.
 
 ### 6. Save merge artifact
 
@@ -153,13 +158,18 @@ Branch: {headRefName}
 
 ## Completion
 
+Report `Artifact saved: {artifact path}` on a line of its own, then print the helper's `summary` verbatim, as the last element of the reply. Do not write any sentence before it that restates the outcome: The summary's heading states it, and the bottom of the reply is the part that the terminal shows first. `merge-pr` places the summary directly above an action-items block when its turn has an ask.
+
+### Refusal summary
+
+A refusal in steps 1 to 4 means that the PR was not merged. End the reply with these lines, in place of the summary that the helper would have printed:
+
 ```
-Merged: {url}
-Commit: {mergeCommit.oid}
-Strategy: {strategy}
-Branch: {headRefName}
-Branch deletion: {branchDeletion}
-Artifact saved: {artifact path}
+---
+
+## ❌ Did not merge PR #{pr_number}
+
+{reason}
 ```
 
 Local state is intentionally left untouched; removing the merged branch is left to the user. Do not append local-branch cleanup steps or advice. Do not report this state to the user.

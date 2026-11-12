@@ -18,6 +18,7 @@ export function makeMergeGhPrSmokeTest(): SmokeTestInvocation {
     mergeCommit: { oid: 'abc123' },
     url: 'https://github.com/acme/widgets/pull/42',
     mergedAt: '2026-09-28T22:00:00Z',
+    baseRefName: 'main',
     headRefName: 'smoke/branch',
     headRepository: { name: 'widgets' },
     headRepositoryOwner: { login: 'acme' },
@@ -38,7 +39,7 @@ export function makeMergeGhPrSmokeTest(): SmokeTestInvocation {
 
 // region | Helpers
 
-/** Asserts that the parsed result reports the merge commit and a deleted branch. */
+/** Asserts that the parsed result reports the merge commit, a deleted branch, and the merge's summary. */
 function assertBranchDeleted(result: unknown): void {
   if (!isRecord(result)) {
     throw new TypeError('expected object result');
@@ -48,6 +49,9 @@ function assertBranchDeleted(result: unknown): void {
   }
   if (!isRecord(result['mergeCommit']) || result['mergeCommit']['oid'] !== 'abc123') {
     throw new Error(`expected mergeCommit.oid abc123, got ${JSON.stringify(result['mergeCommit'])}`);
+  }
+  if (typeof result['summary'] !== 'string' || !result['summary'].includes('## 🔀 Merged PR #42 into main')) {
+    throw new Error(`expected a summary headed by the merge, got ${JSON.stringify(result['summary'])}`);
   }
 }
 

@@ -19,6 +19,7 @@ const MERGED_VIEW = JSON.stringify({
   mergeCommit: { oid: 'abc123' },
   url: 'https://github.com/acme/widgets/pull/42',
   mergedAt: '2026-09-28T22:00:00Z',
+  baseRefName: 'main',
   headRefName: 'feature/cache',
   headRepository: { name: 'widgets' },
   headRepositoryOwner: { login: 'acme' },
@@ -62,6 +63,9 @@ describe('merge-gh-pr CLI', () => {
       headRefName: 'feature/cache',
       mergeCommit: { oid: 'abc123' },
       mergedAt: '2026-09-28T22:00:00Z',
+      summary:
+        '---\n\n## 🔀 Merged PR #42 into main\n\n' +
+        '🗑️ Deleted remote branch feature/cache\nsquash · abc123 · https://github.com/acme/widgets/pull/42',
       url: 'https://github.com/acme/widgets/pull/42',
     });
   });
@@ -105,7 +109,9 @@ describe('merge-gh-pr CLI', () => {
 
     expect(result.exitCode).toBe(4);
     expect(result.stderr).toBe('GraphQL: Pull request is not mergeable\n');
-    expect(result.stdout).toBe('');
+    expect(JSON.parse(result.stdout)).toEqual({
+      summary: '---\n\n## ❌ Did not merge PR #42\n\nGraphQL: Pull request is not mergeable',
+    });
   });
 
   it('warns on a failed deletion and still exits 0 with the result', async () => {
@@ -127,6 +133,7 @@ describe('merge-gh-pr CLI', () => {
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain('--strategy must be one of merge, rebase, squash');
+    expect(JSON.parse(result.stdout)).toMatchObject({ summary: expect.stringContaining('## ❌ Did not merge PR #42') });
   });
 });
 

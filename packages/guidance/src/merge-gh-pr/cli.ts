@@ -17,6 +17,7 @@ import { type FlagSpec, scanFlags, valueFlagMap } from '../lib/parse-flags.ts';
 import { isEnoent, isRecord } from '../lib/type-guards.ts';
 import {
   type DeletionStrategy,
+  formatRefusalSummary,
   type GhResult,
   mergePullRequest,
   type MergeRequest,
@@ -46,21 +47,28 @@ interface ParsedArgs {
   titleFile: string | undefined;
 }
 
-/** Runs the merge from `process.argv`, writing the JSON result to stdout and every diagnostic to stderr. */
+/**
+ * Runs the merge from `process.argv`, writing the JSON result to stdout and every diagnostic to stderr. A failure
+ * writes a JSON object containing only `summary` to stdout.
+ */
 async function main(): Promise<void> {
+  const argv = process.argv.slice(2);
   try {
-    const request = readRequest(parseArgs(process.argv.slice(2)));
+    const request = readRequest(parseArgs(argv));
     const outcome = await mergePullRequest(request, runGh);
     if (!outcome.ok) {
       process.stderr.write(outcome.stderr);
+      writeJson({ summary: outcome.summary });
       process.exit(outcome.exitCode);
     }
     for (const warning of outcome.warnings) {
       process.stderr.write(`${warning}\n`);
     }
-    process.stdout.write(`${JSON.stringify(outcome.result, null, 2)}\n`);
+    writeJson(outcome.result);
   } catch (error) {
-    process.stderr.write(`merge-gh-pr: ${describeError(error)}\n`);
+    const message = describeError(error);
+    process.stderr.write(`merge-gh-pr: ${message}\n`);
+    writeJson({ summary: formatRefusalSummary(scanPrNumber(argv), message) });
     process.exit(1);
   }
 }
@@ -193,6 +201,23 @@ async function runGh(args: readonly string[]): Promise<GhResult> {
     }
     throw error;
   }
+}
+
+/** Returns the `--pr` value from argv when it is a positive integer, without validating any other argument. */
+function scanPrNumber(argv: readonly string[]): number | undefined {
+  for (const [index, token] of argv.entries()) {
+    const value =
+      token === '--pr' ? argv[index + 1] : token.startsWith('--pr=') ? token.slice('--pr='.length) : undefined;
+    if (value !== undefined) {
+      return /^[1-9]\d*$/.test(value) ? Number(value) : undefined;
+    }
+  }
+  return undefined;
+}
+
+/** Writes the value to stdout as indented JSON. */
+function writeJson(value: unknown): void {
+  process.stdout.write(`${JSON.stringify(value, null, 2)}\n`);
 }
 
 // endregion | Helpers

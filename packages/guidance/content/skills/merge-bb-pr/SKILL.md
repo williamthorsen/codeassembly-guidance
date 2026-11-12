@@ -33,13 +33,15 @@ Make every Bitbucket call below with the tool named in [Bitbucket pull-request a
 
 <!-- include: ../_partials/bitbucket-delete-both-refusal.md / -->
 
+End the reply with the [refusal summary](#refusal-summary), with that refusal as its reason.
+
 `remote` and `none` map to `closeSourceBranch` in step 4.
 
 ### 2. Fetch and validate PR state
 
-Issue one `action: "get"` call with `prId` set to `pr_number`, per [Reading a pull request](../_data/bitbucket-pr-access.md#reading-a-pull-request). Capture `state`, `source.branch.name`, `source.repository.full_name`, and `links.html.href`.
+Issue one `action: "get"` call with `prId` set to `pr_number`, per [Reading a pull request](../_data/bitbucket-pr-access.md#reading-a-pull-request). Capture `state`, `source.branch.name`, `source.repository.full_name`, `destination.branch.name`, and `links.html.href`.
 
-Refuse the merge when `state` is not `OPEN`, naming the state: "PR #{n} is {state} (not OPEN); cannot merge." The refusal covers `MERGED`, `DECLINED`, and `SUPERSEDED`. When `state` is missing from the response, **fail closed**: Refuse with "Cannot determine merge state for PR #{n}; verify and merge manually."
+On each refusal in this step and in step 3, stop, and end the reply with the [refusal summary](#refusal-summary), with the refusal's text as its reason. Refuse the merge when `state` is not `OPEN`, naming the state: "PR #{n} is {state} (not OPEN); cannot merge." The refusal covers `MERGED`, `DECLINED`, and `SUPERSEDED`. When `state` is missing from the response, **fail closed**: Refuse with "Cannot determine merge state for PR #{n}; verify and merge manually."
 
 Bitbucket does not expose a counterpart to GitHub's `mergeable` or `mergeStateStatus`, and this step does not invent one. The merge call in step 4 reports a conflict, a failing required check, or a missing required approval as its own error, before anything is published.
 
@@ -75,7 +77,7 @@ Passing a composed title for `merge_commit` diverges from `merge-gh-pr`, which o
 
 Set `closeSourceBranch` to `true` for `deletion_strategy: remote` and `false` for `none`.
 
-Call `action: "merge"` with `prId`, `mergeStrategy`, `message` (except for `rebase_fast_forward`), and `closeSourceBranch`. If the call fails, report the tool's error and exit non-zero. Do not retry, and do not fall back to another strategy.
+Call `action: "merge"` with `prId`, `mergeStrategy`, `message` (except for `rebase_fast_forward`), and `closeSourceBranch`. If the call fails, stop, and end the reply with the [refusal summary](#refusal-summary), with the tool's error as its reason. Do not retry, and do not fall back to another strategy.
 
 ### 5. Capture the merge result
 
@@ -125,12 +127,29 @@ Branch: {source.branch.name}
 
 ## Completion
 
+Report `Artifact saved: {artifact path}` on a line of its own, then print these lines as the last element of the reply:
+
 ```
-Merged: {links.html.href}
-Commit: {merge_commit.hash}
-Strategy: {strategy}
-Branch: {source.branch.name}
-Artifact saved: {artifact path}
+---
+
+## 🔀 Merged PR #{pr_number} into {destination.branch.name}
+
+{deletion line}
+{strategy} · {first 7 characters of merge_commit.hash, or unavailable} · {links.html.href}
+```
+
+The deletion line is `🗑️ Deleted remote branch {source.branch.name}` for `deletion_strategy: remote`, and `⏸️ Kept branch {source.branch.name}` for `none`. Print the lines exactly as this template renders them, and do not write any sentence before them that restates the outcome: The heading states it, and the bottom of the reply is the part that the terminal shows first. `merge-pr` places them directly above an action-items block when its turn has an ask.
+
+### Refusal summary
+
+A refusal in steps 1 to 4 means that the PR was not merged. End the reply with these lines, in place of the summary above:
+
+```
+---
+
+## ❌ Did not merge PR #{pr_number}
+
+{reason}
 ```
 
 Local state is intentionally left untouched; removing the merged branch is left to the user. Do not append local-branch cleanup steps or advice. Do not report this state to the user.
