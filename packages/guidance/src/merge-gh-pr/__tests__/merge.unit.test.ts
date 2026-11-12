@@ -127,6 +127,19 @@ describe(mergePullRequest, () => {
     });
   });
 
+  it('reports an unconfirmed merge when the post-merge view throws', async () => {
+    const gh = makeFakeGh({ view: new Error('stdout maxBuffer length exceeded') });
+
+    const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+    expect(outcome).toMatchObject({
+      ok: false,
+      exitCode: 1,
+      summary: expect.stringContaining('## ⚠️ Could not confirm the merge of PR #42'),
+    });
+    expect(outcome.ok || outcome.summary).toContain('stdout maxBuffer length exceeded');
+  });
+
   describe('summary', () => {
     it.each([
       ['deleted', 'remote', undefined, '🗑️ Deleted remote branch feature/cache'],
@@ -230,6 +243,20 @@ describe(mergePullRequest, () => {
       });
     });
 
+    it('reports a deletion whose gh call throws as failed, and the merge as successful', async () => {
+      const gh = makeFakeGh({ api: new Error('gh was killed by SIGTERM') });
+
+      const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        result: {
+          branchDeletion: 'failed',
+          summary: expect.stringContaining('⚠️ Did not delete remote branch feature/cache: gh was killed by SIGTERM'),
+        },
+      });
+    });
+
     it('leaves deletion to gh for both, and skips it for none', async () => {
       const both = makeFakeGh();
       const none = makeFakeGh();
@@ -246,10 +273,11 @@ describe(mergePullRequest, () => {
 
 // region | Helpers
 
+/** A canned response per subcommand; an `Error` makes the runner throw it. */
 interface FakeGhResponses {
-  api?: GhResult;
-  merge?: GhResult;
-  view?: GhResult;
+  api?: Error | GhResult;
+  merge?: Error | GhResult;
+  view?: Error | GhResult;
 }
 
 /** Returns a failed `gh` result with the given stderr. */
@@ -268,14 +296,19 @@ function makeFakeGh(responses: FakeGhResponses = {}): {
     run: (args) => {
       calls.push([...args]);
       if (args[0] === 'api') {
-        return Promise.resolve(responses.api ?? ok(''));
+        return respond(responses.api ?? ok(''));
       }
       if (args[1] === 'merge') {
-        return Promise.resolve(responses.merge ?? ok(''));
+        return respond(responses.merge ?? ok(''));
       }
-      return Promise.resolve(responses.view ?? ok(JSON.stringify(MERGED_VIEW)));
+      return respond(responses.view ?? ok(JSON.stringify(MERGED_VIEW)));
     },
   };
+}
+
+/** Resolves to the result, or rejects with the error. */
+function respond(response: Error | GhResult): Promise<GhResult> {
+  return response instanceof Error ? Promise.reject(response) : Promise.resolve(response);
 }
 
 /** Returns a successful `gh` result with the given stdout. */

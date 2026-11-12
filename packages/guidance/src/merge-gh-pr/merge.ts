@@ -3,6 +3,8 @@
 //
 // Every `gh` call goes through the injected runner as an argument array, so a shell never interprets a title or path.
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import { isRecord } from '../lib/type-guards.ts';
 
 /** How the head branch deletion ended. */
@@ -84,7 +86,7 @@ export async function mergePullRequest(request: MergeRequest, runGh: RunGh): Pro
     };
   }
 
-  const view = await runGh(['pr', 'view', String(request.prNumber), '--json', VIEW_FIELDS]);
+  const view = await runGhAfterMerge(runGh, ['pr', 'view', String(request.prNumber), '--json', VIEW_FIELDS]);
   if (view.exitCode !== 0) {
     return {
       ok: false,
@@ -187,7 +189,7 @@ async function deleteHeadBranch(
 
   const refPath = merged.headRefName.split('/').map(encodeURIComponent).join('/');
   const endpoint = `repos/${encodeURIComponent(merged.headOwner)}/${encodeURIComponent(merged.headRepo)}/git/refs/heads/${refPath}`;
-  const deletion = await runGh(['api', '-X', 'DELETE', endpoint]);
+  const deletion = await runGhAfterMerge(runGh, ['api', '-X', 'DELETE', endpoint]);
   if (deletion.exitCode === 0) {
     return { branchDeletion: 'deleted' };
   }
@@ -282,6 +284,18 @@ function readNamedField(value: unknown, key: 'login' | 'name'): string | undefin
 /** Returns the value when it is a non-empty string, or `undefined` otherwise. */
 function readNonEmptyString(value: unknown): string | undefined {
   return typeof value === 'string' && value.length > 0 ? value : undefined;
+}
+
+/**
+ * Runs `gh` and returns a thrown error as a failed result, so that a failure after the merge is reported against the
+ * step that failed rather than as a merge that did not take place.
+ */
+async function runGhAfterMerge(runGh: RunGh, args: readonly string[]): Promise<GhResult> {
+  try {
+    return await runGh(args);
+  } catch (error) {
+    return { exitCode: 1, stderr: `${describeError(error)}\n`, stdout: '' };
+  }
 }
 
 // endregion | Helpers
