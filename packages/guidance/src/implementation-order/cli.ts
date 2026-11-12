@@ -1,6 +1,6 @@
 /* eslint n/no-process-exit: off -- CLI entry point: The process must exit non-zero on failure, and `main` runs only behind the `isEntryPoint()` guard, never on import as a library. */
 /* eslint unicorn/no-process-exit: off -- same as above. */
-// CLI entry point for the list-implementation-order helper: reads the named tickets and their blockers, and prints them
+// CLI entry point for the implementation-order helper: reads the named tickets and their blockers, and prints them
 // as JSON in implementation order, arranged as a tree.
 
 import { execFile } from 'node:child_process';
@@ -58,7 +58,7 @@ export interface ImplementationOrder {
   tickets: ListedTicket[];
 }
 
-const PROGRAM = 'list-implementation-order';
+const PROGRAM = 'implementation-order';
 
 /** The most characters that a ticket's line may have, its indent included. */
 const LINE_WIDTH = 60;
