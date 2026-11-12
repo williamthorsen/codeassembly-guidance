@@ -21,7 +21,7 @@ Never invoke this skill on your own initiative, and never suggest it.
 3. **Run the helper.**
 
    ```bash
-   node {harness_home_dir}/skills/list-implementation-order/list-implementation-order.mjs \
+   node {harness_home_dir}/skills/implementation-order/implementation-order.mjs \
      --ticket {OWNER/REPO#N} --external "{KEY}={Title}" --edge "{BLOCKER}>{BLOCKED}"
    ```
 

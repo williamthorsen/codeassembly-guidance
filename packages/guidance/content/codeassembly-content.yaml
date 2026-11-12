@@ -60,7 +60,7 @@ helpers:
   - entry: ../src/lesson-clusters/cli.ts
     out: skills/lesson-clusters/lesson-clusters.mjs
   - entry: ../src/list-implementation-order/cli.ts
-    out: skills/list-implementation-order/list-implementation-order.mjs
+    out: skills/implementation-order/implementation-order.mjs
   - entry: ../src/triage-feedback/cli.ts
     out: skills/triage-feedback/triage-feedback.mjs
   - entry: ../src/triage-spike-findings/cli.ts
