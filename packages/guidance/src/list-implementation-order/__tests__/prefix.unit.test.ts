@@ -33,4 +33,18 @@ describe(derivePrefixes, () => {
 
     expect(Object.fromEntries(prefixes)).toEqual({ 'acme/site-tools': 'AST', 'beta/site-tools': 'BST' });
   });
+
+  it('gives each repository a distinct prefix when an owner letter makes one prefix equal another', () => {
+    const repositories = ['acme/site-tools', 'beta/site-tools', 'acme/a-s-t'];
+
+    const prefixes = derivePrefixes(repositories);
+
+    expect(new Set(prefixes.values()).size).toBe(repositories.length);
+  });
+
+  it('gives one prefix to two spellings of a repository that differ only in case', () => {
+    const prefixes = derivePrefixes(['acme/Site-Tools', 'acme/site-tools']);
+
+    expect(Object.fromEntries(prefixes)).toEqual({ 'acme/Site-Tools': 'ST', 'acme/site-tools': 'ST' });
+  });
 });

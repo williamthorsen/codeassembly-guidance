@@ -51,6 +51,15 @@ describe(orderTickets, () => {
     expect(cycle).toEqual(['a', 'b']);
     expect(placed.map(({ id }) => id)).toEqual(['before', 'a', 'b', 'after']);
   });
+
+  it('places a ticket that waits on a cycle below the cycle, although it comes first in the input', () => {
+    const edges = [edge('a', 'b'), edge('b', 'a'), edge('a', 'down')];
+
+    const { cycle, placed } = orderTickets(['down', 'a', 'b'], edges);
+
+    expect(cycle).toEqual(['a', 'b']);
+    expect(placed.find(({ id }) => id === 'down')).toEqual({ depth: 1, id: 'down', parent: 'a' });
+  });
 });
 
 // region | Helpers

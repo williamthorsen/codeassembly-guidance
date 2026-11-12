@@ -29,7 +29,8 @@ export function orderTickets(
     }
   }
 
-  const sorted = sortAfterBlockers(ids, blockersOf);
+  const cycle = findCycleMembers(ids, blockersOf);
+  const sorted = sortAfterBlockers(ids, blockersOf, new Set(cycle));
   const children = new Map<string, string[]>();
   const parents = new Map<string, string>();
   const roots: string[] = [];
@@ -48,7 +49,7 @@ export function orderTickets(
     id,
     parent: parents.get(id),
   }));
-  return { cycle: findCycleMembers(ids, blockersOf), placed };
+  return { cycle, placed };
 }
 
 // region | Helpers
@@ -71,7 +72,7 @@ function findCycleMembers(ids: readonly string[], blockersOf: ReadonlyMap<string
     for (const id of remaining) {
       const hasBlocker = [...(blockersOf.get(id) ?? [])].some((blocker) => remaining.has(blocker));
       const blocksAny = [...remaining].some((other) => blockersOf.get(other)?.has(id) === true);
-      if (!(!hasBlocker || !blocksAny)) {
+      if (hasBlocker && blocksAny) {
         continue;
       }
 
@@ -88,7 +89,7 @@ function findLastWalked(candidates: readonly string[], walked: readonly string[]
   let lastPosition = -1;
   for (const candidate of candidates) {
     const position = walked.indexOf(candidate);
-    if (!(position > lastPosition)) {
+    if (position <= lastPosition) {
       continue;
     }
 
@@ -100,15 +101,22 @@ function findLastWalked(candidates: readonly string[], walked: readonly string[]
 
 /**
  * Sorts tickets so that each follows its blockers, taking at each step the ready ticket that comes first in `ids`.
- * When every remaining ticket waits on another, the one that comes first in `ids` is taken as though it were ready.
+ * When every remaining ticket waits on another, the first of `cycleMembers` in `ids` is taken as though it were ready,
+ * so that a ticket that only waits on a cycle stays below it.
  */
-function sortAfterBlockers(ids: readonly string[], blockersOf: ReadonlyMap<string, ReadonlySet<string>>): string[] {
+function sortAfterBlockers(
+  ids: readonly string[],
+  blockersOf: ReadonlyMap<string, ReadonlySet<string>>,
+  cycleMembers: ReadonlySet<string>,
+): string[] {
   const sorted: string[] = [];
   const done = new Set<string>();
   while (sorted.length < ids.length) {
     const pending = ids.filter((id) => !done.has(id));
     const next =
-      pending.find((id) => [...(blockersOf.get(id) ?? [])].every((blocker) => done.has(blocker))) ?? pending[0];
+      pending.find((id) => [...(blockersOf.get(id) ?? [])].every((blocker) => done.has(blocker))) ??
+      pending.find((id) => cycleMembers.has(id)) ??
+      pending[0];
     if (next === undefined) {
       break;
     }

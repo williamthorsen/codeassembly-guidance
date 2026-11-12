@@ -2,23 +2,32 @@
  * Derives a short prefix for each `owner/name` repository, unique within the set: the upper-case initials of the name's
  * segments, or the first two letters of a single-segment name. Names whose prefixes collide each take further letters
  * of their last segment until the prefixes differ, and the whole name when the segment is used up. Repositories that
- * share a name under different owners also take letters of the owner, in front.
+ * share a name under different owners also take letters of the owner, in front. A repository whose prefix still equals
+ * another's takes its whole `OWNER/NAME`. Case does not distinguish one repository from another.
  */
 export function derivePrefixes(repositories: readonly string[]): Map<string, string> {
-  const unique = [...new Set(repositories)];
+  const unique = [...new Set(repositories.map((repository) => repository.toLowerCase()))];
   const byName = lengthenUntilDistinct([...new Set(unique.map(readName))], buildNamePrefix);
 
-  const prefixes = new Map<string, string>();
+  const composed = new Map<string, string>();
   for (const name of byName.keys()) {
     const sharing = unique.filter((repository) => readName(repository) === name);
     const owners = lengthenUntilDistinct(sharing.map(readOwner), (owner, extra) =>
       sharing.length === 1 ? '' : owner.slice(0, extra + 1).toUpperCase(),
     );
     for (const repository of sharing) {
-      prefixes.set(repository, `${owners.get(readOwner(repository)) ?? ''}${byName.get(name) ?? ''}`);
+      composed.set(repository, `${owners.get(readOwner(repository)) ?? ''}${byName.get(name) ?? ''}`);
     }
   }
-  return prefixes;
+
+  const taken = composed.values().toArray();
+  return new Map(
+    repositories.map((repository) => {
+      const prefix = composed.get(repository.toLowerCase());
+      const isShared = taken.filter((other) => other === prefix).length > 1;
+      return [repository, prefix === undefined || isShared ? repository.toUpperCase() : prefix];
+    }),
+  );
 }
 
 // region | Helpers
