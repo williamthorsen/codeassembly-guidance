@@ -41,7 +41,7 @@ The plan artifact is read-only. It records what was planned, and a later reader 
 
 8. **Close** with an action-items block:
    - When the findings propose work, recommend {skill?:triage-spike-findings} with the artifact path and the ticket, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
-   - Otherwise, when a ticket governs the run, offer the closing post on it, with its body shown; on consent, post it as that section states.
+   - Otherwise, when a ticket governs the run, offer to close it with the closing post, with the post's body shown; on consent, post it and close the ticket as that section states.
 
 <!-- include: ../_partials/action-items.md / -->
 
