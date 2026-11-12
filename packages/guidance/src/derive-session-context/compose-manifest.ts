@@ -1,6 +1,7 @@
 /** Composes the branch-manifest JSON. Every function here is pure; the CLI performs the I/O. */
 import path from 'node:path';
 
+import type { DeletionStrategy, MergeStrategy } from '../shared/merge-options.ts';
 import { parseRemoteToOwnerRepo } from '../shared/parse-remote-url.ts';
 import { extractPrNumber, extractTicketId, isPrIdentifier } from './extract-ticket-id.ts';
 import type { ProjectStage, SubdirectoryStage } from './read-project-stage.ts';
@@ -8,6 +9,8 @@ import type { BranchManifest, MergeApproval, PrInitialState, ResolvedPreferences
 
 const DEFAULT_SCM = 'github';
 const DEFAULT_MERGE_APPROVAL = 'ask';
+const DEFAULT_MERGE_DELETION_STRATEGY = 'remote';
+const DEFAULT_MERGE_STRATEGY = 'squash';
 const DEFAULT_PR_INITIAL_STATE = 'draft';
 export const DEFAULT_ARTIFACT_BASE_DIR = '~/ai-artifacts';
 export const DEFAULT_REMOTE_NAME = 'origin';
@@ -83,6 +86,8 @@ export function composeManifest(input: {
     pr_url: prUrl,
     pr_initial_state: resolvePrInitialState(preferences),
     merge_approval: resolveMergeApproval(preferences),
+    merge_deletion_strategy: resolveMergeDeletionStrategy(preferences),
+    merge_strategy: resolveMergeStrategy(preferences),
   };
 }
 
@@ -132,6 +137,16 @@ function joinTicketUrl(baseUrl: string, ticketId: string): string {
 /** Resolves whether `merge-pr` asks before merging, defaulting to `ask`. */
 function resolveMergeApproval(preferences: ResolvedPreferences): MergeApproval {
   return preferences.merge?.approval ?? DEFAULT_MERGE_APPROVAL;
+}
+
+/** Resolves which branches `merge-pr` deletes after merging, defaulting to `remote`. */
+function resolveMergeDeletionStrategy(preferences: ResolvedPreferences): DeletionStrategy {
+  return preferences.merge?.deletion_strategy ?? DEFAULT_MERGE_DELETION_STRATEGY;
+}
+
+/** Resolves how `merge-pr` merges a pull request, defaulting to `squash`. */
+function resolveMergeStrategy(preferences: ResolvedPreferences): MergeStrategy {
+  return preferences.merge?.strategy ?? DEFAULT_MERGE_STRATEGY;
 }
 
 /** Resolves the state in which `create-pr` opens a pull request, defaulting to `draft`. */

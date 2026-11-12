@@ -6,11 +6,10 @@
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isRecord } from '../lib/type-guards.ts';
+import type { DeletionStrategy, MergeStrategy } from '../shared/merge-options.ts';
 
 /** How the head branch deletion ended. */
 export type BranchDeletion = 'already-deleted' | 'by-gh' | 'deleted' | 'failed' | 'not-requested';
-
-export type DeletionStrategy = 'both' | 'none' | 'remote';
 
 /** What one `gh` invocation reported. */
 export interface GhResult {
@@ -50,8 +49,6 @@ export interface MergeResult {
   summary: string;
   url: string;
 }
-
-export type MergeStrategy = 'merge' | 'rebase' | 'squash';
 
 export interface MergeSuccess {
   ok: true;

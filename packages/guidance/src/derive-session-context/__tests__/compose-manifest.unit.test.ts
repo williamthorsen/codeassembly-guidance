@@ -265,6 +265,34 @@ describe(composeManifest, () => {
       expect(manifest.merge_approval).toBe('auto');
     });
 
+    it('defaults merge_strategy to squash and merge_deletion_strategy to remote when the preferences do not set them', () => {
+      const manifest = composeManifest({
+        preferences: { merge: { approval: 'auto' } },
+        projectStage: NO_STAGE,
+        subdirectoryStages: [],
+        branchName: 'main',
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.merge_strategy).toBe('squash');
+      expect(manifest.merge_deletion_strategy).toBe('remote');
+    });
+
+    it('takes merge_strategy and merge_deletion_strategy from merge.strategy and merge.deletion_strategy', () => {
+      const manifest = composeManifest({
+        preferences: { merge: { strategy: 'rebase', deletion_strategy: 'none' } },
+        projectStage: NO_STAGE,
+        subdirectoryStages: [],
+        branchName: 'main',
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.merge_strategy).toBe('rebase');
+      expect(manifest.merge_deletion_strategy).toBe('none');
+    });
+
     it('defaults pr_initial_state to draft when the preferences do not set pr.initial_state', () => {
       const manifest = composeManifest({
         preferences: { project: { slug: 'x' } },

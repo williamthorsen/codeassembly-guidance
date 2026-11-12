@@ -11,12 +11,18 @@ import { chainError } from '@williamthorsen/toolbelt.errors/candidate';
 import { parse as parseYaml } from 'yaml';
 
 import { isEnoent, isRecord } from '../lib/type-guards.ts';
+import {
+  DELETION_STRATEGIES,
+  type DeletionStrategy,
+  MERGE_STRATEGIES,
+  type MergeStrategy,
+} from '../shared/merge-options.ts';
 import type { MergeApproval, PreferencesReadResult, PrInitialState, ResolvedPreferences } from './types.ts';
 
 /**
  * Reads the project and global preferences files, merges them with the project's values taking precedence, and projects
  * the result to the fields that the deriver consumes. A missing file is not an error; the function throws on malformed
- * YAML and on a wrong-typed consumed field, naming the offending file or key path.
+ * YAML and on a wrong-typed consumed field, naming the offending file and, for a field, its key path.
  */
 export async function readPreferences(input: { cwd: string; home?: string }): Promise<PreferencesReadResult> {
   const home = input.home ?? homedir();
@@ -26,8 +32,12 @@ export async function readPreferences(input: { cwd: string; home?: string }): Pr
   const project = await readOptionalYaml(projectPath);
   const global = await readOptionalYaml(globalPath);
 
+  // Validate each file alone, so that an error names the file that contains the offending value.
+  validateFile(projectPath, project);
+  validateFile(globalPath, global);
+
   const merged = mergeSections(global?.value, project?.value);
-  const preferences: ResolvedPreferences = projectPreferences(merged);
+  const preferences: ResolvedPreferences = projectPreferences(merged, { warn: true });
 
   const sources: PreferencesReadResult['sources'] = {
     ...(project !== null && { project: projectPath }),
@@ -95,18 +105,12 @@ function mergeSections(global: unknown, project: unknown): Record<string, unknow
   return result;
 }
 
-/** Walks `merged` and returns a typed `ResolvedPreferences` populated from the fields that the deriver consumes. */
-function projectPreferences(merged: Record<string, unknown>): ResolvedPreferences {
-  const result: WritablePreferences = {};
-
-  // Fall back to the legacy top-level `platform` key, so that an existing `bitbucket` configuration still resolves.
-  const scmValue = merged['scm'] ?? merged['platform'];
-  if (scmValue !== undefined) {
-    if (merged['scm'] === undefined) {
-      process.stderr.write("preferences: the top-level 'platform' key is deprecated; rename it to 'scm'.\n");
-    }
-    result.scm = expectScm(scmValue);
-  }
+/**
+ * Walks `merged` and returns a typed `ResolvedPreferences` populated from the fields that the deriver consumes. `warn`
+ * decides whether a deprecated key is reported on stderr.
+ */
+function projectPreferences(merged: Record<string, unknown>, options: { warn: boolean }): ResolvedPreferences {
+  const result: WritablePreferences = projectScm(merged, options);
 
   if (merged['project'] !== undefined) {
     const section = expectRecord(merged['project'], 'project');
@@ -188,10 +192,36 @@ function projectMerge(value: unknown): Pick<WritablePreferences, 'merge'> {
     return {};
   }
   const section = expectRecord(value, 'merge');
-  if (section['approval'] === undefined) {
+  const merge: NonNullable<WritablePreferences['merge']> = {};
+  if (section['approval'] !== undefined) {
+    merge.approval = expectMergeApproval(section['approval']);
+  }
+  if (section['deletion_strategy'] !== undefined) {
+    merge.deletion_strategy = expectMember(
+      section['deletion_strategy'],
+      'merge.deletion_strategy',
+      DELETION_STRATEGIES,
+    );
+  }
+  if (section['strategy'] !== undefined) {
+    merge.strategy = expectMember(section['strategy'], 'merge.strategy', MERGE_STRATEGIES);
+  }
+  return Object.keys(merge).length === 0 ? {} : { merge };
+}
+
+/**
+ * Projects the `scm` key, falling back to the legacy top-level `platform` key so that an existing `bitbucket`
+ * configuration still resolves. Returns an empty object when neither key is set.
+ */
+function projectScm(merged: Record<string, unknown>, options: { warn: boolean }): Pick<WritablePreferences, 'scm'> {
+  const scmValue = merged['scm'] ?? merged['platform'];
+  if (scmValue === undefined) {
     return {};
   }
-  return { merge: { approval: expectMergeApproval(section['approval']) } };
+  if (merged['scm'] === undefined && options.warn) {
+    process.stderr.write("preferences: the top-level 'platform' key is deprecated; rename it to 'scm'.\n");
+  }
+  return { scm: expectScm(scmValue) };
 }
 
 /** Projects the `triage_feedback` section, returning an empty object when the section does not set a consumed key. */
@@ -228,6 +258,8 @@ interface WritablePreferences {
   };
   merge?: {
     approval?: MergeApproval;
+    deletion_strategy?: DeletionStrategy;
+    strategy?: MergeStrategy;
   };
   pr?: {
     initial_state?: PrInitialState;
@@ -252,6 +284,18 @@ function expectMergeApproval(value: unknown): MergeApproval {
 }
 
 /**
+ * Narrows `value` to one of `members`. Throws with the offending key path and the accepted values when it is none of
+ * them.
+ */
+function expectMember<Member extends string>(value: unknown, keyPath: string, members: readonly Member[]): Member {
+  const member = members.find((candidate) => candidate === value);
+  if (member !== undefined) {
+    return member;
+  }
+  throw new Error(`preferences: '${keyPath}' must be ${formatChoices(members)} (got ${formatValue(value)})`);
+}
+
+/**
  * Narrows `value` to the `pr.initial_state` enum. Throws with the offending key path when the value is neither `"draft"`
  * nor `"ready"`.
  */
@@ -271,6 +315,12 @@ function expectScm(value: unknown): 'github' | 'bitbucket' {
     return value;
   }
   throw new Error(`preferences: 'scm' must be "github" or "bitbucket" (got ${formatValue(value)})`);
+}
+
+/** Renders accepted values as a quoted list joined by commas and a final "or". */
+function formatChoices(members: readonly string[]): string {
+  const quoted = members.map((member) => JSON.stringify(member));
+  return quoted.length <= 2 ? quoted.join(' or ') : `${quoted.slice(0, -1).join(', ')}, or ${quoted.at(-1)}`;
 }
 
 /** Narrows `value` to a positive integer. Throws with the offending key path when the value is not one. */
@@ -295,6 +345,21 @@ function expectRecord(value: unknown, keyPath: string): Record<string, unknown> 
     return value;
   }
   throw new Error(`preferences: '${keyPath}' must be an object (got ${formatValue(value)})`);
+}
+
+/**
+ * Projects one file's parsed value alone, so that a wrong-typed consumed field throws with that file's path in front of
+ * the key path. A missing file passes.
+ */
+function validateFile(filePath: string, file: { value: unknown } | null): void {
+  if (file === null || !isRecord(file.value)) {
+    return;
+  }
+  try {
+    projectPreferences(file.value, { warn: false });
+  } catch (error) {
+    throw chainError(filePath, error);
+  }
 }
 
 /**
