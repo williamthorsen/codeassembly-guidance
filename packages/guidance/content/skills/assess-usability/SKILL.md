@@ -9,7 +9,7 @@ supported-harnesses: [claude]
 
 Find where a product would lead its users to conclude that it is broken or unfinished. Each lens is a {subagent:usability-assessor} that walks its use cases in a browser or, for a command-line product, in a shell, without seeing any other lens's report. You prepare the targets, write the brief that every lens reads, dispatch the lenses one at a time, and merge their reports into one findings artifact.
 
-When the findings leave nothing to triage, the skill's one remote write is the [closing post](../_data/spike-conventions.md#closing-post) on the ticket, made on the developer's consent; otherwise the triage round makes the post. It does not create a ticket or edit an issue. The findings artifact is the input of `triage-spike-findings`, which decides what becomes a ticket.
+When the findings leave nothing to triage, the skill's remote writes are the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and the ticket's close, both made on one consent from the developer; otherwise the triage round makes both. It does not create a ticket or edit any other issue. The findings artifact is the input of `triage-spike-findings`, which decides what becomes a ticket.
 
 ## Inputs
 
@@ -97,4 +97,4 @@ Give the developer the findings artifact's path, the page's URL, and one line of
 
 When the artifact has any finding or idea, name `triage-spike-findings` as the next step, with the findings artifact's path as its input, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states. Findings above the ceiling of a [findings batch](../_data/spike-conventions.md#findings-batches) are triaged in several batches, each on its own ticket.
 
-Otherwise, offer the closing post on the ticket in the same response's action-items block. Its contents, consent, and duplicate check are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the use cases exercised and the page's URL.
+Otherwise, offer to close the ticket with the closing post in the same response's action-items block. The post's contents, the consent, and the checks that a rerun relies on are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the use cases exercised and the page's URL.

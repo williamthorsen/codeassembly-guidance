@@ -39,7 +39,7 @@ The concision and content-placement doctrines for feature tickets and plans appl
 
 - [ ] {A decision that the findings must make possible.}
 
-Deliverable: a findings & recommendation artifact, and the closing post on this ticket.
+Deliverable: a findings & recommendation artifact, and the closing post on this ticket, followed by the ticket's close.
 ```
 
 `Context` and `Scope` are opt-in: Include either only when it adds signal on which the reader must act.
@@ -81,7 +81,7 @@ Differences from the feature ticket: `Question` replaces `Problem`; `Timebox` is
 
 ## Deliverable
 
-{The findings & recommendation artifact (the answers reached, a recommendation, and residual unknowns), and the closing post on the ticket, offered at the closing checkpoint and made on consent, per `spike-conventions.md` § Closing post.}
+{The findings & recommendation artifact (the answers reached, a recommendation, and residual unknowns), and the closing post on the ticket, followed by the ticket's close, offered at the closing checkpoint and made on consent, per `spike-conventions.md` § Closing post.}
 ```
 
 Differences from the feature plan: Investigation steps, each framed by the question that it probes, replace tasks with create/modify/test file lists; `Timebox` is first-class; `Deliverable` replaces `Verification`, since a spike produces findings rather than verifiable behavior, and it names the [closing post](#closing-post); a step does not have a test or documentation criterion.
@@ -90,7 +90,7 @@ The `investigate-spike` skill carries out a spike plan.
 
 ## Closing post
 
-The agent that ends a spike posts its conclusion on the ticket as a comment. The post contains:
+The agent that ends a spike posts its conclusion on the ticket as a comment, then closes the ticket as completed. The post contains:
 
 - The answer to each of the ticket's questions to answer.
 - The recommendation on each of the ticket's decisions to enable.
@@ -99,9 +99,12 @@ The agent that ends a spike posts its conclusion on the ticket as a comment. The
 
 The skill that ends the spike offers the post. When the findings leave an item without a disposition, the triage round that disposes of them on the same ticket ends the spike: `triage-spike-findings` offers the post, and the skill that produced the findings names the triage as its next step without offering the post, which could not yet answer the decisions to enable. When the findings leave nothing to triage, the skill that produced them offers it. A follow-up triage ticket for a later batch does not take a closing post, because its dispositions comment is its record; the post on the original ticket names the follow-ups.
 
-Offer the post as an item in the closing action-items block of that skill, show its body, and post it only on consent: It is a remote write, and the developer is the one who can tell whether a finding is fit for the ticket's tracker. When the session does not have a ticket, do not offer it.
+Offer the post and the close as one item in the closing action-items block of that skill, show the post's body, and name both actions in the ask: "Post this conclusion on #420 and close it as completed?". Make both writes only on consent: They are remote writes, and the developer is the one who can tell whether a finding is fit for the ticket's tracker and whether the spike is done. Consent to the offer is the developer's call on closing the ticket. When the developer declines, post nothing and leave the ticket open. When the session does not have a ticket, do not offer it.
 
-Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-body-file). Before posting, read the ticket's comments, and skip the post when a comment already opens with the post's first line, so that a rerun does not post it twice.
+Before writing, read the ticket's comments and its state, and decide each write on its own, so that a rerun neither posts the conclusion twice nor fails on a closed ticket:
+
+- Post the conclusion unless a comment already opens with the post's first line. Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-body-file).
+- Close the ticket with `gh issue close {number} --reason completed` only while its state is `OPEN`.
 
 ## Findings batches
 
