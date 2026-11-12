@@ -90,7 +90,7 @@ The guard keeps a failed read out of the merge. The redirect above truncates the
 
 Pass each PR label from step 2 as a separate `--pr-label` flag. Pass `--ticket-ref` only when `ticket_ref` from session context is non-null and `headRefName` is `branch_name`, since a PR merged from another branch's checkout belongs to another ticket; the helper uses that reference only when the PR title contains none. Pass this skill's `--scope`, `--type`, `--breaking`, and `--no-breaking` as `--override-scope`, `--override-type`, `--override-breaking`, and `--no-override-breaking`, omitting each one that was not given.
 
-If this step's first run exits non-zero, or the helper is not found, stop with its message. Do not compose a title or body without it. Step 8's re-read stops the same way, since the failure there does not come from any answer.
+If this step's first run exits non-zero, or the helper is not found, stop with its message. Do not compose a title or body without it. Step 8's re-read stops the same way, since the failure there does not come from any answer, and ends the reply with the [refusal summary](#11-report-the-outcome).
 
 A re-run driven by a decision or an answer at step 6's gate does not stop the skill, and neither does a refused `amend-entry`. Report the helper's message and return to the decision or the question that produced the value: The refusal is in the value, and the resolution already in hand is still good. A type spelled with `!` is that case, which step 6 maps rather than passes through.
 
@@ -333,7 +333,7 @@ node {harness_home_dir}/scripts/describe-change.mjs check-merge-body \
 
 The helper refuses a body whose block is malformed, or whose entry count differs from `--entry-count`. A count of `0` requires the body not to contain a block. [`check-merge-body`](../_data/title-templates.md#check-merge-body) states the rules.
 
-If it exits non-zero, stop with its message. Nothing is merged.
+If it exits non-zero, stop, and end the reply with the [refusal summary](#11-report-the-outcome), with its message as the reason. Nothing is merged.
 
 ### 10. Call delegate
 
@@ -352,11 +352,23 @@ Pass the following inputs to the selected delegate per the delegate interface:
 
 The orchestrator never passes a title that `defects` blocks, or a `prompt` sentinel, to the delegate: All values are concrete by this point.
 
-If the delegate stopped or failed, stop. Otherwise continue.
+If the delegate stopped or failed, stop: Its reply ends with its own summary. Otherwise continue.
 
 ### 11. Report the outcome
 
-Report nothing beyond the delegate's completion report, and invoke nothing but step 12's offer to close the parent. The merge flow does not record a lede decision or offer to record one; a capture is the author's own request, made whenever they choose.
+Report nothing beyond the delegate's completion report, and invoke nothing but step 12's offer to close the parent. The completion report ends with the delegate's outcome summary, a rule followed by a heading that states the outcome. Print the summary verbatim, as the last element of the reply, or directly above step 12's action-items block when the turn has an ask. Do not write any sentence of your own before it that restates the outcome: The heading states it, and the bottom of the reply is the part that the terminal shows first.
+
+Every stop after the merge is approved, at step 6's gate or by `merge_approval: auto`, ends the reply the same way. When the delegate did not produce the summary, because the run stopped at step 8 or step 9, end the reply with the refusal summary:
+
+```
+---
+
+## ❌ Did not merge PR #{pr_number}
+
+{reason}
+```
+
+A decline at step 6's gate, or at the gate that step 8 re-renders, is the developer's own choice, and keeps the form that those steps state. The merge flow does not record a lede decision or offer to record one; a capture is the author's own request, made whenever they choose.
 
 ### 12. Offer to close the parent
 
