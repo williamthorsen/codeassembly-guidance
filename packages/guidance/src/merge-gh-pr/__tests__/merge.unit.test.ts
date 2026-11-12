@@ -21,13 +21,21 @@ const SQUASH_REQUEST: MergeRequest = {
   title: 'agents|feat: Add cache',
 };
 
+const MERGED_SUBJECT = 'agents|feat: Add cache (#42)';
+
 describe(formatRefusalSummary, () => {
-  it('names the PR when its number is known, and the PR alone otherwise', () => {
-    expect(formatRefusalSummary(42, 'Body file missing or empty: /tmp/body.md')).toBe(
-      '---\n\n## ❌ Did not merge PR #42\n\nBody file missing or empty: /tmp/body.md',
+  it('names the PR when a reference is known, and omits the PR line otherwise', () => {
+    expect(formatRefusalSummary('#42', 'Body file missing or empty: /tmp/body.md')).toBe(
+      '---\n\n## ❌ Not merged\n\nPR: #42\nReason: Body file missing or empty: /tmp/body.md',
     );
     expect(formatRefusalSummary(undefined, '--pr is required')).toBe(
-      '---\n\n## ❌ Did not merge the PR\n\n--pr is required',
+      '---\n\n## ❌ Not merged\n\nReason: --pr is required',
+    );
+  });
+
+  it('keeps a multi-line reason inside the block by removing its blank lines', () => {
+    expect(formatRefusalSummary('#42', '\nfirst line\n\n  \nsecond line\n')).toBe(
+      '---\n\n## ❌ Not merged\n\nPR: #42\nReason: first line\nsecond line',
     );
   });
 });
@@ -77,7 +85,7 @@ describe(mergePullRequest, () => {
       ok: false,
       exitCode: 1,
       stderr: 'GraphQL: Pull request is not mergeable\n',
-      summary: '---\n\n## ❌ Did not merge PR #42\n\nGraphQL: Pull request is not mergeable',
+      summary: '---\n\n## ❌ Not merged\n\nPR: #42\nReason: GraphQL: Pull request is not mergeable',
     });
     expect(gh.calls).toHaveLength(1);
   });
@@ -92,8 +100,8 @@ describe(mergePullRequest, () => {
       exitCode: 1,
       stderr: 'PR #42 is OPEN after merge; branch not deleted.\n',
       summary:
-        '---\n\n## ❌ Did not merge PR #42\n\n' +
-        'PR #42 is OPEN after the merge command, so a merge queue may hold it. The branch was not deleted.',
+        '---\n\n## ❌ Not merged\n\nPR: https://github.com/acme/widgets/pull/42\n' +
+        'Reason: PR #42 is OPEN after the merge command, so a merge queue may hold it. The branch was not deleted.',
     });
     expect(gh.calls.some((args) => args[0] === 'api')).toBe(false);
   });
@@ -106,8 +114,8 @@ describe(mergePullRequest, () => {
     expect(outcome).toMatchObject({
       ok: false,
       summary:
-        '---\n\n## ⚠️ Could not confirm the merge of PR #42\n\n' +
-        "The merge command succeeded, but the PR's state could not be read. The branch was not deleted.",
+        '---\n\n## ⚠️ Merge not confirmed\n\nPR: #42\n' +
+        "Reason: The merge command succeeded, but the PR's state could not be read. The branch was not deleted.",
     });
     expect(gh.calls.some((args) => args[0] === 'api')).toBe(false);
   });
@@ -121,8 +129,8 @@ describe(mergePullRequest, () => {
       ok: false,
       exitCode: 1,
       summary:
-        '---\n\n## ⚠️ Could not confirm the merge of PR #42\n\n' +
-        "The merge command succeeded, but the PR's state could not be read. The branch was not deleted.\n\n" +
+        '---\n\n## ⚠️ Merge not confirmed\n\nPR: #42\n' +
+        "Reason: The merge command succeeded, but the PR's state could not be read. The branch was not deleted.\n" +
         'gh: Bad gateway (HTTP 502)',
     });
   });
@@ -135,29 +143,29 @@ describe(mergePullRequest, () => {
     expect(outcome).toMatchObject({
       ok: false,
       exitCode: 1,
-      summary: expect.stringContaining('## ⚠️ Could not confirm the merge of PR #42'),
+      summary: expect.stringContaining('## ⚠️ Merge not confirmed'),
     });
     expect(outcome.ok || outcome.summary).toContain('stdout maxBuffer length exceeded');
   });
 
   describe('summary', () => {
     it.each([
-      ['deleted', 'remote', undefined, '🗑️ Deleted remote branch feature/cache'],
+      ['deleted', 'remote', undefined, 'Remote branch feature/cache: 🗑️ Deleted'],
       [
         'already-deleted',
         'remote',
         fail('gh: Reference does not exist (HTTP 422)\n'),
-        '🗑️ Remote branch feature/cache was already deleted',
+        'Remote branch feature/cache: 🗑️ Already deleted',
       ],
-      ['by-gh', 'both', undefined, '🗑️ Deleted local and remote branch feature/cache'],
-      ['not-requested', 'none', undefined, '⏸️ Kept branch feature/cache'],
+      ['by-gh', 'both', undefined, 'Local and remote branch feature/cache: 🗑️ Deleted'],
+      ['not-requested', 'none', undefined, 'Remote branch feature/cache: ⏸️ Kept'],
       [
         'failed',
         'remote',
         fail('gh: Server Error (HTTP 500)\n'),
-        '⚠️ Did not delete remote branch feature/cache: gh: Server Error (HTTP 500)',
+        'Remote branch feature/cache: ⚠️ Not deleted: gh: Server Error (HTTP 500)',
       ],
-    ] as const)('reports a %s deletion on its own line', async (_branchDeletion, deletionStrategy, api, line) => {
+    ] as const)('reports a %s deletion on the branch line', async (_branchDeletion, deletionStrategy, api, line) => {
       const gh = makeFakeGh(api === undefined ? {} : { api });
 
       const outcome = await mergePullRequest({ ...SQUASH_REQUEST, deletionStrategy }, gh.run);
@@ -165,9 +173,58 @@ describe(mergePullRequest, () => {
       expect(outcome).toMatchObject({
         ok: true,
         result: {
-          summary: `---\n\n## 🔀 Merged PR #42 into main\n\n${line}\nsquash · abc1234 · https://github.com/acme/widgets/pull/42`,
+          summary:
+            '---\n\n## 🔀 Merged into main · squash · abc1234\n\n' +
+            `Commit title: ${MERGED_SUBJECT}\nPR: https://github.com/acme/widgets/pull/42\n${line}`,
         },
       });
+    });
+
+    it.each([
+      ['merge', '## 🔀 Merged into main · merge commit · abc1234', 'Commit title:'],
+      ['rebase', '## 🔀 Merged into main · rebase · abc1234', 'Last commit title:'],
+    ] as const)('names the %s strategy and labels its commit title', async (strategy, heading, label) => {
+      const gh = makeFakeGh();
+
+      const outcome = await mergePullRequest({ ...SQUASH_REQUEST, strategy }, gh.run);
+
+      const lines = outcome.ok ? outcome.result.summary.split('\n') : [];
+      expect(lines[2]).toBe(heading);
+      expect(lines[4]).toBe(`${label} ${MERGED_SUBJECT}`);
+    });
+
+    it('reads the subject of the merge commit, keeping only its first line', async () => {
+      const gh = makeFakeGh({ commit: ok(`${MERGED_SUBJECT}\n\nBody line.\n`) });
+
+      const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+      expect(gh.calls).toContainEqual(['api', 'repos/{owner}/{repo}/commits/abc1234def', '--jq', '.commit.message']);
+      expect(outcome).toMatchObject({ ok: true, warnings: [] });
+      expect(outcome.ok && outcome.result.summary).toContain(`\nCommit title: ${MERGED_SUBJECT}\n`);
+    });
+
+    it.each([
+      ['fails', fail('gh: Not Found (HTTP 404)\n'), 'gh: Not Found (HTTP 404)'],
+      ['returns an empty message', ok('\n'), 'empty commit message'],
+      ['throws', new Error('gh was killed by SIGTERM'), 'gh was killed by SIGTERM'],
+    ] as const)('falls back to the submitted title and warns when the read %s', async (_case, commit, reason) => {
+      const gh = makeFakeGh({ commit });
+
+      const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
+
+      expect(outcome).toMatchObject({
+        ok: true,
+        warnings: [`warning: Could not read the subject of merge commit abc1234def: ${reason}`],
+      });
+      expect(outcome.ok && outcome.result.summary).toContain('\nCommit title: agents|feat: Add cache\n');
+    });
+
+    it('shows the commit title as unavailable when the read fails and no title was submitted', async () => {
+      const gh = makeFakeGh({ commit: fail('gh: Not Found (HTTP 404)\n') });
+
+      const outcome = await mergePullRequest({ ...SQUASH_REQUEST, strategy: 'rebase', title: undefined }, gh.run);
+
+      expect(outcome.ok && outcome.result.summary).toContain('\nLast commit title: unavailable\n');
     });
 
     it('omits the base branch from the heading when the view does not name it', async () => {
@@ -175,7 +232,7 @@ describe(mergePullRequest, () => {
 
       const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
 
-      expect(outcome.ok && outcome.result.summary.split('\n', 3)[2]).toBe('## 🔀 Merged PR #42');
+      expect(outcome.ok && outcome.result.summary.split('\n', 3)[2]).toBe('## 🔀 Merged · squash · abc1234');
     });
   });
 
@@ -194,8 +251,10 @@ describe(mergePullRequest, () => {
           mergeCommit: { oid: 'abc1234def' },
           mergedAt: '2026-09-28T22:00:00Z',
           summary:
-            '---\n\n## 🔀 Merged PR #42 into main\n\n' +
-            '🗑️ Deleted remote branch feature/cache\nsquash · abc1234 · https://github.com/acme/widgets/pull/42',
+            '---\n\n## 🔀 Merged into main · squash · abc1234\n\n' +
+            `Commit title: ${MERGED_SUBJECT}\n` +
+            'PR: https://github.com/acme/widgets/pull/42\n' +
+            'Remote branch feature/cache: 🗑️ Deleted',
           url: 'https://github.com/acme/widgets/pull/42',
         },
         warnings: [],
@@ -226,7 +285,7 @@ describe(mergePullRequest, () => {
       const outcome = await mergePullRequest(SQUASH_REQUEST, gh.run);
 
       expect(outcome).toMatchObject({ ok: true, result: { branchDeletion: 'already-deleted' } });
-      expect(gh.calls.some((args) => args[0] === 'api')).toBe(false);
+      expect(gh.calls.some(isDeleteCall)).toBe(false);
     });
 
     it('warns on any other deletion failure and still reports the merge as successful', async () => {
@@ -252,7 +311,7 @@ describe(mergePullRequest, () => {
         ok: true,
         result: {
           branchDeletion: 'failed',
-          summary: expect.stringContaining('⚠️ Did not delete remote branch feature/cache: gh was killed by SIGTERM'),
+          summary: expect.stringContaining('Remote branch feature/cache: ⚠️ Not deleted: gh was killed by SIGTERM'),
         },
       });
     });
@@ -266,18 +325,24 @@ describe(mergePullRequest, () => {
 
       expect(bothOutcome).toMatchObject({ result: { branchDeletion: 'by-gh' } });
       expect(noneOutcome).toMatchObject({ result: { branchDeletion: 'not-requested' } });
-      expect([...both.calls, ...none.calls].some((args) => args[0] === 'api')).toBe(false);
+      expect([...both.calls, ...none.calls].some(isDeleteCall)).toBe(false);
     });
   });
 });
 
 // region | Helpers
 
-/** A canned response per subcommand; an `Error` makes the runner throw it. */
+/** A canned response per call; `api` answers the branch deletion and `commit` the commit read. An `Error` makes the runner throw it. */
 interface FakeGhResponses {
   api?: Error | GhResult;
+  commit?: Error | GhResult;
   merge?: Error | GhResult;
   view?: Error | GhResult;
+}
+
+/** Returns true for the `gh api -X DELETE` call that deletes the head branch. */
+function isDeleteCall(args: readonly string[]): boolean {
+  return args[0] === 'api' && args[1] === '-X';
 }
 
 /** Returns a failed `gh` result with the given stderr. */
@@ -295,8 +360,11 @@ function makeFakeGh(responses: FakeGhResponses = {}): {
     calls,
     run: (args) => {
       calls.push([...args]);
-      if (args[0] === 'api') {
+      if (isDeleteCall(args)) {
         return respond(responses.api ?? ok(''));
+      }
+      if (args[0] === 'api') {
+        return respond(responses.commit ?? ok(`${MERGED_SUBJECT}\n`));
       }
       if (args[1] === 'merge') {
         return respond(responses.merge ?? ok(''));

@@ -26,13 +26,14 @@ const MERGED_VIEW = JSON.stringify({
 });
 
 // A `gh` stand-in: It appends its argv to the log as one JSON line and takes its output and exit code from the
-// STUB_* variables.
+// STUB_* variables. `API` is the branch deletion and `COMMIT` the read of the merge commit's subject.
 const GH_STUB = String.raw`#!${process.execPath}
 const fs = require('node:fs');
 const args = process.argv.slice(2);
 fs.appendFileSync(process.env.STUB_LOG, JSON.stringify(args) + '\n');
-const kind = args[0] === 'api' ? 'API' : args[1] === 'merge' ? 'MERGE' : 'VIEW';
-process.stdout.write(kind === 'VIEW' ? process.env.STUB_VIEW : '');
+const kind = args[0] === 'api' ? (args[1] === '-X' ? 'API' : 'COMMIT') : args[1] === 'merge' ? 'MERGE' : 'VIEW';
+const stdout = { COMMIT: 'agents|feat: Quote safely (#42)\n', VIEW: process.env.STUB_VIEW };
+process.stdout.write(stdout[kind] ?? '');
 process.stderr.write(process.env['STUB_' + kind + '_STDERR'] ?? '');
 process.exit(Number(process.env['STUB_' + kind + '_EXIT'] ?? '0'));
 `;
@@ -58,14 +59,17 @@ describe('merge-gh-pr CLI', () => {
     const calls = await readCalls(workDir);
     expect(calls[0]).toEqual(['pr', 'merge', '42', '--squash', '--subject', title, '--body-file', bodyFile]);
     expect(calls[2]).toEqual(['api', '-X', 'DELETE', 'repos/acme/widgets/git/refs/heads/feature/cache']);
+    expect(calls[3]).toEqual(['api', 'repos/{owner}/{repo}/commits/abc123', '--jq', '.commit.message']);
     expect(JSON.parse(result.stdout)).toEqual({
       branchDeletion: 'deleted',
       headRefName: 'feature/cache',
       mergeCommit: { oid: 'abc123' },
       mergedAt: '2026-09-28T22:00:00Z',
       summary:
-        '---\n\n## 🔀 Merged PR #42 into main\n\n' +
-        '🗑️ Deleted remote branch feature/cache\nsquash · abc123 · https://github.com/acme/widgets/pull/42',
+        '---\n\n## 🔀 Merged into main · squash · abc123\n\n' +
+        'Commit title: agents|feat: Quote safely (#42)\n' +
+        'PR: https://github.com/acme/widgets/pull/42\n' +
+        'Remote branch feature/cache: 🗑️ Deleted',
       url: 'https://github.com/acme/widgets/pull/42',
     });
   });
@@ -110,7 +114,7 @@ describe('merge-gh-pr CLI', () => {
     expect(result.exitCode).toBe(4);
     expect(result.stderr).toBe('GraphQL: Pull request is not mergeable\n');
     expect(JSON.parse(result.stdout)).toEqual({
-      summary: '---\n\n## ❌ Did not merge PR #42\n\nGraphQL: Pull request is not mergeable',
+      summary: '---\n\n## ❌ Not merged\n\nPR: #42\nReason: GraphQL: Pull request is not mergeable',
     });
   });
 
@@ -133,7 +137,9 @@ describe('merge-gh-pr CLI', () => {
 
     expect(result.exitCode).toBe(1);
     expect(result.stderr).toContain('--strategy must be one of merge, rebase, squash');
-    expect(JSON.parse(result.stdout)).toMatchObject({ summary: expect.stringContaining('## ❌ Did not merge PR #42') });
+    expect(JSON.parse(result.stdout)).toMatchObject({
+      summary: expect.stringContaining('## ❌ Not merged\n\nPR: #42\n'),
+    });
   });
 });
 

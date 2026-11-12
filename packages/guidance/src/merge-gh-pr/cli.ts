@@ -63,7 +63,8 @@ async function main(): Promise<void> {
   } catch (error) {
     const message = describeError(error);
     process.stderr.write(`merge-gh-pr: ${message}\n`);
-    writeJson({ summary: formatRefusalSummary(scanPrNumber(argv), message) });
+    const prNumber = scanPrNumber(argv);
+    writeJson({ summary: formatRefusalSummary(prNumber === undefined ? undefined : `#${prNumber}`, message) });
     process.exit(1);
   }
 }

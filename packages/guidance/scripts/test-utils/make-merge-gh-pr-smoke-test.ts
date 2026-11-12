@@ -6,10 +6,12 @@ import { isRecord } from './is-record.ts';
 import { makeSmokeScratchDir } from './smoke-scratch.ts';
 import type { SmokeTestInvocation } from './smoke-test-invocation.ts';
 
+const SMOKE_SUBJECT = 'smoke|feat: Rebase the branch';
+
 /**
  * Puts a `gh` stand-in first on `PATH`, then returns an invocation that rebases PR 42 and deletes its branch through
- * it. The stand-in reports the PR as merged and every call as successful, so the run exercises the merge, the state
- * check, and the deletion without contacting GitHub.
+ * it. The stand-in reports the PR as merged, the merge commit's subject, and every call as successful, so the run
+ * exercises the merge, the state check, the deletion, and the subject read without contacting GitHub.
  */
 export function makeMergeGhPrSmokeTest(): SmokeTestInvocation {
   const binDir = makeSmokeScratchDir('merge-gh-pr-bin-');
@@ -26,7 +28,9 @@ export function makeMergeGhPrSmokeTest(): SmokeTestInvocation {
   const ghPath = path.join(binDir, 'gh');
   writeFileSync(
     ghPath,
-    `#!${process.execPath}\nif (process.argv[3] === 'view') process.stdout.write(${JSON.stringify(view)});\n`,
+    `#!${process.execPath}\n` +
+      `if (process.argv[3] === 'view') process.stdout.write(${JSON.stringify(view)});\n` +
+      `if (process.argv[2] === 'api' && process.argv[3] !== '-X') process.stdout.write(${JSON.stringify(SMOKE_SUBJECT)});\n`,
   );
   chmodSync(ghPath, 0o755);
 
@@ -50,8 +54,10 @@ function assertBranchDeleted(result: unknown): void {
   if (!isRecord(result['mergeCommit']) || result['mergeCommit']['oid'] !== 'abc123') {
     throw new Error(`expected mergeCommit.oid abc123, got ${JSON.stringify(result['mergeCommit'])}`);
   }
-  if (typeof result['summary'] !== 'string' || !result['summary'].includes('## 🔀 Merged PR #42 into main')) {
-    throw new Error(`expected a summary headed by the merge, got ${JSON.stringify(result['summary'])}`);
+  const summary = result['summary'];
+  const expectedLines = ['## 🔀 Merged into main · rebase · abc123', `Last commit title: ${SMOKE_SUBJECT}`];
+  if (typeof summary !== 'string' || expectedLines.some((line) => !summary.includes(line))) {
+    throw new Error(`expected a summary headed by the merge, got ${JSON.stringify(summary)}`);
   }
 }
 

@@ -61,10 +61,10 @@ export type RunGh = (args: readonly string[]) => Promise<GhResult>;
 
 const VIEW_FIELDS = 'state,mergeCommit,url,mergedAt,baseRefName,headRefName,headRepository,headRepositoryOwner';
 
-/** Returns the summary of a merge that did not take place, naming the PR when its number is known. */
-export function formatRefusalSummary(prNumber: number | undefined, reason: string): string {
-  const subject = prNumber === undefined ? 'the PR' : `PR #${prNumber}`;
-  return formatSummary(`## ❌ Did not merge ${subject}`, [reason]);
+/** Returns the summary of a merge that did not take place, naming the PR when a reference to it is known. */
+export function formatRefusalSummary(prRef: string | undefined, reason: string): string {
+  const prLines = prRef === undefined ? [] : [`PR: ${prRef}`];
+  return formatSummary('## ❌ Not merged', [...prLines, `Reason: ${normalizeBlock(reason)}`]);
 }
 
 /**
@@ -79,7 +79,7 @@ export async function mergePullRequest(request: MergeRequest, runGh: RunGh): Pro
       ok: false,
       exitCode: merge.exitCode,
       stderr: merge.stderr,
-      summary: formatRefusalSummary(request.prNumber, reason),
+      summary: formatRefusalSummary(`#${request.prNumber}`, reason),
     };
   }
 
@@ -109,12 +109,13 @@ export async function mergePullRequest(request: MergeRequest, runGh: RunGh): Pro
       ok: false,
       exitCode: 1,
       stderr: `PR #${request.prNumber} is ${merged.state} after merge; branch not deleted.\n`,
-      summary: formatRefusalSummary(request.prNumber, reason),
+      summary: formatRefusalSummary(merged.url ?? `#${request.prNumber}`, reason),
     };
   }
 
   const warnings: string[] = [];
   const deletion = await deleteHeadBranch(request.deletionStrategy, merged, runGh, warnings);
+  const commitTitle = await readCommitTitle(request, merged.oid, runGh, warnings);
 
   return {
     ok: true,
@@ -123,7 +124,7 @@ export async function mergePullRequest(request: MergeRequest, runGh: RunGh): Pro
       headRefName: merged.headRefName,
       mergeCommit: { oid: merged.oid },
       mergedAt: merged.mergedAt,
-      summary: formatMergedSummary(request, merged, deletion),
+      summary: formatMergedSummary(request, merged, deletion, commitTitle),
       url: merged.url,
     },
     warnings,
@@ -149,7 +150,17 @@ interface MergedView {
   url: string;
 }
 
-type ParsedView = MergedView | { kind: 'not-merged'; state: string } | { kind: 'unreadable' };
+type ParsedView = MergedView | { kind: 'not-merged'; state: string; url: string | undefined } | { kind: 'unreadable' };
+
+/** The base repository's commits endpoint; `gh api` fills in the placeholders. */
+const COMMITS_ENDPOINT = 'repos/{owner}/{repo}/commits';
+
+/** GitHub's name for the result of each strategy. */
+const STRATEGY_NAMES: Record<MergeStrategy, string> = {
+  merge: 'merge commit',
+  rebase: 'rebase',
+  squash: 'squash',
+};
 
 /** Returns the `gh pr merge` argument array for the request. */
 function buildMergeArgs(request: MergeRequest): string[] {
@@ -198,43 +209,64 @@ async function deleteHeadBranch(
   return { branchDeletion: 'failed', reason };
 }
 
-/** Returns the line that reports how the head branch deletion ended. */
+/** Returns the labelled line that reports how the head branch deletion ended. */
 function formatDeletionLine(branch: string, deletion: DeletionReport): string {
+  const label = deletion.branchDeletion === 'by-gh' ? `Local and remote branch ${branch}` : `Remote branch ${branch}`;
+  return `${label}: ${formatDeletionState(deletion)}`;
+}
+
+/** Returns the state that the deletion line reports. */
+function formatDeletionState(deletion: DeletionReport): string {
   switch (deletion.branchDeletion) {
     case 'already-deleted':
-      return `🗑️ Remote branch ${branch} was already deleted`;
+      return '🗑️ Already deleted';
     case 'by-gh':
-      return `🗑️ Deleted local and remote branch ${branch}`;
     case 'deleted':
-      return `🗑️ Deleted remote branch ${branch}`;
+      return '🗑️ Deleted';
     case 'failed':
-      return `⚠️ Did not delete remote branch ${branch}: ${deletion.reason ?? 'unknown error'}`;
+      return `⚠️ Not deleted: ${normalizeBlock(deletion.reason ?? 'unknown error')}`;
     case 'not-requested':
-      return `⏸️ Kept branch ${branch}`;
+      return '⏸️ Kept';
   }
 }
 
 /** Returns the summary of a confirmed merge. */
-function formatMergedSummary(request: MergeRequest, merged: MergedView, deletion: DeletionReport): string {
+function formatMergedSummary(
+  request: MergeRequest,
+  merged: MergedView,
+  deletion: DeletionReport,
+  commitTitle: string,
+): string {
   const target = merged.baseRefName === undefined ? '' : ` into ${merged.baseRefName}`;
-  return formatSummary(`## 🔀 Merged PR #${request.prNumber}${target}`, [
-    `${formatDeletionLine(merged.headRefName, deletion)}\n${request.strategy} · ${merged.oid.slice(0, 7)} · ${merged.url}`,
+  const titleLabel = request.strategy === 'rebase' ? 'Last commit title' : 'Commit title';
+  return formatSummary(`## 🔀 Merged${target} · ${STRATEGY_NAMES[request.strategy]} · ${merged.oid.slice(0, 7)}`, [
+    `${titleLabel}: ${commitTitle}`,
+    `PR: ${merged.url}`,
+    formatDeletionLine(merged.headRefName, deletion),
   ]);
 }
 
-/** Joins a rule, the heading, and each paragraph, separated by blank lines. */
-function formatSummary(heading: string, paragraphs: readonly string[]): string {
-  return ['---', heading, ...paragraphs].join('\n\n');
+/**
+ * Joins a rule, the heading, and the labelled lines. The blank line below the rule keeps `---` from turning the line
+ * above it into a setext heading.
+ */
+function formatSummary(heading: string, lines: readonly string[]): string {
+  return ['---', '', heading, '', ...lines].join('\n');
 }
 
 /** Returns the summary of a merge whose outcome could not be read after `gh` accepted it. */
 function formatUnconfirmedSummary(prNumber: number, stderr: string): string {
   const reason = "The merge command succeeded, but the PR's state could not be read. The branch was not deleted.";
   const diagnostic = stderr.trim();
-  return formatSummary(
-    `## ⚠️ Could not confirm the merge of PR #${prNumber}`,
-    diagnostic.length > 0 ? [reason, diagnostic] : [reason],
-  );
+  return formatSummary('## ⚠️ Merge not confirmed', [
+    `PR: #${prNumber}`,
+    `Reason: ${diagnostic.length > 0 ? `${reason}\n${normalizeBlock(diagnostic)}` : reason}`,
+  ]);
+}
+
+/** Trims the text and removes its blank lines, so that it stays inside the summary's block of lines. */
+function normalizeBlock(text: string): string {
+  return text.trim().replaceAll(/\n(?:[\t ]*\n)+/g, '\n');
 }
 
 /** Parses the post-merge `gh pr view` JSON into the fields that confirm the merge and locate the head ref. */
@@ -249,7 +281,7 @@ function parseMergedView(stdout: string): ParsedView {
     return { kind: 'unreadable' };
   }
   if (parsed['state'] !== 'MERGED') {
-    return { kind: 'not-merged', state: parsed['state'] };
+    return { kind: 'not-merged', state: parsed['state'], url: readNonEmptyString(parsed['url']) };
   }
   const { headRefName, mergeCommit, mergedAt, url } = parsed;
   const oid = isRecord(mergeCommit) ? mergeCommit['oid'] : undefined;
@@ -271,6 +303,25 @@ function parseMergedView(stdout: string): ParsedView {
     oid,
     url,
   };
+}
+
+/**
+ * Returns the subject of the commit that the merge created, read from the base repository, which `gh` resolves for
+ * `{owner}/{repo}` as it does for `gh pr view`. Falls back to the submitted title, or `unavailable` when none was
+ * submitted, and adds a warning when the subject cannot be read.
+ */
+async function readCommitTitle(request: MergeRequest, oid: string, runGh: RunGh, warnings: string[]): Promise<string> {
+  const read = await runGhAfterMerge(runGh, ['api', `${COMMITS_ENDPOINT}/${oid}`, '--jq', '.commit.message']);
+  const subject = read.exitCode === 0 ? (read.stdout.trim().split('\n', 1)[0] ?? '').trim() : '';
+  if (subject.length > 0) {
+    return subject;
+  }
+  const reason =
+    read.exitCode === 0
+      ? 'empty commit message'
+      : read.stderr.trim() || `\`gh api\` exited with code ${read.exitCode}.`;
+  warnings.push(`warning: Could not read the subject of merge commit ${oid}: ${reason}`);
+  return request.title ?? 'unavailable';
 }
 
 /** Returns the `login` or `name` string of a `gh` repository or owner object, or `undefined` when it is absent. */
