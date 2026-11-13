@@ -29,7 +29,7 @@ A value-bearing flag accepts both `--diataxis howto` and `--diataxis=howto`.
 
 ### Scope
 
-By default the helper searches up to two knowledge bases: the one discovered by walking up from the current directory for a `.kb/` folder, plus the registry's `default_kb` (the machine's default knowledge base). When neither source resolves, or the two resolve to the same path, the default scope contains fewer than two. `--all-kbs` widens the search to every knowledge base declared in the merged `kb.yaml` registry.
+By default the helper searches the knowledge base discovered by walking up from the current directory for a `.kb/` folder, the registry's `default_kb` (the machine's default knowledge base), and every registry entry that declares `in_default_scope: true` (see the `kb.yaml` registry's own documentation in `@williamthorsen/kb`). A knowledge base that more than one source admits is searched once. `in_default_scope: false` does not exclude a knowledge base that discovery or `default_kb` admits. `--all-kbs` widens the search to every knowledge base declared in the merged `kb.yaml` registry.
 
 `--store <name>` (alias `--kb <name>`) narrows the search to a single registered knowledge base, resolved by registry name alone: The helper does not run a `.kb/` discovery walk, so a project-local `.kb/` near which the helper happened to be invoked is never in scope. A name that does not match any registry entry yields an empty result with an explanatory diagnostic.
 
