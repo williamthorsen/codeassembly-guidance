@@ -9,7 +9,7 @@ import { resolveKbDir } from '@williamthorsen/kb/layout';
 import { loadAliases } from '@williamthorsen/kb/tags';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
-import { checkSharedOptIn } from '../kb-shared/check-shared-opt-in.ts';
+import { checkSharedOptIn, type SharedOptInOutcome } from '../kb-shared/check-shared-opt-in.ts';
 import { formatKbResolutionFailure } from '../kb-shared/format-kb-resolution-failure.ts';
 import { type ResolvedKb, resolveWritableKb } from '../kb-shared/resolve-writable-kb.ts';
 import { parseTagList } from '../kb-shared/tag-helpers.ts';
@@ -240,10 +240,7 @@ function buildWriteArgs(input: { raw: Partial<Record<ValueFlag, string>>; auto: 
 }
 
 /** Maps a failed shared-store check to the helper's structured error shape. */
-function formatOptInFailure(
-  outcome: Extract<Awaited<ReturnType<typeof checkSharedOptIn>>, { ok: false }>,
-  kb: ResolvedKb,
-): AddFailure {
+function formatOptInFailure(outcome: Extract<SharedOptInOutcome, { ok: false }>, kb: ResolvedKb): AddFailure {
   if (outcome.reason === 'invalid-config') {
     return { ok: false, error: 'invalid-config', message: outcome.message };
   }
