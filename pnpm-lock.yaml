@@ -302,8 +302,8 @@ importers:
         specifier: 'catalog:'
         version: 0.4.0
       '@williamthorsen/kb':
-        specifier: 0.11.3
-        version: 0.11.3
+        specifier: 0.12.0
+        version: 0.12.0
       '@williamthorsen/nmr':
         specifier: 'catalog:'
         version: 2.0.2(typescript@6.0.3)(vite@8.3.8(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@5.1.0)
@@ -1211,8 +1211,8 @@ packages:
       readyup:
         optional: true
 
-  '@williamthorsen/kb@0.11.3':
-    resolution: {integrity: sha512-WoL7PNbpR5wa+OSWl4Sufudx7j7euKBFcutmL4m0wp9zHBWy47sdw4Cj04uIHbYtOAsZxCdf2N0/syQoK4Plmg==}
+  '@williamthorsen/kb@0.12.0':
+    resolution: {integrity: sha512-GVgV2FMwXbP3fKygqU8zxfP/Y9K5PkhV5uZB2nQkUbUYuq2iFSh6YBw0xqCY0FCPadZCmleEJYxIgUNeGiJ6Aw==}
     engines: {node: '>=24'}
     hasBin: true
 
@@ -3464,7 +3464,7 @@ snapshots:
       - supports-color
       - ts-declaration-location
 
-  '@williamthorsen/kb@0.11.3':
+  '@williamthorsen/kb@0.12.0':
     dependencies:
       '@williamthorsen/toolbelt.errors': 0.9.1
       '@williamthorsen/toolbelt.terminal': 0.3.0
