@@ -39,10 +39,25 @@ describe(runAdd, () => {
 
     expect(result.kb.path).toBe(kbPath);
     expect(result.taxonomyPath).toBe(join(kbPath, '.kb', 'taxonomy.yaml'));
+    expect(result.visibility).toBe('private');
     expect(result.domains).toEqual([
       { path: 'engineering', description: 'Software engineering practice', provisional: false, noteCount: 0 },
     ]);
     expect(result.undeclaredFolders).toEqual([{ path: 'languages', noteCount: 1 }]);
+  });
+
+  it("reports a shared store's visibility", async () => {
+    const kbPath = await makeKb({ visibility: 'shared' });
+
+    const result = await runAdd({
+      argv: ['--survey'],
+      stdin: makeBodyStream(''),
+      startDir: kbPath,
+      now: NOW,
+      home: kbPath,
+    });
+
+    expect(result).toMatchObject({ ok: true, mode: 'survey', visibility: 'shared' });
   });
 
   it('surveys a store that does not declare a taxonomy', async () => {

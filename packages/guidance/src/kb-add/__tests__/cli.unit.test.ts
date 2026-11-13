@@ -41,6 +41,7 @@ describe(parseArgs, () => {
       tags: ['one', 'two', 'three'],
       domainDescription: 'TypeScript language notes',
       auto: false,
+      shared: false,
     });
   });
 
@@ -96,6 +97,15 @@ describe(parseArgs, () => {
 
     expect(parsed.auto).toBe(false);
     expect(parsed.domainDescription).toBeNull();
+  });
+
+  it('parses --shared as a write flag, defaulting to false', () => {
+    expect(parseWriteArgs(['--title', 'Stub', '--shared']).shared).toBe(true);
+    expect(parseWriteArgs(['--title', 'Stub']).shared).toBe(false);
+  });
+
+  it('rejects --shared alongside --survey', () => {
+    expect(() => parseArgs(['--survey', '--shared'])).toThrow(/--survey takes only --kb; drop --shared/);
   });
 
   it('throws when --title is missing', () => {

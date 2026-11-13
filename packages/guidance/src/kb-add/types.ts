@@ -38,6 +38,8 @@ export interface WriteArgs {
   domainDescription: string | null;
   /** Whether the capture ran unconfirmed, which puts a declared domain under `provisional:`. */
   auto: boolean;
+  /** Whether the caller opted into writing into a store whose `visibility` is `shared`. */
+  shared: boolean;
 }
 
 /** The prepared note ready to be written: the assertion record and the canonicalization audit trail. */
@@ -80,7 +82,8 @@ export interface AddFailure {
 }
 
 /** Categorical error codes that the helper can return without an unexpected throw. */
-export type AddErrorCode = KbResolutionErrorCode | 'collision' | 'invalid-args' | 'invalid-config' | 'invalid-title';
+export type AddErrorCode =
+  KbResolutionErrorCode | 'collision' | 'invalid-args' | 'invalid-config' | 'invalid-title' | 'shared-kb';
 
 /** Per-error structured details. */
 export interface AddErrorDetails {
@@ -92,6 +95,10 @@ export interface AddErrorDetails {
   readonlyKbName?: string;
   /** Absolute path of the readonly KB that refused the write, set when `error: 'readonly-kb'`. */
   readonlyKbPath?: string;
+  /** Registry name of the shared KB that refused the write, set when `error: 'shared-kb'` and the KB is registered. */
+  sharedKbName?: string;
+  /** Absolute path of the shared KB that refused the write, set when `error: 'shared-kb'`. */
+  sharedKbPath?: string;
 }
 
 /** The helper's full stdout payload for a write invocation: a discriminated union on `ok`. */

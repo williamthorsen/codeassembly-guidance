@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
 import { enumerateNotePaths } from '@williamthorsen/kb/check';
-import { loadKbConfig } from '@williamthorsen/kb/config';
+import { loadKbConfig, type StoreVisibility } from '@williamthorsen/kb/config';
 import { resolveKbDir, TAXONOMY_FILE } from '@williamthorsen/kb/layout';
 import { loadTaxonomy, resolveDomain } from '@williamthorsen/kb/taxonomy';
 
@@ -9,6 +9,8 @@ import { loadTaxonomy, resolveDomain } from '@williamthorsen/kb/taxonomy';
 export interface KbSurvey {
   /** Absolute path of `.kb/taxonomy.yaml`, whether or not the file exists. */
   taxonomyPath: string;
+  /** The store's effective visibility; a write into a `shared` store requires `--shared`. */
+  visibility: StoreVisibility;
   /** Every declared domain, ordered by path. */
   domains: SurveyedDomain[];
   /** Every folder containing notes outside every declared domain, ordered by path. */
@@ -78,7 +80,7 @@ export async function surveyKb(input: { kbPath: string }): Promise<KbSurvey> {
     .toArray()
     .toSorted(compareByPath);
 
-  return { taxonomyPath: join(input.kbPath, TAXONOMY_FILE), domains, undeclaredFolders };
+  return { taxonomyPath: join(input.kbPath, TAXONOMY_FILE), visibility: config.visibility, domains, undeclaredFolders };
 }
 
 // region | Helpers
