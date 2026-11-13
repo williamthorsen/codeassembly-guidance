@@ -1,9 +1,9 @@
-import { mkdtemp, rm, symlink } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
+import { symlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
+import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { listUnsearchedPrivateStores } from '../list-unsearched-private-stores.ts';
 
 const FIXTURES = join(import.meta.dirname, 'fixtures');
@@ -19,15 +19,6 @@ const REGISTERED = [
 ];
 
 describe(listUnsearchedPrivateStores, () => {
-  let linkDir: string | undefined;
-
-  afterEach(async () => {
-    if (linkDir !== undefined) {
-      await rm(linkDir, { recursive: true, force: true });
-      linkDir = undefined;
-    }
-  });
-
   it('lists every unsearched store that is private or whose config cannot be read, and omits the shared store', async () => {
     const result = await listUnsearchedPrivateStores({ registeredStores: REGISTERED, searchedPaths: [] });
 
@@ -50,8 +41,7 @@ describe(listUnsearchedPrivateStores, () => {
   });
 
   it('treats a store searched through a symlink as searched', async () => {
-    linkDir = await mkdtemp(join(tmpdir(), 'unsearched-'));
-    const linkPath = join(linkDir, 'private-link');
+    const linkPath = join(makeScratchDir('unsearched-'), 'private-link');
     await symlink(join(STORES, 'private-vault'), linkPath);
 
     const result = await listUnsearchedPrivateStores({
