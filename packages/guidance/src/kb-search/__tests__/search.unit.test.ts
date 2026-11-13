@@ -9,6 +9,7 @@ import type { RecallFilters } from '../types.ts';
 
 const FIXTURES = join(import.meta.dirname, 'fixtures');
 const NOTES_VAULT = join(FIXTURES, 'notes-vault');
+const VISIBILITY_REGISTRY = join(FIXTURES, 'visibility-registry');
 
 describe(searchNotes, () => {
   it('returns hits containing the parsed note, so that a command can select by recordType and project its own shape', async () => {
@@ -112,6 +113,44 @@ describe(searchNotes, () => {
     expect(result.scopedKbs).toEqual([]);
     expect(result.emptyScopeDiagnostic).toMatch(/not registered/);
     expect(recall).not.toHaveBeenCalled();
+  });
+
+  it('names the private stores that default scope did not search, including an in-scope store whose path is missing', async () => {
+    const result = await searchNotes({
+      query: 'anything',
+      allKbs: false,
+      filters: {},
+      startDir: VISIBILITY_REGISTRY,
+      home: FIXTURES,
+      recall: buildRecallStub({ missing: [join(VISIBILITY_REGISTRY, 'stores/missing-vault')] }),
+    });
+
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toEqual([
+      'invalid-config-vault',
+      'missing-vault',
+      'no-config-vault',
+      'undeclared-vault',
+    ]);
+  });
+
+  it('names every registered private store when an unregistered --store empties the scope', async () => {
+    const result = await searchNotes({
+      query: 'anything',
+      allKbs: false,
+      storeName: 'no-such-store',
+      filters: {},
+      startDir: VISIBILITY_REGISTRY,
+      home: FIXTURES,
+      recall: buildRecallStub(),
+    });
+
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toEqual([
+      'invalid-config-vault',
+      'missing-vault',
+      'no-config-vault',
+      'private-vault',
+      'undeclared-vault',
+    ]);
   });
 
   it('skips an unreadable note and reports a warning rather than dropping it silently', async () => {

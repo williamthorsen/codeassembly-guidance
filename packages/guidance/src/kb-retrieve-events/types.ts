@@ -1,6 +1,6 @@
 import type { EventImpact } from '@williamthorsen/kb/records';
 
-import type { ScopedKb } from '../kb-search/types.ts';
+import type { RegisteredStore, ScopedKb } from '../kb-search/types.ts';
 
 /** A normalized event candidate ready for the agent to rank by recurrence then recency. */
 export interface EventCandidate {
@@ -42,6 +42,8 @@ export interface EventRetrieveResult {
   scopedKbs: ScopedKb[];
   /** Registry-health problems (malformed registry, dead entry paths). */
   warnings: string[];
+  /** The registered `private` stores that the search did not cover; empty when no scope was resolved. */
+  unsearchedPrivateStores: RegisteredStore[];
   /** A run-level diagnostic, set whenever the candidate list is empty. */
   diagnostic?: string;
 }

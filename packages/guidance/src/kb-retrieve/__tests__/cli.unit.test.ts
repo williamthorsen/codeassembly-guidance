@@ -9,6 +9,7 @@ import { parseArgs, runRetrieve } from '../cli.ts';
 // the retrieve command's integration tests reuse them.
 const FIXTURES = join(import.meta.dirname, '..', '..', 'kb-search', '__tests__', 'fixtures');
 const NOTES_VAULT = join(FIXTURES, 'notes-vault');
+const VISIBILITY_REGISTRY = join(FIXTURES, 'visibility-registry');
 const MALFORMED_NO_KB = join(FIXTURES, 'no-kb.malformed');
 const MALFORMED_REGISTRY = join(FIXTURES, 'registry.malformed');
 const DEAD_PATH_REGISTRY = join(FIXTURES, 'dead-path-registry');
@@ -91,6 +92,36 @@ describe(parseArgs, () => {
 });
 
 describe(runRetrieve, () => {
+  it('names the private stores that the recall did not search', async () => {
+    const result = await runRetrieve({
+      argv: ['anything'],
+      startDir: VISIBILITY_REGISTRY,
+      now: NOW,
+      home: FIXTURES,
+      recall: buildRecallStub({ missing: [join(VISIBILITY_REGISTRY, 'stores/missing-vault')] }),
+    });
+
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toEqual([
+      'invalid-config-vault',
+      'missing-vault',
+      'no-config-vault',
+      'undeclared-vault',
+    ]);
+  });
+
+  it('names the private stores in an empty-scope result', async () => {
+    const result = await runRetrieve({
+      argv: ['anything', '--store', 'no-such-store'],
+      startDir: VISIBILITY_REGISTRY,
+      now: NOW,
+      home: FIXTURES,
+      recall: buildRecallStub(),
+    });
+
+    expect(result.diagnostic).toMatch(/not registered/);
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toContain('private-vault');
+  });
+
   it('returns a candidate table for a matching query', async () => {
     const result = await runRetrieve({
       argv: ['backpressure'],

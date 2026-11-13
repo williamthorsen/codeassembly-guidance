@@ -31,7 +31,7 @@ A value-bearing flag accepts both `--diataxis howto` and `--diataxis=howto`.
 
 By default the helper searches the knowledge base discovered by walking up from the current directory for a `.kb/` folder, the registry's `default_kb` (the machine's default knowledge base), and every registry entry that declares `in_default_scope: true` (see the `kb.yaml` registry's own documentation in `@williamthorsen/kb`). A knowledge base that more than one source admits is searched once. `in_default_scope: false` does not exclude a knowledge base that discovery or `default_kb` admits. `--all-kbs` widens the search to every knowledge base declared in the merged `kb.yaml` registry.
 
-`--store <name>` (alias `--kb <name>`) narrows the search to a single registered knowledge base, resolved by registry name alone: The helper does not run a `.kb/` discovery walk, so a project-local `.kb/` near which the helper happened to be invoked is never in scope. A name that does not match any registry entry yields an empty result with an explanatory diagnostic.
+`--store <name>` (alias `--kb <name>`) narrows the search to a single registered knowledge base, resolved by name against the merged `kb.yaml` registry (user and project): The helper does not run a `.kb/` discovery walk, so a project-local `.kb/` near which the helper happened to be invoked is never in scope. A name that does not match any registry entry yields an empty result with an explanatory diagnostic.
 
 Within each knowledge base, recall is limited to the notes declared by the store, the files matching its configured `targets`/`exclude` (the same note set that `kb check` enforces; `content/**/*.md` by default). Inside a git working tree, that set also excludes every note that the repository ignores. Markdown outside that set, such as a root `README.md` or an excluded draft, is not recalled even when it contains the query terms.
 
@@ -61,6 +61,7 @@ The helper prints a JSON object to stdout:
 - `candidates`: An array of assertion candidates, each with `path`, `title`, `diataxis`, `tags`, `snippet`, `lastVerifiedAgeDays`, `supersession`, and `kbName`. A candidate also has `addressedBy` -- the references from its `addressed-by` list (what was done about the problem that it notes) -- when the note declares one. A note that matches but does not declare a recordType is returned as a degraded candidate with a `diagnostic`, so a note broken in that way is not hidden from recall.
 - `scopedKbs`: The knowledge bases that were actually searched.
 - `warnings`: An array (possibly empty) of registry-health problems, present even when candidates are returned.
+- `unsearchedPrivateStores`: The registered `private` stores that the recall did not search, each with `name` and `path`; an array, possibly empty, present even when candidates are returned.
 - `diagnostic`: Present only when scope is empty or the query did not match any notes.
 
 ### 2. Rank the candidates
@@ -95,6 +96,10 @@ When the helper returns a `diagnostic` without any candidates, report the empty 
 - `registry invalid: …`: The `kb.yaml` registry could not be loaded; entries that it would have contributed are missing from the search.
 - `… path does not exist: …`: A registry entry names a knowledge base whose directory is absent on disk, so that KB was skipped; the entry or the directory needs fixing.
 
+### 6. Disclose partial recall
+
+<!-- include: ../../_partials/kb-unsearched-private-stores.md / -->
+
 ## Completion
 
-A ranked list of relevant notes with freshness and supersession annotations, or a plain empty-result report.
+A ranked list of relevant notes with freshness and supersession annotations, or a plain empty-result report, either one followed by the disclosure of any private store that the recall did not search.

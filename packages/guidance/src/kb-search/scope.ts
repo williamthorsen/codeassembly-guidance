@@ -1,11 +1,13 @@
-import { findKbRoot, tryLoadKbRegistry } from '@williamthorsen/kb/discovery';
+import { findKbRoot, type KbRegistryEntry, tryLoadKbRegistry } from '@williamthorsen/kb/discovery';
 
-import type { ScopedKb } from './types.ts';
+import type { RegisteredStore, ScopedKb } from './types.ts';
 
 /** The resolved query scope: the in-scope KBs, plus any resolution problem for the caller to report. */
 export interface ScopeResult {
   /** The knowledge bases that the query should search. */
   kbs: ScopedKb[];
+  /** Every entry of the merged `kb.yaml` registry, in registry order; empty when the registry failed to load. */
+  registeredStores: RegisteredStore[];
   /** The `kb.yaml` load error message, present only when the registry was malformed or unreadable. */
   registryError?: string;
   /** The requested `--store`/`--kb` name that did not match any registry entry; present only on a named-store miss. */
@@ -15,8 +17,8 @@ export interface ScopeResult {
 /**
  * Resolves which knowledge bases a query should search.
  *
- * When `storeName` is set, scope is the single registry entry of that name and nothing else: `findKbRoot` is skipped
- * entirely, so a project-local `.kb/` cannot appear in results.
+ * When `storeName` is set, scope is the single entry of that name in the merged registry and nothing else: `findKbRoot`
+ * is skipped entirely, so a project-local `.kb/` cannot appear in results.
  *
  * Otherwise, default scope is the `.kb/`-discovered KB nearest `startDir`, the registry's resolved `default_kb`, and
  * every registry entry that declares `in_default_scope: true`; and `allKbs` widens scope to every entry in the merged
@@ -35,30 +37,33 @@ export async function resolveScope(input: {
   storeName?: string;
   home?: string;
 }): Promise<ScopeResult> {
+  const registryLoad = tryLoadKbRegistry({
+    projectDir: input.startDir,
+    ...(input.home !== undefined && { home: input.home }),
+  });
+
   if (input.storeName !== undefined) {
-    const { config, error: registryError } = await tryLoadKbRegistry({
-      ...(input.home !== undefined && { home: input.home }),
-    });
+    const { config, error: registryError } = await registryLoad;
+    const registeredStores = toRegisteredStores(config.entries);
     const match = config.entries.find((entry) => entry.name === input.storeName);
     if (match === undefined) {
       return {
         kbs: [],
+        registeredStores,
         ...(registryError !== undefined && { registryError }),
         storeNotFound: input.storeName,
       };
     }
     return {
       kbs: [{ name: match.name, path: match.path, via: 'registry-named' }],
+      registeredStores,
       ...(registryError !== undefined && { registryError }),
     };
   }
 
   const [discovered, { config, error: registryError }] = await Promise.all([
     findKbRoot({ startDir: input.startDir }),
-    tryLoadKbRegistry({
-      projectDir: input.startDir,
-      ...(input.home !== undefined && { home: input.home }),
-    }),
+    registryLoad,
   ]);
 
   const scoped: ScopedKb[] = [];
@@ -91,5 +96,18 @@ export async function resolveScope(input: {
     }
   }
 
-  return { kbs: scoped, ...(registryError !== undefined && { registryError }) };
+  return {
+    kbs: scoped,
+    registeredStores: toRegisteredStores(config.entries),
+    ...(registryError !== undefined && { registryError }),
+  };
 }
+
+// region | Helpers
+
+/** Projects registry entries onto the name and path that identify each store. */
+function toRegisteredStores(entries: readonly KbRegistryEntry[]): RegisteredStore[] {
+  return entries.map((entry) => ({ name: entry.name, path: entry.path }));
+}
+
+// endregion | Helpers

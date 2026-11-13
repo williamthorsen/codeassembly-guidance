@@ -26,6 +26,14 @@ export interface RecallFilters {
   tag?: string;
 }
 
+/** A store declared in the merged `kb.yaml` registry. */
+export interface RegisteredStore {
+  /** The store's registry name. */
+  name: string;
+  /** Absolute path to the store's root directory. */
+  path: string;
+}
+
 /** A knowledge base resolved as in-scope for the current query. */
 export interface ScopedKb {
   /** The KB's display name. `null` for a `.kb/`-discovered KB without a registry entry. */
@@ -51,6 +59,8 @@ export interface SearchResult {
   warnings: string[];
   /** Note-set-scoped hits before the mechanical filters ran, so that a command can tell "nothing matched" from "all filtered out". */
   recalledCount: number;
+  /** The registered `private` stores that the search did not cover, including in-scope stores whose path is missing. */
+  unsearchedPrivateStores: RegisteredStore[];
   /** Set only when the resolved scope is empty; the command reports it as the run diagnostic. */
   emptyScopeDiagnostic?: string;
 }
