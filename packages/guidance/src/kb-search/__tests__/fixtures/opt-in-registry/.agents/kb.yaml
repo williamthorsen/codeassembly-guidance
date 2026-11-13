@@ -1,0 +1,21 @@
+# Registry fixture for `in_default_scope`: the discovered root and the `default_kb` also opt in, so that their own
+# provenance must win; `vault-b` is admitted by the key alone; and `notes-vault` opts out.
+# Paths are relative to this file's directory (`opt-in-registry/.agents/`).
+default_kb: vault-a
+kbs:
+  notes-vault:
+    path: ../../notes-vault
+    description: Fixture vault that declares the key as false
+    in_default_scope: false
+  opt-in-registry:
+    path: ..
+    description: The discovered root, also opted in
+    in_default_scope: true
+  vault-a:
+    path: ../../vault-a
+    description: Fixture vault A, the default KB, also opted in
+    in_default_scope: true
+  vault-b:
+    path: ../../vault-b
+    description: Fixture vault B, admitted by the key alone
+    in_default_scope: true
