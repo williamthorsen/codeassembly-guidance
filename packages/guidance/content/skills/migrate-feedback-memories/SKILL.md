@@ -122,6 +122,7 @@ On approval, run all captures first, then a single deletion pass:
 ### Composing a capture
 
 - `--store @feedback`: The feedback KB is configured in the registry, not chosen per memory.
+- `--shared`: Only after a `shared-store` refusal, and only for a capture that passes the check in `{skill:capture-event}`'s shared-stores rule. A capture that fails the check, or for which the check is not conclusive, is a failed capture: Its memory stays in place, per step 5.
 - `--tags feedback` always; add `,mistake` (i.e. `--tags feedback,mistake`) when the memory recorded a _misapplied_ existing rule, including the violation-of-existing-guidance memory that the Delete rule routes to Capture instead of deleting.
 - `--skill <slug>` when the lesson targets a specific skill.
 - `--impact <low|medium|high|critical>`: Rate on the merits of the memory's content: how much acting on the lesson would improve future behavior. Omit only on a genuine toss-up.

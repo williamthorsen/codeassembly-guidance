@@ -18,6 +18,7 @@ const baseArgs: WriteArgs = {
   tags: ['streams'],
   domainDescription: null,
   auto: false,
+  shared: false,
 };
 
 const emptyAliases: AliasMap = new Map();

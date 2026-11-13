@@ -9,6 +9,7 @@ import { resolveKbDir } from '@williamthorsen/kb/layout';
 import { loadAliases } from '@williamthorsen/kb/tags';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
+import { checkSharedOptIn, type SharedOptInOutcome } from '../kb-shared/check-shared-opt-in.ts';
 import { formatKbResolutionFailure } from '../kb-shared/format-kb-resolution-failure.ts';
 import { type ResolvedKb, resolveWritableKb } from '../kb-shared/resolve-writable-kb.ts';
 import { parseTagList } from '../kb-shared/tag-helpers.ts';
@@ -59,6 +60,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   // Every flag that a survey does not accept, collected as seen, so that a stray one can be named back to the caller.
   const writeOnly = new Set<string>();
   let auto = false;
+  let shared = false;
   let survey = false;
 
   for (let index = 0; index < argv.length; index += 1) {
@@ -73,6 +75,11 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     if (arg === '--auto') {
       auto = true;
       writeOnly.add('--auto');
+      continue;
+    }
+    if (arg === '--shared') {
+      shared = true;
+      writeOnly.add('--shared');
       continue;
     }
     const matched = matchValueFlag(arg);
@@ -101,7 +108,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     return { mode: 'survey', kb: raw.kb ?? null };
   }
 
-  return buildWriteArgs({ raw, auto });
+  return buildWriteArgs({ raw, auto, shared });
 }
 
 /**
@@ -147,6 +154,11 @@ export async function runAdd(input: {
     return resolved.failure;
   }
   const kb = resolved.kb;
+
+  const optIn = await checkSharedOptIn({ storePath: kb.path, optedIn: args.shared });
+  if (!optIn.ok) {
+    return formatOptInFailure(optIn, kb);
+  }
 
   const kbRoot = { path: kb.path, kbDir: resolveKbDir(kb.path) };
   const aliases = await loadAliasesWithWarning({ kbRoot });
@@ -206,8 +218,8 @@ export async function runAdd(input: {
 // region | Helpers
 
 /** Assembles a write invocation from the raw flag values, applying each optional flag's default. */
-function buildWriteArgs(input: { raw: Partial<Record<ValueFlag, string>>; auto: boolean }): WriteArgs {
-  const { raw, auto } = input;
+function buildWriteArgs(input: { raw: Partial<Record<ValueFlag, string>>; auto: boolean; shared: boolean }): WriteArgs {
+  const { raw, auto, shared } = input;
 
   const title = raw.title;
   if (title === undefined) {
@@ -223,6 +235,21 @@ function buildWriteArgs(input: { raw: Partial<Record<ValueFlag, string>>; auto: 
     tags: raw.tags === undefined ? [] : parseTagList(raw.tags),
     domainDescription: raw['domain-description'] ?? null,
     auto,
+    shared,
+  };
+}
+
+/** Maps a failed shared-store check to the helper's structured error shape. */
+function formatOptInFailure(outcome: Extract<SharedOptInOutcome, { ok: false }>, kb: ResolvedKb): AddFailure {
+  if (outcome.reason === 'invalid-config') {
+    return { ok: false, error: 'invalid-config', message: outcome.message };
+  }
+  const label = kb.name === null ? `at ${kb.path}` : `"${kb.name}"`;
+  return {
+    ok: false,
+    error: 'shared-kb',
+    message: `knowledge base ${label} is shared; pass --shared to write into it, after checking that the note contains nothing private`,
+    details: { ...(kb.name !== null && { sharedKbName: kb.name }), sharedKbPath: kb.path },
   };
 }
 

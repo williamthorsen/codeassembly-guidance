@@ -19,6 +19,8 @@ export interface ParsedArgs {
   impact: EventImpact | null;
   /** The id of an existing event to amend instead of capturing a new one; `null` for a fresh capture. */
   amend: string | null;
+  /** Whether the caller opted into capturing into a store whose `visibility` is `shared`. */
+  shared: boolean;
 }
 
 /** The auto-filled context that an event includes beyond the agent-supplied fields. */
@@ -57,12 +59,14 @@ export interface CaptureFailure {
 /** Categorical error codes that the helper can return without an unexpected throw. */
 export type CaptureErrorCode =
   | 'invalid-args'
+  | 'invalid-config'
   | 'missing-store'
   | 'store-not-registered'
   | 'readonly-store'
   | 'no-default-store'
   | 'no-feedback-store'
   | 'schema-validation'
+  | 'shared-store'
   | 'amend-not-found'
   | 'amend-parse';
 

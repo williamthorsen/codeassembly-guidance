@@ -42,7 +42,13 @@ describe(parseArgs, () => {
       tags: ['one', 'two', 'three'],
       impact: 'high',
       amend: null,
+      shared: false,
     });
+  });
+
+  it('parses --shared, defaulting to false', () => {
+    expect(parseArgs(['--summary', 'x', '--shared']).shared).toBe(true);
+    expect(parseArgs(['--summary', 'x']).shared).toBe(false);
   });
 
   it('parses --amend', () => {

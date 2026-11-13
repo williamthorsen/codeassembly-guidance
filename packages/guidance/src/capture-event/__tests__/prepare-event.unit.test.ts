@@ -19,6 +19,7 @@ function argsFor(overrides: Partial<ParsedArgs>): ParsedArgs {
     tags: [],
     impact: null,
     amend: null,
+    shared: false,
     ...overrides,
   };
 }

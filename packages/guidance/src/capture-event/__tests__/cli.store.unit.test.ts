@@ -246,4 +246,71 @@ describe(runCapture, () => {
     expect(result.error).toBe('store-not-registered');
     expect(result.message).toMatch(/default_kb "ghost" does not match any registered KB/);
   });
+  describe('in a shared store', () => {
+    it('refuses a capture without --shared, naming the store and the flag, and writes nothing', async () => {
+      const { storePath, home } = await makeStore('team', { visibility: 'shared' });
+
+      const result = await runCapture({ ...captureInput(home), argv: ['--store', 'team', '--summary', 'x'] });
+
+      expect(result).toEqual({
+        ok: false,
+        error: 'shared-store',
+        message: expect.stringMatching(/"team".*--shared/),
+      });
+      expect(await readdir(storePath)).toEqual(['.kb']);
+    });
+
+    it('captures with --shared', async () => {
+      const { home } = await makeStore('team', { visibility: 'shared' });
+
+      const result = await runCapture({
+        ...captureInput(home),
+        argv: ['--store', 'team', '--summary', 'x', '--shared'],
+      });
+
+      expect(result.ok).toBe(true);
+    });
+
+    it('amends an existing event without --shared', async () => {
+      const { home } = await makeStore('team', { visibility: 'shared' });
+      const captured = await runCapture({
+        ...captureInput(home),
+        argv: ['--store', 'team', '--summary', 'x', '--shared'],
+      });
+      if (!captured.ok) throw new Error(`capture failed: ${captured.message}`);
+
+      const result = await runCapture({
+        ...captureInput(home),
+        argv: ['--store', 'team', '--summary', 'y', '--amend', captured.id],
+      });
+
+      expect(result).toMatchObject({ ok: true, id: captured.id });
+    });
+  });
+
+  it('captures into a private store without --shared', async () => {
+    const { home } = await makeStore('mine', { visibility: 'private' });
+
+    const result = await runCapture({ ...captureInput(home), argv: ['--store', 'mine', '--summary', 'x'] });
+
+    expect(result.ok).toBe(true);
+  });
+
+  it('returns invalid-config when the store config is malformed', async () => {
+    const { storePath, home } = await makeStore('broken');
+    await writeFile(join(storePath, '.kb', 'config.yaml'), 'visibility: public\n', 'utf8');
+
+    const result = await runCapture({ ...captureInput(home), argv: ['--store', 'broken', '--summary', 'x'] });
+
+    expect(result).toEqual({ ok: false, error: 'invalid-config', message: expect.stringContaining('config.yaml') });
+  });
 });
+
+// region | Helpers
+
+/** Builds the invocation fields that the shared-store tests do not vary. */
+function captureInput(home: string): Omit<Parameters<typeof runCapture>[0], 'argv'> {
+  return { git: NO_REMOTE_GIT, stdin: makeBodyStream('Body.'), cwd: home, env: {}, now: NOW, home };
+}
+
+// endregion | Helpers

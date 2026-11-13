@@ -21,6 +21,7 @@ The split is deliberate: The helper is narrow and mechanical; the classification
 | `--domain-description` | One-line description for a domain that the write declares. Takes prose, not a path; the path comes from `--folder`. Without it the domain is declared bare.                      | No       |
 | `--folder`             | Topic subpath beneath the assertions root (`content/assertions/`). The helper supplies the `assertions/` segment; pass the topic only. Defaults to `content/assertions/` itself. | No       |
 | `--kb`                 | Knowledge base name, or `@default` for the registry default. Overrides `.kb/` discovery; the registry default is reachable only via `--kb @default`.                             | No       |
+| `--shared`             | Permit a write into a KB whose `visibility` is `shared`. See [Shared KBs](#shared-kbs).                                                                                          | No       |
 | `--survey`             | Report the destination's shape and exit. Takes `--kb` alone; writes nothing and does not read stdin. See [step 2](#2-survey-the-destination-kb).                                 | No       |
 | `--tags`               | Comma-separated tag list. Known aliases are canonicalized at write time.                                                                                                         | No       |
 | `--title`              | The note title; also doubles as the filename.                                                                                                                                    | Yes      |
@@ -30,6 +31,12 @@ A value-bearing flag accepts both `--diataxis howto` and `--diataxis=howto`. The
 ### KB selection
 
 By default the helper writes to the knowledge base discovered by walking up from the current directory for a `.kb/` folder. When the walk does not discover a `.kb/` and the caller does not pass `--kb`, the helper refuses to write rather than guessing a destination. `--kb <name>` names a specific entry from the merged `kb.yaml` registry and overrides discovery; `--kb @default` is the only way to reach the registry's `default_kb`. The chosen KB is shown in the proposal so that the user can redirect the write via `--kb` if it is wrong.
+
+### Shared KBs
+
+A KB's `.kb/config.yaml` declares its `visibility`: `shared` for a KB published to collaborators, `private` otherwise; a KB that does not declare it counts as `private`. The helper refuses a write into a `shared` KB unless the invocation passes `--shared`, because a note published in that KB's history cannot be withdrawn.
+
+Never pass `--shared` by habit. Read the note's title, tags, and body as a collaborator would, and pass the flag only when they contain nothing unfit for that audience, such as a credential, a personal detail, or a workplace-internal fact. Otherwise, redirect the note to a private KB with `--kb <name>`, or report it uncaptured. When you cannot tell, do not pass the flag. In default mode, the user's confirmation of a proposal that names the KB as shared is the opt-in; in auto mode, the check is yours.
 
 <!-- include: ../../_partials/kb-standard-tags.md / -->
 
@@ -74,6 +81,7 @@ It reports:
 
 - `kb`: The knowledge base to which the write will resolve, by the same rules.
 - `taxonomyPath`: The `.kb/taxonomy.yaml` from which the domains came.
+- `visibility`: `shared` or `private`; a write into a `shared` KB needs `--shared`, per [Shared KBs](#shared-kbs).
 - `domains`: Each declared domain with its `description`, its `provisional` flag, and the `noteCount` at or beneath it.
 - `undeclaredFolders`: Folders containing notes outside every declared domain.
 
@@ -98,7 +106,7 @@ Write the note body. Embed cross-references inline when the reference contribute
 
 ### 6. Present the proposal (default mode)
 
-In default mode, present the proposed KB, folder, Diátaxis label, title, tags, and body to the user. Name the domain that the folder matched, that domain's description, and the taxonomy file from which they came, so that the user can see what the placement was measured against. When the folder is a new domain, name it as new and propose the description that you will pass as `--domain-description`. When the survey reported an undeclared folder relevant to the choice, say so. Wait for confirmation or a redirect. In auto mode, skip this step.
+In default mode, present the proposed KB, folder, Diátaxis label, title, tags, and body to the user. Name the domain that the folder matched, that domain's description, and the taxonomy file from which they came, so that the user can see what the placement was measured against. When the folder is a new domain, name it as new and propose the description that you will pass as `--domain-description`. When the survey reported an undeclared folder relevant to the choice, say so. When the survey reported `visibility: shared`, say that the KB is shared and that confirming the proposal writes into it with `--shared`. Wait for confirmation or a redirect. In auto mode, skip this step.
 
 <!-- include: ../_partials/action-items.md / -->
 
@@ -110,7 +118,7 @@ Pipe the composed body to the bundled helper. A heredoc keeps multi-line bodies 
 cat <<'EOF' | node {harness_home_dir}/skills/kb-add/kb-add.mjs \
   --diataxis <label> --title "<title>" \
   [--kb <name>] [--folder <topic-subpath>] \
-  [--tags <comma,separated>] [--domain-description "<description>"] [--auto]
+  [--tags <comma,separated>] [--domain-description "<description>"] [--auto] [--shared]
 <note body, may span multiple lines and contain any characters>
 EOF
 ```
@@ -150,8 +158,9 @@ On `ok: false`, act on the `error` code:
 - `missing-destination`: The helper did not discover a `.kb/`, and the invocation did not pass `--kb`. Ask the user where the note should go, passing `--kb <name>` for a specific KB or `--kb @default` for the registry default (or, in auto mode, fail visibly with the categorical reason).
 - `no-default`: `--kb @default` was given but `kb.yaml` does not configure a `default_kb`. Report the message; have the user name a KB explicitly or configure a default.
 - `readonly-kb`: The resolved KB is marked `readonly: true` in `kb.yaml`, so the write was refused. Report the message; have the user choose a writable KB with `--kb <name>`.
+- `shared-kb`: The resolved KB is shared and the invocation did not pass `--shared`. Act per [Shared KBs](#shared-kbs).
 - `invalid-args` / `invalid-title`: Report the helper's message and propose a corrected invocation.
-- `invalid-config`: A survey found a malformed `.kb/config.yaml` or `.kb/taxonomy.yaml`. The message names the file; report it and have the user repair it before capturing.
+- `invalid-config`: A survey found a malformed `.kb/config.yaml` or `.kb/taxonomy.yaml`, or a write found a malformed `.kb/config.yaml` and refused because the KB's visibility is unknown. The message names the file; report it and have the user repair it before capturing.
 - `collision`: A note already exists at the target path. Decide whether to re-title, append the new material to the existing note (read it first, then write a follow-up edit), or abort.
 
 ## Completion
