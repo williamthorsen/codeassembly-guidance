@@ -16,6 +16,7 @@ import {
 import { describeError } from '@williamthorsen/toolbelt.errors';
 import { ulid } from 'ulid';
 
+import { checkSharedOptIn } from '../kb-shared/check-shared-opt-in.ts';
 import { formatMissingStoreMessage } from '../kb-shared/format-missing-store.ts';
 import { formatRoleFailure } from '../kb-shared/format-role-failure.ts';
 import { formatUtcTimestamp, isSafeEventId } from '../kb-shared/note-helpers.ts';
@@ -41,6 +42,7 @@ const FLAGS: readonly FlagSpec[] = [
   { name: 'tags', takesValue: true },
   { name: 'impact', takesValue: true },
   { name: 'amend', takesValue: true },
+  { name: 'shared', takesValue: false },
 ];
 
 /** Executes the helper from `process.argv` and writes the JSON result to stdout. */
@@ -123,6 +125,20 @@ export async function runCapture(input: {
   }
   const store = resolved.store;
 
+  // An amend addresses an event already in this store, so only a fresh capture can route a record to the wrong one.
+  if (args.amend === null) {
+    const optIn = await checkSharedOptIn({ storePath: store.path, optedIn: args.shared });
+    if (!optIn.ok) {
+      return optIn.reason === 'invalid-config'
+        ? { ok: false, error: 'invalid-config', message: optIn.message }
+        : {
+            ok: false,
+            error: 'shared-store',
+            message: `event store "${store.name}" is shared; pass --shared to capture into it, after checking that the event contains nothing private`,
+          };
+    }
+  }
+
   const body = await readAll(input.stdin);
 
   if (args.amend !== null) {
@@ -203,6 +219,7 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     tags: raw['tags'] === undefined ? [] : parseTagList(raw['tags']),
     impact,
     amend,
+    shared: flags.some((flag) => flag.name === 'shared'),
   };
 }
 
