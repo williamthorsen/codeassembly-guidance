@@ -51,6 +51,7 @@ If the feedback is purely behavioral (a standing rule with nothing to fix right 
 Invoke the `{skill:capture-event}` skill to append the record, composing its arguments and body as follows:
 
 - `--store @feedback`: Always. The registry's `feedback_kb` names the KB read by the pass that refines guidance in this environment, whichever repository the guidance came from.
+- `--shared`: Only after a `shared-store` refusal, and only when the record passes the check in `{skill:capture-event}`'s shared-stores rule. A record that fails the check, or for which the check is not conclusive, goes uncaptured: Never retry against another store.
 - `--tags feedback`: Always. Add `,mistake` when existing guidance was misapplied (step 1, "Yes").
 - `--skill <slug>`: When the refinement target is a skill.
 - `--impact <level>`: Optionally rate how much addressing this feedback would improve the agent's future behavior: `low`, `medium`, `high`, or `critical`. Omit it when you do not have a clear read; the rating is revisable later with `kb-update-events`.
@@ -62,7 +63,7 @@ Invoke the `{skill:capture-event}` skill to append the record, composing its arg
 
 ### 4. Report
 
-State what was fixed (or that the feedback was behavioral-only) and the captured record's id and path. If `~/.agents/kb.yaml` does not configure `feedback_kb`, say so in place of the id and path, and name the key to set.
+State what was fixed (or that the feedback was behavioral-only) and the captured record's id and path. If `~/.agents/kb.yaml` does not configure `feedback_kb`, say so in place of the id and path, and name the key to set. If the record went uncaptured because `feedback_kb` is shared and the record failed the shared-store check, say so and name what in the record made it unfit.
 
 If the user then says the record is inaccurate, correct it in place with `capture-event --amend <id>` rather than capturing a second record; amend rewrites the record in place. Capture a fresh record only when the correction is a genuinely distinct lesson.
 

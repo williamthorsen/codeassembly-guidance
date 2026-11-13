@@ -22,16 +22,17 @@ A **skill-caused mistake**, an error that a clearer skill definition would have 
 
 ## Arguments
 
-| Argument    | Description                                                                           | Required |
-| ----------- | ------------------------------------------------------------------------------------- | -------- |
-| `--summary` | A human-readable one-line summary; becomes the record's label on recall.              | Yes      |
-| `--store`   | Registry name, `@default` for the `default_kb`, or `@feedback` for the `feedback_kb`. | Yes      |
-| `--skill`   | The skill to which the event relates.                                                 | No       |
-| `--model`   | The model identifier in play.                                                         | No       |
-| `--harness` | The agent platform (`claude`, `rovo`); install-injected. Keep as-is.                  | Injected |
-| `--tags`    | Comma-separated tag list.                                                             | No       |
-| `--impact`  | Impact rating: one of `low`, `medium`, `high`, `critical`. Omit to leave unrated.     | No       |
-| `--amend`   | Id of an existing event to rewrite in place instead of capturing a new one.           | No       |
+| Argument    | Description                                                                                              | Required |
+| ----------- | -------------------------------------------------------------------------------------------------------- | -------- |
+| `--summary` | A human-readable one-line summary; becomes the record's label on recall.                                 | Yes      |
+| `--store`   | Registry name, `@default` for the `default_kb`, or `@feedback` for the `feedback_kb`.                    | Yes      |
+| `--skill`   | The skill to which the event relates.                                                                    | No       |
+| `--model`   | The model identifier in play.                                                                            | No       |
+| `--harness` | The agent platform (`claude`, `rovo`); install-injected. Keep as-is.                                     | Injected |
+| `--tags`    | Comma-separated tag list.                                                                                | No       |
+| `--impact`  | Impact rating: one of `low`, `medium`, `high`, `critical`. Omit to leave unrated.                        | No       |
+| `--amend`   | Id of an existing event to rewrite in place instead of capturing a new one.                              | No       |
+| `--shared`  | Permit a fresh capture into a store whose `visibility` is `shared`. See [Shared stores](#shared-stores). | No       |
 
 A value-bearing flag accepts both `--summary text` and `--summary=text`. The event body is read from stdin to EOF; an empty body is allowed.
 
@@ -48,6 +49,12 @@ A value-bearing flag accepts both `--summary text` and `--summary=text`. The eve
 Choose the destination deliberately. When the lesson is specific to a project, pass that project's KB with `--store <name>`. Only when the lesson is environment-level, meaning an observation or refinement that applies across every project in the current environment, send it to the registry's `default_kb` by passing `--store @default`. Selecting the default is an explicit act, not what happens when the flag is forgotten.
 
 A caller whose destination is a configured role rather than a per-lesson judgment passes that role's sentinel: `--store @feedback` sends a record to the registry's `feedback_kb`, the KB that receives feedback about agent guidance.
+
+### Shared stores
+
+A store's `.kb/config.yaml` declares its `visibility`: `shared` for a store published to collaborators, `private` otherwise; a store that does not declare it counts as `private`. The helper refuses a fresh capture into a `shared` store unless the invocation passes `--shared`, because a record published in that store's history cannot be withdrawn.
+
+Never pass `--shared` by habit. On a `shared-store` refusal, read the event's summary and body as a collaborator would: Retry with `--shared` only when they contain nothing unfit for that audience, such as a credential, a personal detail, or a workplace-internal fact. Otherwise, capture into a private store, or report the event uncaptured. When you cannot tell, do not pass the flag. `--amend` is exempt, because it rewrites an event already in the named store.
 
 ### Amending an event
 
@@ -79,7 +86,7 @@ cat <<'EOF' | node {harness_home_dir}/skills/capture-event/capture-event.mjs \
   --summary "<one-line summary>" \
   --store <name|@default|@feedback> \
   --harness {harness_id} \
-  [--skill <skill>] [--model <model>] [--tags <comma,separated>] [--impact <level>]
+  [--skill <skill>] [--model <model>] [--tags <comma,separated>] [--impact <level>] [--shared]
 <event body, may span multiple lines and contain any characters>
 EOF
 ```
@@ -99,6 +106,8 @@ On `ok: false`, handle the `error` code as follows:
 - `missing-store`: `--store` was omitted. Re-run with `--store <name>` for the KB named by the user, or `--store @default` for an environment-level lesson; the message lists the registered stores.
 - `store-not-registered`: The named store is not in `kb.yaml`. Confirm the store name or register it.
 - `readonly-store`: The store is marked readonly; captures are refused.
+- `shared-store`: The store is shared and the invocation did not pass `--shared`. Act per [Shared stores](#shared-stores).
+- `invalid-config`: The store's `.kb/config.yaml` is malformed, so its visibility is unknown and the capture is refused. The message names the file; report it and have the user repair it.
 - `no-default-store`: `--store @default` was given but `kb.yaml` does not configure a `default_kb`. Name a store explicitly or configure a default with `kb set-default`.
 - `no-feedback-store`: `--store @feedback` was given but `kb.yaml` does not configure a `feedback_kb`. Set `feedback_kb` in `kb.yaml` to the KB that receives feedback about agent guidance.
 - `schema-validation`: Report the `errors`, then supply the missing field and retry.
