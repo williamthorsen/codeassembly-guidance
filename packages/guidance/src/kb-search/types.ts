@@ -59,6 +59,8 @@ export interface SearchResult {
   warnings: string[];
   /** Note-set-scoped hits before the mechanical filters ran, so that a command can tell "nothing matched" from "all filtered out". */
   recalledCount: number;
+  /** The registered `private` stores that the search did not cover, including in-scope stores whose path is missing. */
+  unsearchedPrivateStores: RegisteredStore[];
   /** Set only when the resolved scope is empty; the command reports it as the run diagnostic. */
   emptyScopeDiagnostic?: string;
 }

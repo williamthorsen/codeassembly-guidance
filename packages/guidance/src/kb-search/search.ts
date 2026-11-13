@@ -13,6 +13,7 @@ import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { extractString, parseNoteSafely } from '../kb-shared/note-helpers.ts';
 import { loadAliasesOrEmpty } from '../kb-shared/tag-helpers.ts';
+import { listUnsearchedPrivateStores } from './list-unsearched-private-stores.ts';
 import { type RecallFn, recallNotes } from './recall.ts';
 import { resolveScope } from './scope.ts';
 import type { RawHit, RecallFilters, ScopedKb, SearchHit, SearchResult } from './types.ts';
@@ -21,8 +22,9 @@ import type { RawHit, RecallFilters, ScopedKb, SearchHit, SearchResult } from '.
  * Recalls the notes matching `query` across every in-scope knowledge base, scoping each hit to its KB's configured
  * note set and applying the mechanical filters.
  *
- * Returns an empty hit list and an `emptyScopeDiagnostic` for an empty scope. Skips a note whose file cannot be read,
- * reporting it in `warnings`. Keeps a note that parses but does not have frontmatter as a degraded hit.
+ * Returns an empty hit list and an `emptyScopeDiagnostic` for an empty scope. Names every registered `private` store
+ * that the search did not cover in `unsearchedPrivateStores`. Skips a note whose file cannot be read, reporting it in
+ * `warnings`. Keeps a note that parses but does not have frontmatter as a degraded hit.
  *
  * `home` overrides the directory from which the user-global `kb.yaml` is read, and `recall` replaces the default
  * ripgrep recall; both exist so that a test can run against fixtures without spawning a process.
@@ -38,6 +40,7 @@ export async function searchNotes(input: {
 }): Promise<SearchResult> {
   const {
     kbs: inScopeKbs,
+    registeredStores,
     registryError,
     storeNotFound,
   } = await resolveScope({
@@ -52,6 +55,7 @@ export async function searchNotes(input: {
       scopedKbs: [],
       warnings: composeWarnings({ registryError, missingKbs: [] }),
       recalledCount: 0,
+      unsearchedPrivateStores: await listUnsearchedPrivateStores({ registeredStores, searchedPaths: [] }),
       emptyScopeDiagnostic: composeEmptyScopeDiagnostic({ storeNotFound, registryError }),
     };
   }
@@ -85,6 +89,10 @@ export async function searchNotes(input: {
     scopedKbs: searchedKbs,
     warnings: [...composeWarnings({ registryError, missingKbs }), ...configWarnings, ...unreadableWarnings],
     recalledCount: noteHits.length,
+    unsearchedPrivateStores: await listUnsearchedPrivateStores({
+      registeredStores,
+      searchedPaths: searchedKbs.map((kb) => kb.path),
+    }),
   };
 }
 
