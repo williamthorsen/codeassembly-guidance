@@ -1,0 +1,24 @@
+# Registry fixture for store visibility: one store of each kind. `private-vault` and the dead-path `missing-vault`
+# opt into default scope, so that default scope searches one private store and skips one that does not exist.
+# Paths are relative to this file's directory (`visibility-registry/.agents/`).
+kbs:
+  invalid-config-vault:
+    path: ../../invalid-config-vault
+    description: A store whose config is malformed
+  missing-vault:
+    path: ../stores/missing-vault
+    description: A store whose path does not exist
+    in_default_scope: true
+  no-config-vault:
+    path: ../stores/no-config-vault
+    description: A store without a config file
+  private-vault:
+    path: ../stores/private-vault
+    description: A store that declares itself private
+    in_default_scope: true
+  shared-vault:
+    path: ../stores/shared-vault
+    description: A store that declares itself shared
+  undeclared-vault:
+    path: ../stores/undeclared-vault
+    description: A store whose config omits visibility

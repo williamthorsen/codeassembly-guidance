@@ -12,6 +12,7 @@ const NOTES_VAULT = join(FIXTURES, 'notes-vault');
 const MALFORMED_REGISTRY = join(FIXTURES, 'registry.malformed');
 const OPT_IN_REGISTRY = join(FIXTURES, 'opt-in-registry');
 const HOME_WITH_DEFAULT = join(FIXTURES, 'home-with-default');
+const VISIBILITY_REGISTRY = join(FIXTURES, 'visibility-registry');
 // A home directory without a `.agents/kb.yaml`, so the user-global registry is empty.
 const HOME_EMPTY = FIXTURES;
 
@@ -112,5 +113,44 @@ describe(resolveScope, () => {
 
     expect(kbs).toEqual([]);
     expect(storeNotFound).toBe('no-such-store');
+  });
+
+  it('resolves --store against the project registry as well as the user registry', async () => {
+    const { kbs } = await resolveScope({
+      startDir: VISIBILITY_REGISTRY,
+      allKbs: false,
+      storeName: 'private-vault',
+      home: HOME_WITH_DEFAULT,
+    });
+
+    expect(kbs).toEqual([
+      { name: 'private-vault', path: join(VISIBILITY_REGISTRY, 'stores/private-vault'), via: 'registry-named' },
+    ]);
+  });
+
+  it.each([
+    { label: 'default scope', allKbs: false },
+    { label: '--all-kbs', allKbs: true },
+    { label: 'a --store hit', allKbs: false, storeName: 'vault-a' },
+    { label: 'a --store miss', allKbs: false, storeName: 'no-such-store' },
+  ])('lists every merged registry entry under $label', async ({ allKbs, storeName }) => {
+    const { registeredStores } = await resolveScope({
+      startDir: PROJECT_KB,
+      allKbs,
+      ...(storeName !== undefined && { storeName }),
+      home: HOME_WITH_DEFAULT,
+    });
+
+    expect(registeredStores).toEqual([
+      { name: 'global-vault', path: VAULT_B },
+      { name: 'vault-a', path: VAULT_A },
+      { name: 'vault-b', path: VAULT_B },
+    ]);
+  });
+
+  it('lists no registered stores when the registry fails to load', async () => {
+    const { registeredStores } = await resolveScope({ startDir: MALFORMED_REGISTRY, allKbs: false, home: HOME_EMPTY });
+
+    expect(registeredStores).toEqual([]);
   });
 });
