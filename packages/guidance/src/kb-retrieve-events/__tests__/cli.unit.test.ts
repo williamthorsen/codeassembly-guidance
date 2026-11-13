@@ -8,6 +8,7 @@ import { parseArgs, runRetrieveEvents } from '../cli.ts';
 // The vault and registry fixtures are stored with the shared search primitive (kb-search), which owns scope and recall.
 const FIXTURES = join(import.meta.dirname, '..', '..', 'kb-search', '__tests__', 'fixtures');
 const NOTES_VAULT = join(FIXTURES, 'notes-vault');
+const VISIBILITY_REGISTRY = join(FIXTURES, 'visibility-registry');
 
 describe(parseArgs, () => {
   it('joins non-flag tokens into the query', () => {
@@ -75,6 +76,34 @@ describe(parseArgs, () => {
 });
 
 describe(runRetrieveEvents, () => {
+  it('names the private stores that the recall did not search', async () => {
+    const result = await runRetrieveEvents({
+      argv: ['anything'],
+      startDir: VISIBILITY_REGISTRY,
+      home: FIXTURES,
+      recall: buildRecallStub({ missing: [join(VISIBILITY_REGISTRY, 'stores/missing-vault')] }),
+    });
+
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toEqual([
+      'invalid-config-vault',
+      'missing-vault',
+      'no-config-vault',
+      'undeclared-vault',
+    ]);
+  });
+
+  it('names the private stores in an empty-scope result', async () => {
+    const result = await runRetrieveEvents({
+      argv: ['anything', '--store', 'no-such-store'],
+      startDir: VISIBILITY_REGISTRY,
+      home: FIXTURES,
+      recall: buildRecallStub(),
+    });
+
+    expect(result.diagnostic).toMatch(/not registered/);
+    expect(result.unsearchedPrivateStores.map((store) => store.name)).toContain('private-vault');
+  });
+
   it('returns an event candidate with its recurrence signals', async () => {
     const result = await runRetrieveEvents({
       argv: ['phantomwidget'],
@@ -216,7 +245,13 @@ describe(runRetrieveEvents, () => {
       recall: buildRecallStub({ hits: quillfrondEvents() }),
     });
 
-    expect(Object.keys(result).toSorted()).toEqual(['candidates', 'diagnostic', 'scopedKbs', 'warnings']);
+    expect(Object.keys(result).toSorted()).toEqual([
+      'candidates',
+      'diagnostic',
+      'scopedKbs',
+      'unsearchedPrivateStores',
+      'warnings',
+    ]);
     expect(result.candidates).toEqual([]);
     expect(result.diagnostic).toBe('all matches were filtered out');
   });

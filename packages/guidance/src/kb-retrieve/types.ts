@@ -1,6 +1,6 @@
 // The candidate table is the helper's contract with `SKILL.md`, so the shape and the skill change together.
 
-import type { ScopedKb } from '../kb-search/types.ts';
+import type { RegisteredStore, ScopedKb } from '../kb-search/types.ts';
 
 /** A fully normalized assertion candidate ready for the agent to rank and present. */
 export interface AssertionCandidate {
@@ -37,6 +37,8 @@ export interface RetrieveResult {
   scopedKbs: ScopedKb[];
   /** Knowledge-base health problems, always present and possibly empty. */
   warnings: string[];
+  /** The registered `private` stores that the search did not cover; empty when no scope was resolved. */
+  unsearchedPrivateStores: RegisteredStore[];
   /** A run-level diagnostic, set when the run didn't produce any candidates. */
   diagnostic?: string;
 }

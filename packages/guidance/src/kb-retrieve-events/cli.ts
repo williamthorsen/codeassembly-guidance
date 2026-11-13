@@ -101,7 +101,13 @@ export async function runRetrieveEvents(input: {
   const { query, allKbs, storeName, filters, minImpact } = parseArgs(input.argv);
 
   if (query === '') {
-    return { candidates: [], scopedKbs: [], warnings: [], diagnostic: 'no query provided' };
+    return {
+      candidates: [],
+      scopedKbs: [],
+      warnings: [],
+      unsearchedPrivateStores: [],
+      diagnostic: 'no query provided',
+    };
   }
 
   const search = await searchNotes({
@@ -119,6 +125,7 @@ export async function runRetrieveEvents(input: {
       candidates: [],
       scopedKbs: search.scopedKbs,
       warnings: search.warnings,
+      unsearchedPrivateStores: search.unsearchedPrivateStores,
       diagnostic: search.emptyScopeDiagnostic,
     };
   }
@@ -131,6 +138,7 @@ export async function runRetrieveEvents(input: {
     candidates,
     scopedKbs: search.scopedKbs,
     warnings: search.warnings,
+    unsearchedPrivateStores: search.unsearchedPrivateStores,
   };
   if (candidates.length === 0) {
     result.diagnostic =
