@@ -18,9 +18,10 @@ export interface ScopeResult {
  * When `storeName` is set, scope is the single registry entry of that name and nothing else: `findKbRoot` is skipped
  * entirely, so a project-local `.kb/` cannot appear in results.
  *
- * Otherwise, default scope is the `.kb/`-discovered KB nearest `startDir` plus the registry's resolved `default_kb`; and
- * `allKbs` widens scope to every entry in the merged `kb.yaml` registry. A KB that is both discovered and registered
- * is added to scope once, de-duplicated by absolute path.
+ * Otherwise, default scope is the `.kb/`-discovered KB nearest `startDir`, the registry's resolved `default_kb`, and
+ * every registry entry that declares `in_default_scope: true`; and `allKbs` widens scope to every entry in the merged
+ * `kb.yaml` registry. A KB that more than one source admits is added to scope once, de-duplicated by absolute path,
+ * with the provenance of the first source in that order.
  *
  * Degrades a malformed or unreadable registry to an empty list of registry entries, and records its message in
  * `registryError`.
@@ -79,8 +80,15 @@ export async function resolveScope(input: {
     for (const entry of config.entries) {
       add({ name: entry.name, path: entry.path, via: 'registry-all' });
     }
-  } else if (config.defaultKb !== undefined) {
-    add({ name: config.defaultKb.name, path: config.defaultKb.path, via: 'registry-default' });
+  } else {
+    if (config.defaultKb !== undefined) {
+      add({ name: config.defaultKb.name, path: config.defaultKb.path, via: 'registry-default' });
+    }
+    for (const entry of config.entries) {
+      if (entry.inDefaultScope === true) {
+        add({ name: entry.name, path: entry.path, via: 'registry-in-default-scope' });
+      }
+    }
   }
 
   return { kbs: scoped, ...(registryError !== undefined && { registryError }) };

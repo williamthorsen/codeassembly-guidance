@@ -33,7 +33,7 @@ export interface ScopedKb {
   /** Absolute path to the KB's root directory. */
   path: string;
   /** How the KB was added to scope. */
-  via: 'discovery' | 'registry-default' | 'registry-all' | 'registry-named';
+  via: 'discovery' | 'registry-default' | 'registry-in-default-scope' | 'registry-all' | 'registry-named';
 }
 
 /** A recalled note that passed note-set scoping and the mechanical filters. */

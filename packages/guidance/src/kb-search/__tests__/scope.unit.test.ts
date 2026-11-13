@@ -10,6 +10,7 @@ const VAULT_A = join(FIXTURES, 'vault-a');
 const VAULT_B = join(FIXTURES, 'vault-b');
 const NOTES_VAULT = join(FIXTURES, 'notes-vault');
 const MALFORMED_REGISTRY = join(FIXTURES, 'registry.malformed');
+const OPT_IN_REGISTRY = join(FIXTURES, 'opt-in-registry');
 const HOME_WITH_DEFAULT = join(FIXTURES, 'home-with-default');
 // A home directory without a `.agents/kb.yaml`, so the user-global registry is empty.
 const HOME_EMPTY = FIXTURES;
@@ -32,6 +33,17 @@ describe(resolveScope, () => {
       { name: null, path: PROJECT_KB, via: 'discovery' },
       { name: 'vault-a', path: VAULT_A, via: 'registry-all' },
       { name: 'vault-b', path: VAULT_B, via: 'registry-all' },
+    ]);
+  });
+
+  it('adds each entry that opts into default scope once, keeping the provenance of discovery and default_kb', async () => {
+    const { kbs } = await resolveScope({ startDir: OPT_IN_REGISTRY, allKbs: false, home: HOME_EMPTY });
+
+    // `notes-vault` declares `in_default_scope: false`, so the exact list also asserts that it stays out.
+    expect(kbs).toEqual([
+      { name: null, path: OPT_IN_REGISTRY, via: 'discovery' },
+      { name: 'vault-a', path: VAULT_A, via: 'registry-default' },
+      { name: 'vault-b', path: VAULT_B, via: 'registry-in-default-scope' },
     ]);
   });
 
