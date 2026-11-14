@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0 — 2026-11-14
+
+### 🎉 Features
+
+- Makes `prepare-prototype-brief` post the approved brief on the ticket as a comment without asking a second time, with a summary line that names the lenses and the brief artifact and the full brief in a collapsed `<details>` block, and skips the post when an earlier run already posted it. (#145)
+- Adds the `merge.approval` preference, whose value `auto` makes `merge-pr` merge without its approval gate when the pull request is on GitHub and not breaking, its merge state is `CLEAN` or `HAS_HOOKS`, and the run neither reports a notice nor makes a decision of its own. (#147)
+- Adds the `--confirm` option to `merge-pr`, which shows the approval gate for one run when `merge.approval` is `auto`. (#147)
+- Adds the `project.stages` key to `.agents/preferences.yaml`, which declares the maturity, sensitivity, or audience of one subdirectory, and which `derive-session-context` reports as `project_stages` with each inherited value filled in, so that `plan` and `design-and-plan` apply the stage of the subdirectory that contains the work. (#150)
+- Adds `exploration` as a `project.maturity` value, below `hobby`, for work whose output is still taking shape and that nothing depends on yet. (#150)
+- Directs `plan` and `design-and-plan` to verify unsettled output, such as output at the `exploration` maturity or from a prototype, through a round in which the developer reads it on real inputs, and to plan golden references, answer keys, and evals only as tasks that follow the developer's approval of an output. (#150)
+- Adds an optional `## Notes for reviewers` section to the change summary written by `summarize-change`, along with a reader test that each line of that section, `## Why`, and `## How to test` must pass by changing what a reviewer who hasn't read the ticket checks or decides. (#151)
+- Directs `create-pr` to include `## Notes for reviewers` in the pull-request body and not to add a section, a note, or a test plan of its own. (#151)
+- Narrows the instruction in the shared `AGENTS.md`, `align-ticket-with-implementation`, and `review-branch` that had an agent report every divergence from the ticket's proposal in the pull-request description: It now names `## Notes for reviewers` and applies only to a divergence that changes what a reviewer checks. (#151)
+- Replaces the key-value completion lines at the end of `merge-pr`, `merge-gh-pr`, and `merge-bb-pr` replies with an outcome summary under a heading that states whether the PR was merged. (#158)
+- Adds a `summary` field to the JSON that `merge-gh-pr.mjs` prints after a confirmed merge, and changes the script to print a JSON object containing only `summary` on stdout when the merge is refused, fails, or cannot be confirmed. (#158)
+- Adds the ticket's close to the closing-post offer that ends a spike, so that one consent from the developer posts the conclusion and closes the ticket as completed, and a rerun skips whichever of the two writes is already done. (#159)
+- Makes `merge-pr` take its merge strategy and branch deletion from the `merge.strategy` (`squash`, `merge`, or `rebase`) and `merge.deletion_strategy` (`both`, `remote`, or `none`) preferences, which `derive-session-context` reports as `merge_strategy` and `merge_deletion_strategy` and which the `--strategy` and `--delete` flags override for one run. (#160)
+- Makes `derive-session-context` name the preferences file that contains an invalid value when it rejects one, in addition to the key and the accepted values. (#160)
+- Adds the `list-implementation-order` skill, which prints the conversation's open tickets as a tree in implementation order for a narrow column, with each ticket indented under its blocker, the blockers that the indent does not show, and a line for each change that must be published and upgraded in a consuming repository before a blocked ticket can start. (#163)
+- Changes the merged summary of `merge-gh-pr` and `merge-bb-pr` to a heading that names the target branch, the strategy, and the short merge commit hash, followed by labelled lines for the commit title, the PR link, and the remote branch deletion, with `merge-gh-pr` reading the commit title from GitHub after the merge and falling back to the submitted title, or to `unavailable`, when the read fails. (#164)
+- Changes the refusal summary of `merge-pr`, `merge-gh-pr`, and `merge-bb-pr` to a `## ❌ Not merged` heading followed by `PR:` and `Reason:` lines, and gives the unconfirmed-merge summary of `merge-gh-pr` the same layout under `## ⚠️ Merge not confirmed`. (#164)
+- Adds the implementation-order list, which shows the order, the blockers, and the publish gates of the tickets, to the output of a split's launch prompts and of the `triage-spike-findings`, `triage-feedback`, and `wrap-up` reports whenever the run creates two or more tickets. (#165)
+- Adds each `kb.yaml` registry entry that declares `in_default_scope: true` to the default scope of `kb-retrieve` and `kb-retrieve-events`, which previously searched only the discovered `.kb/` and the registry's `default_kb` unless `--all-kbs` was passed. (#172)
+- Makes `kb-add` refuse a write into a KB whose `visibility` is `shared` with a `shared-kb` error unless the invocation passes the new `--shared` flag, refuse a write with `invalid-config` when the KB's `.kb/config.yaml` is malformed, and report the KB's `visibility` in the `--survey` result. (#173)
+- Makes `capture-event` refuse a fresh capture into a store whose `visibility` is `shared` with a `shared-store` error unless the invocation passes the new `--shared` flag, and with `invalid-config` when the store's `.kb/config.yaml` is malformed, while leaving `--amend` exempt. (#173)
+- Adds a rule to the `capture-feedback` and `migrate-feedback-memories` skills that permits `--shared` only on a retry after a `shared-store` refusal and only for a record that contains nothing unfit for the store's collaborators, and that leaves any other record uncaptured rather than redirected to another store. (#173)
+- Adds `unsearchedPrivateStores` to the output of the `kb-retrieve` and `kb-retrieve-events` helpers, listing each registered store whose visibility is `private` and that the recall did not search, and directs the agent in both skills to report such a recall as partial and to name, for each store, the `--store` or `--all-kbs` flag that would include it, or that its path needs fixing. (#174)
+- Adds a rule to the `williamthorsen-ticketing-preferences` rulebook that limits a ticket to work in one repository and directs that a change needing two or more repositories get one ticket per repository, with the merge order, upstream first, recorded as blocked-by relations. (#179)
+- Makes `triage-spike-findings`, on a run given a batch, close the follow-up triage ticket as completed without a closing post once it posts the dispositions comment, and lists that close in the run's single confirmation and in its report. (#180)
+
+### 🐛 Bug fixes
+
+- Fixes the issue that the `live-worktree-policy` rulebook's example of the `{path}.live` naming gave `~/repos/projects/codeassembly` paths, when the repository is cloned under `~/repos/oss/`. (#157)
+- Fixes the issue that `--store` in `kb-retrieve` and `kb-retrieve-events` resolved a name against the user-level `kb.yaml` alone and did not find a store registered only in the project's `kb.yaml`. (#174)
+- Fixes the issue that the Split rule in the `next-steps-after-plan` partial never recommended splitting a small plan that touches two or more repositories, because the rule required every plan to be too large for one implement-and-review pass. (#179)
+
+### ♻️ Refactoring
+
+- Moves the implementation-order helper out of the `list-implementation-order` skill's directory into its own `skills/implementation-order/` directory as `implementation-order.mjs`, so that each skill that prints the implementation-order list runs it from one shared path. (#165)
+
+### 🧪 Tests
+
+- Moves the URL-construction tests from `compose-manifest.unit.test.ts` into a new `compose-manifest.urls.unit.test.ts`, which brings the original file under the 500-line limit set by the `max-lines` rule. (#149)
+- Rewrites the skill-name regex in `entry-points.unit.test.ts` as a `String.raw` template, as the `prefer-string-raw` rule requires, without changing the resulting regex. (#149)
+
 ## 0.6.0 — 2026-11-09
 
 ### 🎉 Features
