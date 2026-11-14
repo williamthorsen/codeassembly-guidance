@@ -94,7 +94,7 @@ Compose the bodies:
 
 Run the helper's `render --preview` to `{ticket_dir}/triage/preview/`, which writes the dispositions comment with `(pending)` where a number is not yet known, and one comment file per issue that a `comment` disposition names.
 
-Show everything that step 7 will create or post in one block: every body with its title and labels, the parent relationship and the blockers of each child and each follow-up, every per-issue comment with its issue, and the dispositions comment. Confirm once in the action-items block. This confirmation is the only one: {skill:create-ticket} does not re-confirm a relationship given as an argument.
+Show everything that step 7 will create or post in one block: every body with its title and labels, the parent relationship and the blockers of each child and each follow-up, every per-issue comment with its issue, the dispositions comment, and, on a run given **The batch**, the close of the triage ticket as completed. Confirm once in the action-items block. This confirmation is the only one: {skill:create-ticket} does not re-confirm a relationship given as an argument.
 
 ### 7. Write
 
@@ -115,15 +115,16 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
 
    Keep the URL that `gh issue comment` prints for the dispositions comment; when the post was skipped, keep the `url` of the matching comment instead. Step 8 links it.
 
-7. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
+7. On a run given **The batch**, close the triage ticket without a closing post, because its dispositions comment is its record: Read `gh issue view {triage ticket} --json state`, and run `gh issue close {triage ticket} --reason completed` only while the state is `OPEN`.
+8. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
 
 ### 8. Report
 
-Report the umbrella when one was created, each child with its grades and blockers in the order in which step 7 created them, each follow-up triage ticket with its batch, each issue commented on, and the artifact's path.
+Report the umbrella when one was created, each child with its grades and blockers in the order in which step 7 created them, each follow-up triage ticket with its batch, each issue commented on, the close of the triage ticket on a run given **The batch**, and the artifact's path.
 
 When the record names two or more tickets among the children and the follow-up triage tickets, print the list for them after the report, per [implementation-order list](#implementation-order-list), leaving out the umbrella. They include a ticket that an earlier run of the same record created.
 
-The triage round ends the spike, so offer to close the triage ticket with the [closing post](../_data/spike-conventions.md#closing-post) in the same response's action-items block, showing the post's body, and on consent post it and close the ticket with that section's checks. When the developer declines the offer, the triage ticket stays open. Do not offer it when the run was given **The batch**: A follow-up triage ticket's dispositions comment is its record. The post contains:
+The triage round ends the spike, so offer to close the triage ticket with the [closing post](../_data/spike-conventions.md#closing-post) in the same response's action-items block, showing the post's body, and on consent post it and close the ticket with that section's checks. When the developer declines the offer, the triage ticket stays open. Do not offer it when the run was given **The batch**: A follow-up triage ticket's dispositions comment is its record, and step 7 has closed the ticket. The post contains:
 
 - The answer to each question to answer and the recommendation on each decision to enable that the triage ticket's body lists, taken from the findings and the approved dispositions. A body that lists neither leaves the post with the items below alone.
 - The count of items by disposition.
