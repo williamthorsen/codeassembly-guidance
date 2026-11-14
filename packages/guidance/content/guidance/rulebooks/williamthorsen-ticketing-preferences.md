@@ -2,7 +2,7 @@
 slug: williamthorsen-ticketing-preferences
 description: William Thorsen's preferences for how work is split across tickets, how the relationships between them are recorded, and which figures a ticket body states.
 delivery: hook
-version: '6'
+version: '7'
 ---
 
 # William Thorsen's ticketing preferences
@@ -12,6 +12,8 @@ version: '6'
 When work deserves more than one pull request, give each pull request its own ticket. When splitting a ticket into two, keep the first piece in the originating ticket. When splitting into more, make the originating ticket an umbrella.
 
 A piece gets its own ticket when it can be merged and verified on its own, not when it looks large enough to deserve one. When the count is a judgment, cut finer: Merging two tickets that turned out to be one costs an edit and a close, while splitting one that turned out to be four costs a rewrite of the original, new children, a re-cut plan, and whatever was committed against the superseded contract.
+
+A ticket covers work in one repository. When a change needs work in two or more repositories, give each repository its own ticket, even when one repository's share is small, and record the merge order, upstream first, as blocked-by relations. The repository boundary does not need a judgment: A pull request lives in one repository, so a ticket that spans two cannot close on a single merge.
 
 This governs work already judged to need more than one pull request. Whether work discovered mid-change becomes a ticket at all is decided first by the fold-in default in [scope-and-deferral.md](../../skills/_data/scope-and-deferral.md).
 
