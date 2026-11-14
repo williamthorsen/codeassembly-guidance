@@ -65,9 +65,9 @@ Select the recommended option by checking these rules in order and stopping at t
 
    When rule 1 matches, the rendered option must name that decision on a `➕` line. Being unable to write the line means rule 1 did not match.
 
-2. **Split the ticket**: Recommend only when the plan is too large for one implement-and-review pass, and it contains two or more pieces that can each be merged and verified on their own. Both halves are required: Too large without a seam is not a match, and a seam in a plan that one pass would cover is not one either.
+2. **Split the ticket**: Recommend only when the plan is too large for one implement-and-review pass, and it contains two or more pieces that can each be merged and verified on their own. Both halves are required: Too large without a seam is not a match, and a seam in a plan that one pass would cover is not one either. A plan that touches two or more repositories matches whatever its size: Each repository is a piece, per the ticketing preferences.
 
-   A piece gets its own ticket when it can be merged and verified on its own, not when it looks large enough to deserve one. The `➕` line names the size and the pieces, each with the tasks that it takes: `➕ eleven tasks across three packages, and two pieces ship on their own: the schema change (tasks 1–4), then the reader that consumes it (tasks 5–11)`.
+   A piece gets its own ticket when it can be merged and verified on its own, not when it looks large enough to deserve one. The `➕` line names the size and the pieces, each with the tasks that it takes: `➕ eleven tasks across three packages, and two pieces ship on their own: the schema change (tasks 1–4), then the reader that consumes it (tasks 5–11)`. For a plan that spans repositories, the pieces are the repositories: `➕ three tasks across two repositories: the helper in williamthorsen/codeassembly (task 1), then the skill that calls it here (tasks 2–3)`.
 
    Structural properties (new module boundaries, changed interfaces, several packages) make a plan _more likely_ to be too large. They are evidence to weigh, and none of them matches rule 2 on its own.
 
