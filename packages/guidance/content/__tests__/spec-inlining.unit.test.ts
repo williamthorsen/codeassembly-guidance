@@ -216,6 +216,9 @@ const NEXT_STEPS_AFTER_PLAN: Spec = {
     // Rule 2's test. Without both halves the rule matches on size alone, which splits a large plan that has no
     // independent pieces, or on any seam, which cuts plans that one pass would handle.
     'Recommend only when the plan is too large for one implement-and-review pass, and it contains two or more pieces that can each be merged and verified on their own',
+    // The repository exception to rule 2's size half. Without it a small plan that spans repositories falls through to
+    // Implement, although no single pull request can carry it.
+    'A plan that touches two or more repositories matches whatever its size',
     // The same demotion for rule 2. Without it a multi-package plan is split on structure alone.
     'none of them matches rule 2 on its own',
     // The same obligation for rule 2. Without it the seam stays a hunch that the developer has to ask about.
