@@ -30,6 +30,15 @@ describe('closing post contract', () => {
     expect(text).not.toContain("The triage ticket stays open: Closing it is the developer's call");
     expect(text).toContain('When the developer declines the offer, the triage ticket stays open');
   });
+
+  it('closes a follow-up triage ticket without a post once its dispositions comment is posted', async () => {
+    const skill = await readContentFile('skills/triage-spike-findings/SKILL.md');
+
+    expect(skill).toContain('the close of the triage ticket as completed. Confirm once');
+    expect(skill).toContain('On a run given **The batch**, close the triage ticket without a closing post');
+    expect(skill).toContain('`gh issue close {triage ticket} --reason completed` only while the state is `OPEN`');
+    expect(await CONVENTIONS).toContain('`triage-spike-findings` closes it as completed, without a post');
+  });
 });
 
 describe.each([
