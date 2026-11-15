@@ -110,7 +110,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-writing-preferences',
-    { bodyHash: '778eecb88facbdd921f8f2a367e0bb99b9b1724d70a8d8bbb05665acbc17eeee', version: '12' },
+    { bodyHash: 'adcd33104b46d54446d6974146923c47ce876fa413e424f9f953c7a53c1d3169', version: '13' },
   ],
 ]);
 
@@ -141,7 +141,7 @@ const RULE_PINS = new Map<string, RulePin>([
   ['line-wrapping', { sectionHash: '6cb583e22c0a9310f995e204516a15b7a06b0dd3edf6c5f386b6498727434fff', version: '1' }],
   [
     'reduced-object-relative',
-    { sectionHash: '4c431bf7a3aa72af3ff9e49b7d249bfe98cc3ce039f11f0c8d627a663b98b303', version: '1' },
+    { sectionHash: '216ce95006fb954310b3af28340bdde9283e027f8e457e73e509dc4c31b5a531', version: '1' },
   ],
   ['second-person', { sectionHash: '5b5fa597c03587feb40ba41386593007c04370bd01eb4e042bccf8e1b9e46427', version: '1' }],
   ['sentence-case', { sectionHash: 'e19ffdafdd6eb84f47e229d07871a70ab55114981c8052b365f4bd33330d9b18', version: '1' }],

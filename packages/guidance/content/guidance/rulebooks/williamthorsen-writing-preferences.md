@@ -2,7 +2,7 @@
 slug: williamthorsen-writing-preferences
 description: William Thorsen's personal writing preferences for agent-authored prose.
 delivery: [ambient, hook]
-version: '12'
+version: '13'
 ---
 
 # William Thorsen's writing preferences
@@ -34,7 +34,7 @@ Don't use em-dashes; use appropriate punctuation instead. A dash separating an i
 
 <!-- rule: reduced-object-relative 1 -->
 
-A relative clause with an object gap takes an overt relativizer: "the source that it names", never "the source it names". The test is mechanical: Between the head noun and the embedded subject, look for `that` or `which`. This is a house convention, not a claim about ordinary English, which permits the contact clause freely.
+A relative clause with an object gap takes an overt relativizer: "the source that it names", never "the source it names". The test is mechanical: Between the head noun and the embedded subject, look for `that` or `which`. This is a house convention, not a claim about ordinary English, which permits the contact clause freely. For a gap after a copula, a coordinated gap, or the anaphoric one-series as head, see [rare cases](../../skills/_data/reduced-object-relatives.md).
 
 **Repairs, in preference order.** Choose per site; restored relativizers stacked across a passage read as a tic of their own.
 
@@ -43,10 +43,6 @@ A relative clause with an object gap takes an overt relativizer: "the source tha
 3. **Recast** if neither fits: Promote the embedded clause to a main clause, or replace the relative with a prepositional phrase.
 
 **A gap in a prepositional phrase takes its own order.** Pied-pipe the preposition first: "the level against which it is probed", preferred over the stranded "the level that it is probed against". If pied-piping reads stiffly, the stranded relativizer is the second choice and a recast the third. The passive participle is last here rather than first, since the actor is already inside the clause.
-
-**A predicate-nominal gap takes the restored relativizer.** "the throwing mock that it is", never "the throwing mock it is". Neither of the other repairs applies to it: A copula does not have a preposition to pied-pipe or an actor to promote into a participle. If the restored relativizer reads stiffly, recast.
-
-**A coordinated gap takes a doubled relative or one shared stranded relativizer.** When a direct-object gap coordinates with an oblique one, pied-piping cannot apply to the first, which does not have a preposition to pipe. The parallel forms are "the error which it threw or with which it rejected" and "the error that it threw or rejected with".
 
 **The shapes, ranked from worst to mildest.** The rank follows the embedded subject's form, since the reader must keep that form in mind until the verb appears. Each is an exhibit of the construction, not a model to copy.
 
@@ -57,7 +53,7 @@ A relative clause with an object gap takes an overt relativizer: "the source tha
 
 **The agentive `by`-phrase satisfies plain speech.** Plain speech rejects the _agentless_ passive that hides who acted. A `by`-phrase names the actor in the same phrase; therefore, "imported by every exported tier module" satisfies plain speech as fully as the active form does. This rule breaks the habit of using a contact clause to avoid a passive that was never the target.
 
-**Scope.** The rule governs a lexical head noun whose relative clause has a gap in an argument position: the direct object ("the source that it names"), the object of a preposition ("the level against which it is probed"), or the complement of a copula ("the throwing mock that it is"). The anaphoric one-series heads a relative clause under the rule too, though it is not a lexical noun, because a relativizer restores to it: "one that the spy carries". Two neighboring constructions fall outside the rule, each on a ground of its own: the fused head ("everything I know", "all you need"), which is its own relative pronoun and does not admit a relativizer, and the adjunct relative ("the reason it fails", "the way it works"), whose gap does not fill an argument position. The boundary keys on head type and gap role. Neither a short embedded subject nor a tight word budget exempts anything.
+**Scope.** The rule governs a lexical head noun whose relative clause has a gap in an argument position: the direct object ("the source that it names"), the object of a preposition ("the level against which it is probed"), or the complement of a copula ("the throwing mock that it is"). Two neighboring constructions fall outside the rule, each on a ground of its own: the fused head ("everything I know", "all you need"), which is its own relative pronoun and does not admit a relativizer, and the adjunct relative ("the reason it fails", "the way it works"), whose gap does not fill an argument position. The boundary keys on head type and gap role. Neither a short embedded subject nor a tight word budget exempts anything.
 
 ## Second person
 
