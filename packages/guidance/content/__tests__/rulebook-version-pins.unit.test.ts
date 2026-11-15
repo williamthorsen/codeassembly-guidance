@@ -52,6 +52,10 @@ const PINS = new Map<string, RulebookPin>([
     { bodyHash: '0a5c79ab85f65578b70ea0478dc0c1c7dffcace75b705ab8dc1483261d8884ef', version: '11' },
   ],
   [
+    'cross-repo-migration-conventions',
+    { bodyHash: 'd138c775fe46633a2b0b4856a42f0c22237b25f51a872d9c99a5d7858ed24cb3', version: '1' },
+  ],
+  [
     'generated-content-policy',
     { bodyHash: '2448d32434c2545e9dd8433bb153eb72ca6f35fca0db4702ed5a0198cebac942', version: '1' },
   ],
@@ -94,7 +98,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-ticketing-preferences',
-    { bodyHash: '59b8c1450b4c1202b078e6ba640027c04f864a62aaed7b29b9847029f53100a5', version: '7' },
+    { bodyHash: '71998f238d8a931b0b4ce4bb67eba366d5653cf458f8d478aa85bd2d0bd0c1a6', version: '8' },
   ],
   [
     'williamthorsen-tooling-preferences',
