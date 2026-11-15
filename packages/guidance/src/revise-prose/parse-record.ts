@@ -1,6 +1,7 @@
 /**
  * Parsing for the sweep record, `.agents/revise-prose.yaml`, and for the fold that a run reports back for recording.
  */
+import { describeError } from '@williamthorsen/toolbelt.errors';
 import { parse as parseYaml } from 'yaml';
 import { z } from 'zod';
 
@@ -156,7 +157,7 @@ export function parseRunFold(json: string): RunFold {
   try {
     parsed = JSON.parse(json);
   } catch (error) {
-    throw new Error(`Invalid run fold: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+    throw new Error(`Invalid run fold: ${describeError(error)}`, { cause: error });
   }
 
   const result = RunFoldSchema.safeParse(parsed);

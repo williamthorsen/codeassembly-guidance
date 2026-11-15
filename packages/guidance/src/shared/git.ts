@@ -2,6 +2,8 @@
 import { execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import { isRecord } from '../lib/type-guards.ts';
 
 /** The git queries that the shared helpers make, each returning parsed values. */
@@ -37,7 +39,7 @@ function describeGitFailure(error: unknown): string {
   if (typeof stderr === 'string' && stderr.trim() !== '') {
     return stderr.trim();
   }
-  return error instanceof Error ? error.message : String(error);
+  return describeError(error);
 }
 
 /** Runs `git branch --show-current`, which prints an empty line on a detached HEAD. */

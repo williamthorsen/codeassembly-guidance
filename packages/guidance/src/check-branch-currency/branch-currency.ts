@@ -2,6 +2,8 @@
 import { execFileSync } from 'node:child_process';
 import process from 'node:process';
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import { isRecord } from '../lib/type-guards.ts';
 
 /** A commit that the base gained and the branch lacks. */
@@ -84,7 +86,7 @@ function describeGitFailure(error: unknown): string {
   if (typeof stderr === 'string' && stderr.trim() !== '') {
     return stderr.trim();
   }
-  return error instanceof Error ? error.message : String(error);
+  return describeError(error);
 }
 
 /** Runs `git fetch` with terminal prompts disabled, so that a credential prompt fails rather than waits. */

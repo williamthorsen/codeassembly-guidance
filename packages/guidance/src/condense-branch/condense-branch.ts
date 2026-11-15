@@ -2,6 +2,8 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import { isMissingFile, isRecord } from '../lib/type-guards.ts';
 import { composeMessage, parseChangeEntries } from './compose-message.ts';
 
@@ -83,7 +85,7 @@ function describeGitFailure(error: unknown): string {
   if (typeof stderr === 'string' && stderr.trim() !== '') {
     return stderr.trim();
   }
-  return error instanceof Error ? error.message : String(error);
+  return describeError(error);
 }
 
 /** Returns true when a local branch named `name` exists. */
