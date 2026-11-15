@@ -69,3 +69,5 @@ helpers:
     out: scripts/check-branch-currency.mjs
   - entry: ../src/check-prose/cli.ts
     out: scripts/check-prose.mjs
+  - entry: ../src/condense-branch/cli.ts
+    out: skills/condense-branch/condense-branch.mjs
