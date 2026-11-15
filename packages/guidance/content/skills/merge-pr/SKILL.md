@@ -218,7 +218,7 @@ A type that the developer named, through `--type` or in an answer at the gate, s
 
 Take a type spelled with the marker, whether decided here or named by the developer, as the pair that the flags imply: `feat!` is `--override-type feat` with `--override-breaking`, and for an entry, `--type feat` with `--breaking`. The helper refuses a type spelled with `!`, so it would refuse such a type passed through unchanged, and the defect would stay unsettled.
 
-When asking option-style questions, follow [option format](#option-format). (Reinforces the rule in `AGENTS.md`: intentional redundancy.)
+When asking option-style questions, follow [option format](#option-format).
 
 Re-run step 3 after each amendment and each override, with every override added to the override set, until `defects` is empty. Never offer the merge while `defects` contains an item. If an override or an amendment moves the effective record to another tier and step 5 drafted the body, re-run step 5's drafting against the new tier.
 

@@ -49,7 +49,7 @@ When you do ask, prefer forms that the user can answer unambiguously:
 
 - **A confirmation prompt** (end with `👍🏼👎🏼`). A fixed comprehension contract applies to the marker: On a clear affirmation, proceed; on a clear negation, don't; treat anything else as conversation. Full spec in `AGENTS.md` under "Prompt formatting". (Reinforces the rule in `AGENTS.md`: intentional redundancy.)
 - **A numbered options list.** Include a "some other approach (describe)" option if alternatives should stay open.
-  - When asking option-style questions, follow [option format](#option-format). (Reinforces the rule in `AGENTS.md`: intentional redundancy.)
+  - When asking option-style questions, follow [option format](#option-format).
 
 **Never use an interactive selector to pose the question.** `{tool:AskUserQuestion}` (or any pop-up / arrow-key picker) cannot render the strength markers or pros and cons that the gradient requires, so it silently discards the convention. Always write the choice as plain text in the message body.
 
