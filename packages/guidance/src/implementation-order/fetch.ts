@@ -21,6 +21,8 @@ export interface GithubTicket {
 /** A ticket read from GitHub, with every blocker that GitHub records for it, open or closed. */
 export interface FetchedTicket extends GithubTicket {
   blockers: GithubTicket[];
+  /** Whether the ticket has sub-issues, open or closed, which makes it an umbrella whose children do its work. */
+  hasSubIssues: boolean;
 }
 
 const TICKET_REF_PATTERN = /^([\w.-]+\/[\w.-]+)#(\d+)$/;
@@ -58,6 +60,7 @@ export async function fetchTicket(
       repository: readRepository(node.url) ?? ticket.repository,
       title: node.title,
     })),
+    hasSubIssues: issue.subIssuesSummary.total > 0,
     number: issue.number,
     open: issue.state === 'OPEN',
     repository: readRepository(issue.url) ?? ticket.repository,

@@ -6,6 +6,7 @@ import type { GhRunner } from '../fetch.ts';
 interface FakeIssue {
   blockedBy?: string[];
   state?: 'CLOSED' | 'OPEN';
+  subIssues?: { completed: number; total: number };
   title?: string;
 }
 
@@ -56,8 +57,44 @@ describe(listImplementationOrder, () => {
 
     const order = await listImplementationOrder(['--ticket', 'acme/app#1', '--ticket', 'acme/app#2'], gh);
 
-    expect(order.omitted).toEqual(['acme/app#1']);
+    expect(order.omitted).toEqual([{ reason: 'closed', ref: 'acme/app#1' }]);
     expect(order.tickets).toMatchObject([{ depth: 0, otherBlockers: [], ref: 'acme/app#2' }]);
+  });
+
+  it.each([
+    { children: 'open', subIssues: { completed: 0, total: 2 } },
+    { children: 'closed', subIssues: { completed: 2, total: 2 } },
+  ])('leaves out an umbrella whose children are $children, naming it as an umbrella', async ({ subIssues }) => {
+    const gh = makeGh({ 'acme/app#1': { subIssues }, 'acme/app#2': {} });
+
+    const order = await listImplementationOrder(['--ticket', 'acme/app#1', '--ticket', 'acme/app#2'], gh);
+
+    expect(order.omitted).toEqual([{ reason: 'umbrella', ref: 'acme/app#1' }]);
+    expect(order.tickets.map(({ ref }) => ref)).toEqual(['acme/app#2']);
+  });
+
+  it('names a closed umbrella as closed', async () => {
+    const gh = makeGh({ 'acme/app#1': { state: 'CLOSED', subIssues: { completed: 2, total: 2 } } });
+
+    const order = await listImplementationOrder(['--ticket', 'acme/app#1'], gh);
+
+    expect(order.omitted).toEqual([{ reason: 'closed', ref: 'acme/app#1' }]);
+  });
+
+  it('lists the children of an omitted umbrella as it lists them without the umbrella', async () => {
+    const gh = makeGh({
+      'acme/app#1': { subIssues: { completed: 0, total: 3 } },
+      'acme/app#2': {},
+      'acme/app#3': { blockedBy: ['acme/app#2'] },
+      'acme/app#4': { blockedBy: ['acme/app#2', 'acme/core-lib#9'] },
+      'acme/core-lib#9': {},
+    });
+    const children = ['--ticket', 'acme/app#2', '--ticket', 'acme/app#3', '--ticket', 'acme/app#4'];
+
+    const withUmbrella = await listImplementationOrder(['--ticket', 'acme/app#1', ...children], gh);
+    const withoutUmbrella = await listImplementationOrder(children, gh);
+
+    expect(withUmbrella.tickets).toEqual(withoutUmbrella.tickets);
   });
 
   it('orders by a supplied edge, and lists a ticket outside GitHub by its key', async () => {
@@ -143,6 +180,7 @@ function makeGh(issues: Record<string, FakeIssue>): GhRunner {
     const view = {
       ...toNode(ref, issue),
       blockedBy: { nodes: (issue.blockedBy ?? []).map((blocker) => toNode(blocker, issues[blocker] ?? {})) },
+      subIssuesSummary: issue.subIssues ?? { completed: 0, total: 0 },
     };
     return Promise.resolve({ exitCode: 0, stderr: '', stdout: JSON.stringify(view) });
   };

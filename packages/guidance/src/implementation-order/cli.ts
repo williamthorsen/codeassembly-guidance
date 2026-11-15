@@ -53,9 +53,15 @@ export interface ListedTicket {
 export interface ImplementationOrder {
   /** The listed tickets that block each other, by `ref`. */
   cycle: string[];
-  /** The closed tickets that were named, by `ref`. */
-  omitted: string[];
+  /** The named tickets that the list leaves out, in the order in which the arguments name them. */
+  omitted: OmittedTicket[];
   tickets: ListedTicket[];
+}
+
+/** A named ticket that the list leaves out: one that is closed, or an open umbrella, whose sub-issues do its work. */
+export interface OmittedTicket {
+  reason: 'closed' | 'umbrella';
+  ref: string;
 }
 
 const PROGRAM = 'implementation-order';
@@ -70,7 +76,8 @@ const execFileAsync = promisify(execFile);
 /**
  * Lists the tickets that `argv` names in implementation order. `--ticket OWNER/REPO#N` names a GitHub ticket,
  * `--external KEY=Title` a ticket outside GitHub, and `--edge BLOCKER>BLOCKED` a dependency that GitHub does not
- * record. Closed tickets are left out, as tickets and as blockers.
+ * record. Closed tickets are left out, as tickets and as blockers. A ticket that has sub-issues is left out of the
+ * tickets but stays a blocker.
  *
  * Throws on a malformed flag, an edge naming an unknown ticket, and a ticket that cannot be read.
  */
@@ -80,6 +87,7 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
   const entries = new Map<string, Entry>();
   const edges: Edge[] = [];
   const fetched = await Promise.all(request.tickets.map((ticket) => fetchTicket(gh, ticket)));
+  const umbrellas = new Set(request.listedIds.filter((_id, index) => fetched[index]?.hasSubIssues === true));
   for (const [index, ticket] of fetched.entries()) {
     const id = request.listedIds[index] ?? buildId(ticket);
     for (const blocker of ticket.blockers) {
@@ -104,7 +112,7 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
   edges.push(...request.edges);
 
   const listed = [...request.order];
-  const active = listed.filter((id) => entries.get(id)?.open === true);
+  const active = listed.filter((id) => entries.get(id)?.open === true && !umbrellas.has(id));
   const { cycle, placed } = orderTickets(active, edges);
 
   const shown = new Set([...active, ...active.flatMap((id) => findOpenBlockers(id, edges, entries))]);
@@ -112,7 +120,12 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
 
   return {
     cycle: cycle.map((id) => describeEntry(id, entries, prefixes).ref),
-    omitted: listed.filter((id) => !active.includes(id)).map((id) => describeEntry(id, entries, prefixes).ref),
+    omitted: listed
+      .filter((id) => !active.includes(id))
+      .map((id) => ({
+        reason: entries.get(id)?.open === true ? 'umbrella' : 'closed',
+        ref: describeEntry(id, entries, prefixes).ref,
+      })),
     tickets: placed.map(({ depth, id, parent }) => {
       const ticket = describeEntry(id, entries, prefixes);
       const otherBlockers = findOpenBlockers(id, edges, entries)
