@@ -76,8 +76,8 @@ Assessment produces drift: `partial`, relevance: `relevant` (baseline), progress
 
 ```
 Next steps:
-1. ♻️ ■□□ Update ticket to match current codebase state:
-2. 🏁 ■■□ Close and create a new ticket scoped to remaining work:
+1. ♻️ ■□□ Update ticket to match current codebase state
+2. 🏁 ■■□ Close and create a new ticket scoped to remaining work
 ```
 
 Action 1 combines drift and progress update triggers into a single option. Action 2 comes from progress, and leads because a new ticket scoped to the small remainder states the work more plainly than a revised one. Relevance is baseline and contributes nothing.
@@ -88,8 +88,8 @@ Assessment produces drift: `partial` and advisability: `questionable` (other dim
 
 ```
 Next steps:
-1. ♻️ ■□□ Update ticket to match current codebase state:
-2. ♻️ ■■□ Revise ticket to address advisability concerns:
+1. ♻️ ■□□ Update ticket to match current codebase state
+2. ♻️ ■■□ Revise ticket to address advisability concerns
 ```
 
 Both actions share the ♻️ icon but represent distinct intents (factual sync with the codebase versus content/scope rework), so they appear as separate numbered options rather than collapsing under the dedupe rule. The revision leads because a scope change also rewrites the parts that the update would sync.
