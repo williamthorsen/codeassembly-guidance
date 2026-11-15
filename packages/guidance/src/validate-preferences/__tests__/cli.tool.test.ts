@@ -6,7 +6,7 @@ import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
-import { runValidatePreferences } from '../cli.ts';
+import { runValidatePreferences, runValidatePreferencesCommand } from '../cli.ts';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../..');
 const programName = 'validate-preferences';
@@ -134,6 +134,18 @@ describe(runValidatePreferences, () => {
     expect(stdio.stderrChunks.join('')).toMatch(
       /^validate-preferences: .*--bogus.*; run validate-preferences --help for usage\n$/,
     );
+  });
+});
+
+describe(runValidatePreferencesCommand, () => {
+  it('reports a thrown error on stderr and exits 1', async () => {
+    const workDir = makeScratchDir('validate-preferences-command-');
+    // A directory makes `readFile` throw EISDIR, which `runValidatePreferences` does not handle.
+    await mkdir(path.join(workDir, 'dir.yaml'));
+    using stdio = captureStdio();
+    expect(await runValidatePreferencesCommand(['dir.yaml'], workDir, programName)).toBe(1);
+    expect(stdio.stdoutChunks).toEqual([]);
+    expect(stdio.stderrChunks.join('')).toMatch(/^validate-preferences: .*EISDIR.*\n$/);
   });
 });
 
