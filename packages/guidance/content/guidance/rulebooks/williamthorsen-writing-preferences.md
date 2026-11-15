@@ -60,9 +60,7 @@ Imperative mood is untouched, because it does not contain a pronoun: "Run the fo
 
 **The replacement names an actor.** Say who or what acts: "the config sets a cap on the rule" rather than "you cap the rule". If an actor does not belong in the sentence, recast so that the artifact is the subject of a verb that it performs or one that states a relation, as plain speech requires: "the flag takes a path" rather than "you pass it a path".
 
-A naive substitution can fail this way:
-
-- **The agentless passive.** Dropping the pronoun by hiding who acted trades one defect for another: "your rules are capped" becomes "the rules are capped", which names nobody. Plain speech rejects that passive; name the actor instead.
+Dropping the pronoun by hiding who acted trades one defect for another: "your rules are capped" becomes "the rules are capped", which names nobody. Plain speech rejects that passive; name the actor instead.
 
 ## Sentence case
 

@@ -110,7 +110,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-writing-preferences',
-    { bodyHash: 'bdc798160d46de2aa9b5eca253a3d9ea963a253eeb85767b1c11263a7bbf7e82', version: '14' },
+    { bodyHash: '68d20fffd276c5485e3eafad4a83336d5dd981bb67e6291d5a531eb8dcc1e818', version: '14' },
   ],
 ]);
 
@@ -143,7 +143,7 @@ const RULE_PINS = new Map<string, RulePin>([
     'reduced-object-relative',
     { sectionHash: '2210b89d0bb0a88594da2c41fa0d8a5b0cf925f19a7f5fbb617b3746d29e60e6', version: '1' },
   ],
-  ['second-person', { sectionHash: 'cfbae3ddcdeae6cfc29460beb23c3c391da20b993e9c0af205332213ad9e0f0c', version: '1' }],
+  ['second-person', { sectionHash: 'dc33c8565c0e7ff5620be152e816b9605f06c930590bb23e1a2139dd06e45305', version: '1' }],
   ['sentence-case', { sectionHash: '54a42d009098e91ec4c828c7108f629e2b0d0f9f9f24f5e0913b27464bb35a84', version: '1' }],
   ['so', { sectionHash: '2ed8a0d1f531d1d33778f9006214931528d13f0ccd79ad004a87d05e0ba97bf3', version: '1' }],
   ['where', { sectionHash: 'de807a9bf2e30c9b97415507a2a0b67a216674032755cb6cf3e23e8d2019e397', version: '2' }],
