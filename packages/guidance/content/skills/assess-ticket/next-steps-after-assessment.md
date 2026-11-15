@@ -66,33 +66,30 @@ When multiple dimensions produce non-baseline verdicts, their actions are combin
 
 ## Output format
 
-```
-Next steps:
-  1. ♻️ {Update action}
-  2. 🏁 {Close action}
-  3. 💬 {Comment action}
-```
+Render the list per [option format](SKILL.md#option-format), with each action's icon before its marker. The list always renders, whatever the markers say, because every action writes to the ticket.
+
+Mark each action at the strength that the evidence behind its verdict supports. When two actions answer the same verdict, such as an update and a close for `severe` drift, the one that the evidence favors leads.
 
 ## Example: Combined output
 
-Assessment produces drift: `partial`, relevance: `relevant` (baseline), progress: `partial`:
+Assessment produces drift: `partial`, relevance: `relevant` (baseline), progress: `partial`, and the remaining work is a small part of the ticket:
 
 ```
 Next steps:
-  1. ♻️ Update ticket to match current codebase state
-  2. 🏁 Close and create a new ticket scoped to remaining work
+1. ♻️ ■□□ Update ticket to match current codebase state
+2. 🏁 ■■□ Close and create a new ticket scoped to remaining work
 ```
 
-Action 1 combines drift and progress update triggers into a single option. Action 2 comes from progress. Relevance is baseline and contributes nothing.
+Action 1 combines drift and progress update triggers into a single option. Action 2 comes from progress, and leads because a new ticket scoped to the small remainder states the work more plainly than a revised one. Relevance is baseline and contributes nothing.
 
 ## Example: Distinct ♻️ flavors
 
-Assessment produces drift: `partial` and advisability: `questionable` (other dimensions baseline):
+Assessment produces drift: `partial` and advisability: `questionable` (other dimensions baseline), and the advisability concern changes the ticket's scope:
 
 ```
 Next steps:
-  1. ♻️ Update ticket to match current codebase state
-  2. ♻️ Revise ticket to address advisability concerns
+1. ♻️ ■□□ Update ticket to match current codebase state
+2. ♻️ ■■□ Revise ticket to address advisability concerns
 ```
 
-Both actions share the ♻️ icon but represent distinct intents (factual sync with the codebase versus content/scope rework), so they appear as separate numbered options rather than collapsing under the dedupe rule.
+Both actions share the ♻️ icon but represent distinct intents (factual sync with the codebase versus content/scope rework), so they appear as separate numbered options rather than collapsing under the dedupe rule. The revision leads because a scope change also rewrites the parts that the update would sync.

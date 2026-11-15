@@ -33,7 +33,9 @@ Obtain the base SHA via `git rev-parse --short HEAD`.
 
 ### 4. Next steps
 
-After presenting the assessment output, evaluate whether any verdicts are non-baseline and, if so, present follow-up actions. Follow [next steps after assessment](next-steps-after-assessment.md) for the verdict-to-actions mapping, combination rules, and interaction protocol, and [Baseline verdicts](#baseline-verdicts) for the baseline definition.
+After presenting the assessment output, evaluate whether any verdicts are non-baseline and, if so, present follow-up actions. Follow [next steps after assessment](next-steps-after-assessment.md) for the verdict-to-actions mapping, combination rules, and interaction protocol, [option format](#option-format) for the list's form, and [Baseline verdicts](#baseline-verdicts) for the baseline definition.
+
+<!-- include: ../_partials/option-format.md / -->
 
 <!-- include: ../_partials/action-items.md / -->
 
