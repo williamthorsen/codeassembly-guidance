@@ -46,10 +46,11 @@ This skill is the canonical home of the shared review process. `review-pr` invok
 5. **Analyze changes**: `git diff <merge-base-sha>..HEAD`.
 6. **Review thoroughly** following the guidelines below.
 7. **Challenge your own findings**: Re-read each finding and delete every one that you would not defend to a skeptical author asking "why does this matter?" A review may legitimately end with zero findings.
-8. **Assign a score** out of 10.
-9. **Resolve frontmatter fields** before saving; see [Frontmatter resolution](#frontmatter-resolution).
-10. **Save the review** per the [Saving](#saving) section.
-11. **Present next steps**: After saving, present a next-steps prompt following [next-steps options](#next-steps-options). Supply recommendation context: finding counts and categories from the review, which criteria the specification compliance section marked in conflict with the implementation, and the consistency verdict when the consistency section was rendered. The next-steps prompt is interactive output only and is not saved in the review artifact.
+8. **Reflow over-width comments**: For each comment line that the diff adds or modifies and that exceeds the `max_line_length` that `.editorconfig` sets for its file, reflow the paragraph from that line on, changing only whitespace, and drop any finding that the reflow resolves. Commit the reflows as a new commit, composed per `{skill:create-commit}` with the reflowed paths named, and record each in the review's `## Applied reflows` section. Do not ask first: A reflow does not involve any judgment. Report the line as a finding instead when the review covers a pull request, whose branch belongs to its author, or when its file has uncommitted changes, which the commit would sweep in. A line that whitespace changes cannot bring within the width is neither reflowed nor reported by this step.
+9. **Assign a score** out of 10.
+10. **Resolve frontmatter fields** before saving; see [Frontmatter resolution](#frontmatter-resolution).
+11. **Save the review** per the [Saving](#saving) section.
+12. **Present next steps**: After saving, present a next-steps prompt following [next-steps options](#next-steps-options). Supply recommendation context: finding counts and categories from the review, which criteria the specification compliance section marked in conflict with the implementation, and the consistency verdict when the consistency section was rendered. The next-steps prompt is interactive output only and is not saved in the review artifact.
 
 ## Frontmatter resolution
 
@@ -120,6 +121,10 @@ The body following the frontmatter has this structure:
 ### Documentation
 
 ### Test quality
+
+## Applied reflows
+
+{Omit when step 8 did not reflow anything. Otherwise one line per reflowed comment: `path:line`, then the reflow commit's short SHA.}
 
 ## Action required
 
@@ -249,7 +254,7 @@ Paraphrasing is not divergence: Evaluate semantic alignment, not textual overlap
 
 ### Clean reviews
 
-When a change does not warrant any findings, render it on this shape rather than as empty `### FIXMEs` / "None." scaffolding:
+When a change does not warrant any findings, render it on this shape rather than as empty `### FIXMEs` / "None." scaffolding. A reflow is not a finding, so a review whose only issue was an over-width comment is clean too, with its `## Applied reflows` section above `## Action required`:
 
 ```markdown
 ## Action required
