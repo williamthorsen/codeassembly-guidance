@@ -1,6 +1,6 @@
 ## Implementation-order list
 
-Print open tickets in the order in which to implement them, as a tree for a narrow column. The step that links here names the tickets, in the order in which it reached them, an `--external` entry for each ticket outside GitHub, and an `--edge` for each dependency that the tracker does not record. A bundled helper reads the tickets, orders them, and writes the fixed part of every line. You shorten the titles and mark the publish gates.
+Print open tickets that have work of their own in the order in which to implement them, as a tree for a narrow column. An umbrella, a ticket that has sub-issues, is left out, because its children do its work; the step names the children for them to be listed. The step that links here names the tickets, in the order in which it reached them, an `--external` entry for each ticket outside GitHub, and an `--edge` for each dependency that the tracker does not record. A bundled helper reads the tickets, orders them, and writes the fixed part of every line. You shorten the titles and mark the publish gates.
 
 1. **Run the helper.**
 
@@ -11,7 +11,7 @@ Print open tickets in the order in which to implement them, as a tree for a narr
 
    Write a GitHub ticket as `OWNER/REPO#N`, taking the repository from the ticket's URL. Repeat each flag once per ticket or edge. Each side of an edge is `OWNER/REPO#N` or a key that an `--external` declares, and the blocked side is a listed ticket. On a non-zero exit, report the helper's stderr and do not print the list: A list that lacks a ticket misstates the order.
 
-   The helper prints `{"tickets": [...], "omitted": [...], "cycle": [...]}`. `tickets` is in list order. `omitted` names the closed tickets, which the list leaves out.
+   The helper prints `{"tickets": [...], "omitted": [...], "cycle": [...]}`. `tickets` is in list order. `omitted` names each ticket that the list leaves out, with its `reason`: `closed`, or `umbrella` for an open ticket that has sub-issues.
 
 2. **Shorten each title** to at most the ticket's `titleBudget` characters. Cut words rather than end with an ellipsis, and keep the leading verb. Leave a title that already fits as it is.
 

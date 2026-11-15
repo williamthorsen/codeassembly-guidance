@@ -6,13 +6,13 @@ disable-model-invocation: true
 
 # List implementation order
 
-Print the open tickets that the conversation created or discussed, in the order in which to implement them. You name the tickets, and the [implementation-order list](#implementation-order-list) section renders them.
+Print the open tickets that the conversation created or discussed and that have work of their own, in the order in which to implement them. You name the tickets, and the [implementation-order list](#implementation-order-list) section renders them.
 
 Never invoke this skill on your own initiative, and never suggest it.
 
 ## Process
 
-1. **Collect the tickets.** List every ticket that the conversation created or discussed, in the order in which the conversation reached them. Give a ticket outside GitHub its key and its title.
+1. **Collect the tickets.** List every ticket that the conversation created or discussed, in the order in which the conversation reached them. Give a ticket outside GitHub its key and its title. For an umbrella, name its children as well: The list leaves the umbrella out.
 
    When the conversation does not contain any ticket, say so in one line and stop.
 

@@ -20,7 +20,7 @@ export function makeImplementationOrderSmokeTest(): SmokeTestInvocation {
     `const blocker = ${blocker};`,
     'const blocked = { number: 2, state: "OPEN", title: "Blocked", url: "https://github.com/acme/widgets/issues/2" };',
     'const issue = process.argv[4] === "2" ? { ...blocked, blockedBy: { nodes: [blocker] } } : { ...blocker, blockedBy: { nodes: [] } };',
-    'process.stdout.write(JSON.stringify(issue));',
+    'process.stdout.write(JSON.stringify({ ...issue, subIssuesSummary: { completed: 0, total: 0 } }));',
   ].join('\n');
   writeFileSync(ghPath, `${script}\n`);
   chmodSync(ghPath, 0o755);
