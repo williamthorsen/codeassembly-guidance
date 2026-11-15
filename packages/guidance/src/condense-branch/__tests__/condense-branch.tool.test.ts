@@ -42,6 +42,15 @@ const REFUSALS: RefusalCase[] = [
     'not valid JSON',
   ],
   [
+    'a failure to write the commit',
+    (fixture, options) => {
+      // An empty name in the repository's config overrides any global identity and fails `commit-tree`.
+      git(fixture.repo, 'config', 'user.name', '');
+      return options;
+    },
+    'git commit-tree failed',
+  ],
+  [
     'a branch without commits of its own',
     (fixture, options) => {
       git(fixture.repo, 'switch', '--quiet', '--create', 'empty', 'main');

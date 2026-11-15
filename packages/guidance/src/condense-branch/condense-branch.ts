@@ -27,10 +27,10 @@ export interface CondenseResult {
 }
 
 /**
- * Creates a backup branch at the original head, writes one commit whose tree is the original head's tree and whose
- * parent is the merge base with `base`, and moves the branch to it. Throws before any write on a detached HEAD, a
- * missing or empty message file, a corrupt consolidation record, an ambiguous merge base, or a branch without commits
- * of its own. Throws after deleting the backup when the branch moved during the run.
+ * Writes one commit whose tree is the original head's tree and whose parent is the merge base with `base`, creates a
+ * backup branch at the original head, and moves the branch to the commit. Throws before any ref write on a detached
+ * HEAD, a missing or empty message file, a corrupt consolidation record, an ambiguous merge base, a branch without
+ * commits of its own, or a failed `commit-tree`. Throws after deleting the backup when the branch moved during the run.
  */
 export function condenseBranch(options: CondenseOptions): CondenseResult {
   const { base, consolidationFile, cwd, messageFile } = options;
@@ -38,25 +38,26 @@ export function condenseBranch(options: CondenseOptions): CondenseResult {
   const branch = readCheckedOutBranch(cwd);
   const body = readMessageBody(messageFile);
   const changes = parseChangeEntries(consolidationFile === undefined ? '' : readOptionalFile(consolidationFile));
-  const originalHead = readGit(cwd, ['rev-parse', '--verify', 'HEAD^{commit}']);
+  const originalHead = runGit(cwd, ['rev-parse', '--verify', 'HEAD^{commit}']);
   const mergeBase = resolveMergeBase(cwd, base, originalHead);
   if (mergeBase === originalHead) {
     throw new Error(`${branch} does not have any commits beyond its merge base with ${base}`);
   }
 
+  // Write the commit before any ref: `commit-tree` adds only an unreferenced object, so a failure here changes no ref.
   const message = composeMessage(body, changes);
-  const backup = createBackupBranch(cwd, branch, originalHead);
-  const condensedHead = readGit(
+  const condensedHead = runGit(
     cwd,
     ['commit-tree', originalHead + '^{tree}', '-p', mergeBase, '--no-gpg-sign'],
     message,
   );
+  const backup = createBackupBranch(cwd, branch, originalHead);
 
   try {
     // Pass the original head as the expected value, so that a branch moved during the run fails the update.
-    readGit(cwd, ['update-ref', '-m', 'condense-branch', `refs/heads/${branch}`, condensedHead, originalHead]);
+    runGit(cwd, ['update-ref', '-m', 'condense-branch', `refs/heads/${branch}`, condensedHead, originalHead]);
   } catch (error) {
-    readGit(cwd, ['update-ref', '-d', `refs/heads/${backup}`, originalHead]);
+    runGit(cwd, ['update-ref', '-d', `refs/heads/${backup}`, originalHead]);
     throw error;
   }
 
@@ -70,7 +71,7 @@ function createBackupBranch(cwd: string, branch: string, head: string): string {
   for (let version = 1; ; version += 1) {
     const name = `${branch}-v${version}`;
     if (!hasBranch(cwd, name)) {
-      readGit(cwd, ['branch', '--no-track', name, head]);
+      runGit(cwd, ['branch', '--no-track', name, head]);
       return name;
     }
   }
@@ -88,7 +89,7 @@ function describeGitFailure(error: unknown): string {
 /** Returns true when a local branch named `name` exists. */
 function hasBranch(cwd: string, name: string): boolean {
   try {
-    readGit(cwd, ['show-ref', '--verify', '--quiet', `refs/heads/${name}`]);
+    runGit(cwd, ['show-ref', '--verify', '--quiet', `refs/heads/${name}`]);
     return true;
   } catch {
     return false;
@@ -98,22 +99,9 @@ function hasBranch(cwd: string, name: string): boolean {
 /** Returns the checked-out branch's short name. Throws on a detached HEAD. */
 function readCheckedOutBranch(cwd: string): string {
   try {
-    return readGit(cwd, ['symbolic-ref', '--quiet', '--short', 'HEAD']);
+    return runGit(cwd, ['symbolic-ref', '--quiet', '--short', 'HEAD']);
   } catch (error) {
     throw new Error('HEAD is detached; check out the branch to condense', { cause: error });
-  }
-}
-
-/** Runs git in `cwd`, feeding `input` to its stdin, and returns its trimmed stdout. Throws with git's own message. */
-function readGit(cwd: string, args: readonly string[], input?: string): string {
-  try {
-    return execFileSync('git', ['-C', cwd, ...args], {
-      encoding: 'utf8',
-      input,
-      stdio: ['pipe', 'pipe', 'pipe'],
-    }).trim();
-  } catch (error) {
-    throw new Error(`git ${args[0] ?? ''} failed: ${describeGitFailure(error)}`, { cause: error });
   }
 }
 
@@ -148,7 +136,7 @@ function readOptionalFile(filePath: string): string {
 
 /** Returns the single merge base of `base` and `head`. Throws when there is none or more than one. */
 function resolveMergeBase(cwd: string, base: string, head: string): string {
-  const output = readGit(cwd, ['merge-base', '--all', base, head]);
+  const output = runGit(cwd, ['merge-base', '--all', base, head]);
   const bases = output === '' ? [] : output.split('\n');
   if (bases.length === 0) {
     throw new Error(`HEAD does not have a merge base with ${base}`);
@@ -157,6 +145,19 @@ function resolveMergeBase(cwd: string, base: string, head: string): string {
     throw new Error(`HEAD has ${bases.length} merge bases with ${base}, so the condensed commit's parent is ambiguous`);
   }
   return bases[0] ?? '';
+}
+
+/** Runs git in `cwd`, feeding `input` to its stdin, and returns its trimmed stdout. Throws with git's own message. */
+function runGit(cwd: string, args: readonly string[], input?: string): string {
+  try {
+    return execFileSync('git', ['-C', cwd, ...args], {
+      encoding: 'utf8',
+      input,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    }).trim();
+  } catch (error) {
+    throw new Error(`git ${args[0] ?? ''} failed: ${describeGitFailure(error)}`, { cause: error });
+  }
 }
 
 // endregion | Helpers
