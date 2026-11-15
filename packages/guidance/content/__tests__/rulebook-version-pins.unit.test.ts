@@ -53,7 +53,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'cross-repo-migration-conventions',
-    { bodyHash: 'd138c775fe46633a2b0b4856a42f0c22237b25f51a872d9c99a5d7858ed24cb3', version: '1' },
+    { bodyHash: '956b4e846f372a911a5cbce32bbdc606f59341513fb6f1657d1a0890a574555b', version: '1' },
   ],
   [
     'generated-content-policy',

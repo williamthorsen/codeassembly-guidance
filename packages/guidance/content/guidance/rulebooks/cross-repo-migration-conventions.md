@@ -14,7 +14,7 @@ A migration that spans repositories moves each repository to the same new versio
 - **Children.** The umbrella has one child per repository, linked as a sub-issue, and "Every child is closed" as its acceptance criterion.
 - **Shared runtimes first.** A runtime that several repositories use, such as a reusable CI workflow, a shared host that runs checks, or the toolchain installed on each machine, is upstream of every repository that uses it, and its child blocks theirs. Moving it changes the runtime of every repository that uses it, including those that have not moved yet; the child that moves it states so on the ledger.
 - **The ledger.** The umbrella's comments record what each child found. A ticket is readable and writable from a session in any repository, so the ledger does not need a branch in a shared repository, and a comment can be added after the umbrella's body is frozen by the start of work. The body states the plan; the comments state what the plan met.
-- **Per-machine steps.** A step that each machine needs follows [who applies the change](../../skills/_data/design-priorities.md#who-applies-the-change): one script, posted on the ledger, and a ticket for each machine that has not run it.
+- **Per-machine steps.** A step that each machine needs follows [who applies the change](../../skills/_data/design-priorities.md#who-applies-the-change). When it reaches the script rung, post the script on the ledger and open a ticket for each machine that has not run it.
 
 ## Contract changes
 
