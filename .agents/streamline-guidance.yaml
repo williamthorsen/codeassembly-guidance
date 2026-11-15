@@ -21,6 +21,9 @@ reviewed:
   - file: packages/guidance/content/guidance/rulebooks/williamthorsen-collaboration-preferences.md
     reviewed-at: 2026-11-15
     deployed-bytes: 6031
+  - file: packages/guidance/content/guidance/rulebooks/williamthorsen-writing-preferences.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 7316
   - file: packages/guidance/content/guidance/shared/AGENTS.md
     reviewed-at: 2026-11-15
     deployed-bytes: 16556
@@ -33,6 +36,9 @@ reviewed:
   - file: packages/guidance/content/skills/_data/recommendation-gradient.md
     reviewed-at: 2026-11-15
     deployed-bytes: 21567
+  - file: packages/guidance/content/skills/_data/reduced-object-relatives.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 1084
   - file: packages/guidance/content/skills/index-prototypes/SKILL.md
     reviewed-at: 2026-10-11
     deployed-bytes: 12531

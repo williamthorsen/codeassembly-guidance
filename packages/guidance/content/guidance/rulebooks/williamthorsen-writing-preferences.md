@@ -2,7 +2,7 @@
 slug: williamthorsen-writing-preferences
 description: William Thorsen's personal writing preferences for agent-authored prose.
 delivery: [ambient, hook]
-version: '13'
+version: '14'
 ---
 
 # William Thorsen's writing preferences
@@ -34,7 +34,7 @@ Don't use em-dashes; use appropriate punctuation instead. A dash separating an i
 
 <!-- rule: reduced-object-relative 1 -->
 
-A relative clause with an object gap takes an overt relativizer: "the source that it names", never "the source it names". The test is mechanical: Between the head noun and the embedded subject, look for `that` or `which`. This is a house convention, not a claim about ordinary English, which permits the contact clause freely. For a gap after a copula, a coordinated gap, or the anaphoric one-series as head, see [rare cases](../../skills/_data/reduced-object-relatives.md).
+A relative clause with an object gap takes an overt relativizer: "the source that it names", never "the source it names". The test is mechanical: Between the head noun and the embedded subject, look for `that` or `which`. For a gap after a copula, a coordinated gap, or the anaphoric one-series as head, see [rare cases](../../skills/_data/reduced-object-relatives.md).
 
 **Repairs, in preference order.** Choose per site; restored relativizers stacked across a passage read as a tic of their own.
 
@@ -44,16 +44,9 @@ A relative clause with an object gap takes an overt relativizer: "the source tha
 
 **A gap in a prepositional phrase takes its own order.** Pied-pipe the preposition first: "the level against which it is probed", preferred over the stranded "the level that it is probed against". If pied-piping reads stiffly, the stranded relativizer is the second choice and a recast the third. The passive participle is last here rather than first, since the actor is already inside the clause.
 
-**The shapes, ranked from worst to mildest.** The rank follows the embedded subject's form, since the reader must keep that form in mind until the verb appears. Each is an exhibit of the construction, not a model to copy.
+**The agentive `by`-phrase satisfies plain speech.** Plain speech rejects the _agentless_ passive that hides who acted. A `by`-phrase names the actor in the same phrase; therefore, "imported by every exported tier module" satisfies plain speech as fully as the active form does.
 
-1. **Quantified noun phrase** (worst): "a dependency every exported tier module imports". The reader absorbs a quantifier and a full noun phrase before any verb discharges the head.
-2. **Definite noun phrase**: "the ticket the branch name encodes".
-3. **Bare noun**: "an idiom developers recognize".
-4. **Pronoun** (mildest): "the source it names". Forbidden all the same; a pronoun shortens the wait rather than ending it.
-
-**The agentive `by`-phrase satisfies plain speech.** Plain speech rejects the _agentless_ passive that hides who acted. A `by`-phrase names the actor in the same phrase; therefore, "imported by every exported tier module" satisfies plain speech as fully as the active form does. This rule breaks the habit of using a contact clause to avoid a passive that was never the target.
-
-**Scope.** The rule governs a lexical head noun whose relative clause has a gap in an argument position: the direct object ("the source that it names"), the object of a preposition ("the level against which it is probed"), or the complement of a copula ("the throwing mock that it is"). Two neighboring constructions fall outside the rule, each on a ground of its own: the fused head ("everything I know", "all you need"), which is its own relative pronoun and does not admit a relativizer, and the adjunct relative ("the reason it fails", "the way it works"), whose gap does not fill an argument position. The boundary keys on head type and gap role. Neither a short embedded subject nor a tight word budget exempts anything.
+**Scope.** The rule governs a lexical head noun whose relative clause has a gap in an argument position: the direct object ("the source that it names"), the object of a preposition ("the level against which it is probed"), or the complement of a copula ("the throwing mock that it is"). Two neighboring constructions fall outside the rule, each on a ground of its own: the fused head ("everything I know", "all you need"), which is its own relative pronoun and does not admit a relativizer, and the adjunct relative ("the reason it fails", "the way it works"), whose gap does not fill an argument position. Neither a short embedded subject nor a tight word budget exempts anything.
 
 ## Second person
 
@@ -67,10 +60,9 @@ Imperative mood is untouched, because it does not contain a pronoun: "Run the fo
 
 **The replacement names an actor.** Say who or what acts: "the config sets a cap on the rule" rather than "you cap the rule". If an actor does not belong in the sentence, recast so that the artifact is the subject of a verb that it performs or one that states a relation, as plain speech requires: "the flag takes a path" rather than "you pass it a path".
 
-A naive substitution fails in two ways:
+A naive substitution can fail this way:
 
 - **The agentless passive.** Dropping the pronoun by hiding who acted trades one defect for another: "your rules are capped" becomes "the rules are capped", which names nobody. Plain speech rejects that passive; name the actor instead.
-- **The surviving object gap.** "the cap you set" and "the cap the config sets" are the same reduced object relative; therefore, the substitution leaves the second defect in place. Restore the relativizer, or apply the repairs in "Reduced object relatives" above.
 
 ## Sentence case
 
@@ -79,7 +71,6 @@ A naive substitution fails in two ways:
 Use sentence case for titles, headings, section headers, steps, labels, and interface elements. Never use title case. Preserve the case of proper nouns, named entities, and the actual titles of books and movies.
 
 - "Backend: Express API routes and server" not "Backend: Express API Routes And Server"
-- "Frontend: Static Excalibur scene" not "Frontend: Static Excalibur Scene"
 - "Customizing the Status Adapter for a new backend", not "Customizing the Status Adapter for a New Backend"
 
 ## `so` and other connectives
