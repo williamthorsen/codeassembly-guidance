@@ -59,8 +59,7 @@ That restraint on editing a record applies to the remote ticket as well, from th
 
 From that point on, the ticket's `## Problem`, `## Context`, and `## Proposed solution` record what was known and proposed when the work began, so they are never revised toward the outcome: A proposal does not become wrong because the implementer did something else, and revising it destroys the only record of what was foreseen. Report a divergence between one of those sections and the implementation in the pull-request description's `## Notes for reviewers` only when it changes what a reviewer checks, per the reader test that `summarize-change` states, and state it as the current fact rather than as a departure from the ticket.
 
-Acceptance criteria are the one revisable part, because they alone are the contract that an implementation can falsify. Align them to the implementation only when the two conflict, or when the gap would mislead a reviewer. Small improvements are made as a matter of course, and the ticket is not rewritten to pretend they were foreseen.
-
+Acceptance criteria are the one revisable part, because they alone are the contract that an implementation can falsify. Align them to the implementation only when the two conflict, or when the gap would mislead a reviewer.
 A write that this section rules out is not a skipped step, because nobody asked for it, and it does not produce any user-facing text: Do not mention the doctrine or the marker, do not report the write that was not made, and do not offer to reconcile the record with current state. When the user asks for such a write, decline it in one line and name the alternative: for a revision that you publish, a new record; for a divergence from the ticket, the pull-request description; for a lede that the records do not contain, `capture-lede-decision`'s `--agent-lede-file` and `--merged-lede-file`. A human's later edit to a published body does not need a record, because the `merge` record captures what merged.
 
 ## Documentation placement
@@ -75,4 +74,4 @@ Agents write most of what appears under the developer's account, so a creator, r
 
 ## Commits
 
-Invoke the `create-commit` skill to make a commit. It states the procedure: what to stage, one commit per logical unit of work, and how the title is rendered. The `consult-commit-conventions` skill states what the message is composed to -- the title and body conventions, the work-type taxonomy, and the branch-naming format -- and is worth consulting on its own before writing a message by hand. A title rendered from the configured template is correct: Never propose changing it to match other commits, and do not comment on whether it contains a ticket reference.
+Invoke the `create-commit` skill to make a commit. A title rendered from the configured template is correct: Never propose changing it to match other commits, and do not comment on whether it contains a ticket reference.

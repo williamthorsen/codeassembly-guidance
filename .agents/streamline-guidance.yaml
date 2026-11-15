@@ -1,8 +1,29 @@
 declined: []
 reviewed:
+  - file: packages/guidance/content/_partials/concision.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 5343
+  - file: packages/guidance/content/_partials/file-access.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 5340
+  - file: packages/guidance/content/_partials/plain-speech.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 54096
+  - file: packages/guidance/content/_partials/shell-commands.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 1848
+  - file: packages/guidance/content/_partials/technical-recommendations.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 5955
   - file: packages/guidance/content/guidance/rulebooks/accessibility-conventions.md
     reviewed-at: 2026-11-07
     deployed-bytes: 4500
+  - file: packages/guidance/content/guidance/shared/AGENTS.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 16556
+  - file: packages/guidance/content/skills/_data/concision.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 1351
   - file: packages/guidance/content/skills/index-prototypes/SKILL.md
     reviewed-at: 2026-10-11
     deployed-bytes: 12531
