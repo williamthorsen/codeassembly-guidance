@@ -28,18 +28,20 @@ export function parseChangeEntries(text: string): string[] {
   try {
     record = JSON.parse(text);
   } catch (error) {
-    throw new Error(`consolidation file is not valid JSON: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(`consolidation file is not valid JSON: ${error instanceof Error ? error.message : String(error)}`, {
+      cause: error,
+    });
   }
 
   const entries = isRecord(record) ? record['entries'] : undefined;
   if (!Array.isArray(entries)) {
-    throw new Error('consolidation file does not contain an `entries` array');
+    throw new TypeError('consolidation file does not contain an `entries` array');
   }
 
   return entries.map((entry: unknown, index) => {
     const change = isRecord(entry) ? entry['change'] : undefined;
     if (typeof change !== 'string' || change.trim() === '') {
-      throw new Error(`consolidation entry ${index} does not have a non-empty \`change\` string`);
+      throw new TypeError(`consolidation entry ${index} does not have a non-empty \`change\` string`);
     }
     return change;
   });

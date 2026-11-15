@@ -56,14 +56,14 @@ function runCommand(argv: readonly string[]): CondenseResult {
   }
 
   const base = readSingleFlag(flags, 'base');
-  const messageFile = readSingleFlag(flags, 'message-file');
-  const consolidationFile = readSingleFlag(flags, 'consolidation-file');
   if (base === undefined) {
     throw new Error(`--base is required\n${USAGE}`);
   }
+  const messageFile = readSingleFlag(flags, 'message-file');
   if (messageFile === undefined) {
     throw new Error(`--message-file is required\n${USAGE}`);
   }
+  const consolidationFile = readSingleFlag(flags, 'consolidation-file');
 
   return condenseBranch({ base, consolidationFile, cwd: process.cwd(), messageFile });
 }

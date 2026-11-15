@@ -8,6 +8,65 @@ import { type BranchFixture, commitFile, git, makeBranchFixture } from '../test-
 
 const CONSOLIDATION = JSON.stringify({ entries: [{ change: 'guidance|fix: One' }, { change: 'guidance|feat: Two' }] });
 
+/** A refusal's label, the arrangement that provokes it, and a fragment of its message. */
+type RefusalCase = [string, (fixture: BranchFixture, options: CondenseOptions) => CondenseOptions, string];
+
+const REFUSALS: RefusalCase[] = [
+  [
+    'a detached HEAD',
+    (fixture, options) => {
+      git(fixture.repo, 'switch', '--quiet', '--detach');
+      return options;
+    },
+    'HEAD is detached',
+  ],
+  [
+    'a missing message file',
+    (fixture, options) => ({ ...options, messageFile: path.join(fixture.outside, 'none') }),
+    'message file is missing',
+  ],
+  [
+    'an empty message file',
+    (_fixture, options) => {
+      writeFileSync(options.messageFile, '\n');
+      return options;
+    },
+    'message file is empty',
+  ],
+  [
+    'a corrupt consolidation record',
+    (_fixture, options) => {
+      writeFileSync(options.consolidationFile ?? '', '{');
+      return options;
+    },
+    'not valid JSON',
+  ],
+  [
+    'a branch without commits of its own',
+    (fixture, options) => {
+      git(fixture.repo, 'switch', '--quiet', '--create', 'empty', 'main');
+      return options;
+    },
+    'does not have any commits beyond its merge base',
+  ],
+  [
+    'more than one merge base',
+    (fixture, options) => {
+      makeCrissCross(fixture.repo);
+      return options;
+    },
+    '2 merge bases',
+  ],
+  [
+    'a branch moved during the run',
+    (fixture, options) => {
+      installRefTransactionVeto(fixture.repo, 'refs/heads/feature');
+      return options;
+    },
+    'git update-ref failed',
+  ],
+];
+
 describe('condenseBranch', () => {
   let fixture: BranchFixture;
   let options: CondenseOptions;
@@ -83,61 +142,7 @@ describe('condenseBranch', () => {
     );
   });
 
-  it.each<[string, (fixture: BranchFixture, options: CondenseOptions) => CondenseOptions, string]>([
-    [
-      'a detached HEAD',
-      (fixture, options) => {
-        git(fixture.repo, 'switch', '--quiet', '--detach');
-        return options;
-      },
-      'HEAD is detached',
-    ],
-    [
-      'a missing message file',
-      (fixture, options) => ({ ...options, messageFile: path.join(fixture.outside, 'none') }),
-      'message file is missing',
-    ],
-    [
-      'an empty message file',
-      (_fixture, options) => {
-        writeFileSync(options.messageFile, '\n');
-        return options;
-      },
-      'message file is empty',
-    ],
-    [
-      'a corrupt consolidation record',
-      (_fixture, options) => {
-        writeFileSync(options.consolidationFile ?? '', '{');
-        return options;
-      },
-      'not valid JSON',
-    ],
-    [
-      'a branch without commits of its own',
-      (fixture, options) => {
-        git(fixture.repo, 'switch', '--quiet', '--create', 'empty', 'main');
-        return options;
-      },
-      'does not have any commits beyond its merge base',
-    ],
-    [
-      'more than one merge base',
-      (fixture, options) => {
-        makeCrissCross(fixture.repo);
-        return options;
-      },
-      '2 merge bases',
-    ],
-    [
-      'a branch moved during the run',
-      (fixture, options) => {
-        installRefTransactionVeto(fixture.repo, 'refs/heads/feature');
-        return options;
-      },
-      'git update-ref failed',
-    ],
-  ])('refuses %s and leaves every ref as it was', (_label, arrange, message) => {
+  it.each(REFUSALS)('refuses %s and leaves every ref as it was', (_label, arrange, message) => {
     const arranged = arrange(fixture, options);
     const refsBefore = git(fixture.repo, 'for-each-ref', '--format=%(refname) %(objectname)');
 

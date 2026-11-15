@@ -48,7 +48,7 @@ export function condenseBranch(options: CondenseOptions): CondenseResult {
   const backup = createBackupBranch(cwd, branch, originalHead);
   const condensedHead = readGit(
     cwd,
-    ['commit-tree', `${originalHead}^{tree}`, '-p', mergeBase, '--no-gpg-sign'],
+    ['commit-tree', originalHead + '^{tree}', '-p', mergeBase, '--no-gpg-sign'],
     message,
   );
 
@@ -99,8 +99,8 @@ function hasBranch(cwd: string, name: string): boolean {
 function readCheckedOutBranch(cwd: string): string {
   try {
     return readGit(cwd, ['symbolic-ref', '--quiet', '--short', 'HEAD']);
-  } catch {
-    throw new Error('HEAD is detached; check out the branch to condense');
+  } catch (error) {
+    throw new Error('HEAD is detached; check out the branch to condense', { cause: error });
   }
 }
 
@@ -113,7 +113,7 @@ function readGit(cwd: string, args: readonly string[], input?: string): string {
       stdio: ['pipe', 'pipe', 'pipe'],
     }).trim();
   } catch (error) {
-    throw new Error(`git ${args[0] ?? ''} failed: ${describeGitFailure(error)}`);
+    throw new Error(`git ${args[0] ?? ''} failed: ${describeGitFailure(error)}`, { cause: error });
   }
 }
 
@@ -124,7 +124,7 @@ function readMessageBody(messageFile: string): string {
     body = readFileSync(messageFile, 'utf8');
   } catch (error) {
     if (isMissingFile(error)) {
-      throw new Error(`message file is missing: ${messageFile}`);
+      throw new Error(`message file is missing: ${messageFile}`, { cause: error });
     }
     throw error;
   }
