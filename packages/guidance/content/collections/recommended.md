@@ -7,6 +7,7 @@ members:
     - accessibility-conventions
     - cli-conventions
     - command-output-conventions
+    - cross-repo-migration-conventions
     - generated-content-policy
     - machine-readable-output-conventions
     - readme-conventions
@@ -24,6 +25,8 @@ The public collection. Membership claims that an artifact was examined and found
 Membership is per-artifact and enumerated in full rather than by dependency root, so the closure check notices every member that an artifact's dependency edges would add.
 
 The skills belong here on different grounds. A rulebook of the personal collection names `capture-feedback` in a body token, and `capture-feedback` names `capture-event` in another. Because a collection cannot be closed over an artifact of lesser standing, both were promoted. `capture-event`'s promotion was forced by that chain rather than chosen on its own merits. It is the one member to re-examine first. `capture-feedback` qualifies on its own terms: It does not name any store, declares the registry needed by a capture, and sends a record to the store that the registry's `feedback_kb` names.
+
+`cross-repo-migration-conventions` qualifies on its own terms as well. Each rule that it states follows from a mechanism that any migration across repositories meets, such as a ticket body that freezes once work starts, a session that ends at merge, and a shared host that runs the checks of every repository that uses it, rather than from a preference, and it does not name any author, repository, host, or tracker. Its body does not contain any invocation token, so its closure is empty.
 
 `generated-content-policy` qualifies on its own terms too: What it states is a mechanism that every consumer meets, not a preference, and the guidance that a reader needs beyond the trigger is in the linked reference rather than in the ambient body loaded by every session.
 
