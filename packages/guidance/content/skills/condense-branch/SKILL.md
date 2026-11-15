@@ -8,11 +8,16 @@ user-invocable: true
 
 Condense the current branch into a single commit with a comprehensive message.
 
+## Result
+
+The branch holds one commit on its merge base with the default branch. That commit's tree is the tree of the branch's original head, and its message describes the branch as a whole.
+
+- A backup branch points at the original head.
+- Uncommitted changes, staged or not, and untracked files are not part of the condensed commit, and they are not discarded. Leave them where they are: Do not stash, stage, or commit them.
+
 ## Process
 
-1. **Stash changes** if working tree is dirty
-
-2. **Analyze branch** to create a good commit message, and consolidate it while its commits still exist:
+1. **Analyze branch** to create a good commit message, and consolidate it while its commits still exist:
    - Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `default_branch` from the manifest JSON that it emits on stdout.
    - Consolidate the range into a scratch file, created per the path rules of [gh body file](#gh-body-file) and named `consolidation-{timestamp}.json`:
 
@@ -23,40 +28,23 @@ Condense the current branch into a single commit with a comprehensive message.
 
      If the call fails, as it does when `commit.title_format` is empty, it leaves the file empty. Relay its error and continue without a consolidated record: The subject renders without a scope or type, and the message does not contain a trailer.
 
-   - Report each `unmatched` subject and each `violations` entry to the developer. An unmatched subject does not get a trailer in step 4, so it drops out of the entries that the condensed commit declares.
+   - Report each `unmatched` subject and each `violations` entry to the developer. An unmatched subject does not get a trailer in step 2, so it drops out of the entries that the condensed commit declares.
 
    [The change record](../_data/change-record.md) states the consolidated record and the `Change:` trailer.
 
-3. **Create backup branch**:
+2. **Condense commits**:
 
-```bash
-git branch $(git branch --show-current)-v1
-```
+   Write the title, a blank line, and the body to a scratch file per [gh body file](#gh-body-file), naming it `commit-message-{timestamp}.md`; do not inline the message into the shell command. Do not write any `Change:` trailer: The helper appends one per consolidation entry, oldest first, as the last paragraph.
 
-If branch exists, increment version number.
-
-4. **Condense commits**:
-
-   Write the title, a blank line, and the body to a scratch file per [gh body file](#gh-body-file), naming it `commit-message-{timestamp}.md`; do not inline the message into the shell command.
-
-   The call below composes the final message from that file and the step-2 consolidation: the body, a blank line, and one `Change: {change}` trailer per entry, oldest first, as the last paragraph. The trailers are read from the consolidation file inside the call, so the agent does not retype any entry into a command, and a retry rebuilds the message rather than appending to it. If the consolidation did not find any entry, or failed and left the file empty, the message does not contain a trailer.
+   Run the bundled helper as one command:
 
    ```bash
-   body_path="{absolute path from the write step}"
-   consolidation_path="{absolute path of the step-2 consolidation file}"
-   [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
-   message_path="${body_path%.md}-with-trailers.md"
-   {
-     cat "$body_path"
-     if [ -s "$consolidation_path" ]; then
-       printf '\n\n'
-       jq -r '.entries[] | "Change: " + .change' "$consolidation_path"
-     fi
-   } > "$message_path"
-   git reset --soft $(git merge-base {default_branch} HEAD)
-   git add --all
-   git commit --file "$message_path" --no-gpg-sign --no-verify
+   node {harness_home_dir}/skills/condense-branch/condense-branch.mjs --base {default_branch} --message-file {absolute message path} --consolidation-file {absolute path of the step-1 consolidation file}
    ```
+
+   Pass `--consolidation-file` even when step 1 failed and left the file empty; the helper reads an empty or absent file as no trailers. Pass each path as the literal absolute path, unquoted, without a shell variable or a guard: The helper refuses a missing or empty message file itself.
+
+   The helper creates the backup branch `{branch}-v{N}` at the first free version, writes the condensed commit without running hooks or signing it, and moves the branch to it. It does not touch the index or the working tree. It prints JSON naming the `backup` branch and the number of `trailers`; report both. On a non-zero exit it has not changed any ref: Relay its stderr and stop.
 
 ## Commit message creation
 
@@ -70,14 +58,8 @@ Use `{skill:summarize-change}` to compose a good commit message. Save the descri
 
 ## Commit format
 
-Compose the message per `{rulebook:commit-conventions}`. Use `describe-change.mjs` to render the full commit title (see [title-templates.md](../_data/title-templates.md) for syntax), taking `{scope}` and `{type}` from the step-2 `consolidated_record` and appending `!` to the type if it is breaking. If the consolidation failed, or a field is `null`, omit that flag:
+Compose the message per `{rulebook:commit-conventions}`. Use `describe-change.mjs` to render the full commit title (see [title-templates.md](../_data/title-templates.md) for syntax), taking `{scope}` and `{type}` from the step-1 `consolidated_record` and appending `!` to the type if it is breaking. If the consolidation failed, or a field is `null`, omit that flag:
 
 <!-- include: ../_partials/commit-title-rendering.md / -->
-
-## Safety
-
-- Always create a backup branch before condensing
-- Increment version numbers if backup already exists
-- Use `--no-gpg-sign --no-verify` to avoid hook issues
 
 <!-- include: ../_partials/gh-body-file.md / -->

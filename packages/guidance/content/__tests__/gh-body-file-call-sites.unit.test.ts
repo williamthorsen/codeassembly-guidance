@@ -44,17 +44,20 @@ describe('gh-body-file call sites', () => {
     expect(violations, message).toEqual([]);
   });
 
-  it('passes literal paths to the merge-gh-pr helper, without shell composition', async () => {
-    const content = await readFile(path.join(CONTENT_ROOT, 'skills/merge-gh-pr/SKILL.md'), 'utf8');
-    const helperBlocks = listShellBlocks(content).filter((block) => block.includes('merge-gh-pr.mjs'));
+  it.each(['condense-branch', 'merge-gh-pr'])(
+    'passes literal paths to the %s helper, without shell composition',
+    async (skill) => {
+      const content = await readFile(path.join(CONTENT_ROOT, `skills/${skill}/SKILL.md`), 'utf8');
+      const helperBlocks = listShellBlocks(content).filter((block) => block.includes(`${skill}.mjs`));
 
-    expect(helperBlocks).toHaveLength(1);
-    for (const block of helperBlocks) {
-      expect(block).not.toContain('$');
-      expect(block).not.toMatch(/\{\s/);
-      expect(block).not.toContain('gh api');
-    }
-  });
+      expect(helperBlocks).toHaveLength(1);
+      for (const block of helperBlocks) {
+        expect(block).not.toContain('$');
+        expect(block).not.toMatch(/\{\s/);
+        expect(block).not.toContain('gh api');
+      }
+    },
+  );
 });
 
 // region | Helpers
