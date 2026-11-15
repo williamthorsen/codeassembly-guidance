@@ -18,12 +18,21 @@ reviewed:
   - file: packages/guidance/content/guidance/rulebooks/accessibility-conventions.md
     reviewed-at: 2026-11-07
     deployed-bytes: 4500
+  - file: packages/guidance/content/guidance/rulebooks/williamthorsen-collaboration-preferences.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 6031
   - file: packages/guidance/content/guidance/shared/AGENTS.md
     reviewed-at: 2026-11-15
     deployed-bytes: 16556
+  - file: packages/guidance/content/skills/_data/action-items.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 10401
   - file: packages/guidance/content/skills/_data/concision.md
     reviewed-at: 2026-11-15
     deployed-bytes: 1351
+  - file: packages/guidance/content/skills/_data/recommendation-gradient.md
+    reviewed-at: 2026-11-15
+    deployed-bytes: 21567
   - file: packages/guidance/content/skills/index-prototypes/SKILL.md
     reviewed-at: 2026-10-11
     deployed-bytes: 12531

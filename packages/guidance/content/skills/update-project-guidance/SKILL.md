@@ -91,7 +91,7 @@ For each finding, assign one of these classes:
 - A finding belongs in the ambient tier only when it is absent from the tool's own output _and_ the obvious action goes wrong without it. A command table restates `--help`; a directory listing restates `ls`. Both are reference at best, and reference material injected at launch goes stale silently, because nothing fails when it drifts.
 - Do not duplicate general guidance or a rulebook loaded into the session; omit what they state. For a fact defined in a repository file, point to that file and add only what it does not state, per the "Documentation placement" section of the shared agent instructions. If a project-specific convention _extends_ a general one, include only the delta.
 - When unsure about scope, place the finding on the recommended side provisionally and collect every ambiguous finding into one review at the gate below, as multiple-choice questions when possible.
-  - When asking option-style questions, follow [option format](#option-format). (Reinforces the rule in `AGENTS.md`: intentional redundancy.)
+  - When asking option-style questions, follow [option format](#option-format).
 - Content that is obvious from reading the code (e.g., "this project uses TypeScript") does not add any value. Include only what would save an agent from a wrong assumption or a slow discovery.
 
 <!-- include: ../_partials/action-items.md / -->

@@ -87,7 +87,7 @@ Evaluate the finding counts:
 
 - **0 user questions** (UserQuestions = 0, AutoResolvable > 0): Skip user interaction. Proceed to step 4 with empty user answers.
 
-- **User questions present** (UserQuestions > 0): Read the review artifact. Extract all findings from the "Decision gaps" section (these may be C or X findings -- the section is organized by resolution type, not finding category). Present each finding's question using the finding's ID (e.g., `C1`, `X2`) as the question identifier. When asking option-style questions, follow [option format](#option-format). (Reinforces the rule in `AGENTS.md`: intentional redundancy.)
+- **User questions present** (UserQuestions > 0): Read the review artifact. Extract all findings from the "Decision gaps" section (these may be C or X findings -- the section is organized by resolution type, not finding category). Present each finding's question using the finding's ID (e.g., `C1`, `X2`) as the question identifier. When asking option-style questions, follow [option format](#option-format).
 
   ```
   The plan review identified {UserQuestions} question(s) that need your input:
