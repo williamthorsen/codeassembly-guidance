@@ -102,7 +102,7 @@ Here, _the implementation_ is the plan artifact (Phase 4): Mechanism that the ti
 
 <!-- include: ../../_partials/prose-line-breaks.md / -->
 
-**Present the ticket as the first checkpoint**, in one turn: the draft ticket, the decisions taken so far with their reasons, and the forks that survived the gate as option-style questions. Revise until approved. Approval of the ticket is approval of the design.
+**Present the ticket as the first checkpoint**, in one turn: the draft ticket, the decisions taken so far with their reasons, and the forks that survived the gate as option-style questions. When the design spans several layers or adds a new subsystem, also state the size estimate and the split recommendation that "Splitting work across tickets" above requires; because a split creates tickets, offer it as a menu, with the split at ■■■ when each piece can be merged and verified on its own. Revise until approved. Approval of the ticket is approval of the design.
 
 **When the checkpoint splits the ticket**, the session continues with one piece: With two pieces, it plans the originating ticket, which keeps the first piece; with an umbrella, it plans the first child, whose work belongs in that child's own worktree. Phase 5 then ends with the launch prompts that [Splitting the ticket](#splitting-the-ticket) defines. With two pieces, the next-steps menu stays for the originating ticket, and that ticket's prompt heading adds that this session continues with it at the menu. With an umbrella, the launch prompts replace the `Next action` menu, so that nothing offers to implement a child in the current worktree.
 
