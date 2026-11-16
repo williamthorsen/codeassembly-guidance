@@ -65,14 +65,24 @@ export async function runValidatePreferences(
   return results.every((result) => result.valid) ? 0 : 1;
 }
 
-if (isEntryPoint(import.meta.url, 'validate-preferences')) {
-  const programName = deriveProgramName(process.argv[1]);
+/** Runs `runValidatePreferences`, reporting a thrown error on stderr and returning 1 for it. */
+export async function runValidatePreferencesCommand(
+  argv: readonly string[],
+  cwd: string,
+  programName: string,
+): Promise<number> {
   try {
-    process.exit(await runValidatePreferences(process.argv.slice(2), process.cwd(), programName));
+    return await runValidatePreferences(argv, cwd, programName);
   } catch (error) {
     process.stderr.write(`${programName}: ${describeError(error)}\n`);
-    process.exit(1);
+    return 1;
   }
+}
+
+if (isEntryPoint(import.meta.url, 'validate-preferences')) {
+  process.exit(
+    await runValidatePreferencesCommand(process.argv.slice(2), process.cwd(), deriveProgramName(process.argv[1])),
+  );
 }
 
 // region | Helpers

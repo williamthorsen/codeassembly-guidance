@@ -5,6 +5,8 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import type { BacklogGit } from './git.ts';
 import { type LedgerRecord, LedgerRecordSchema } from './schemas.ts';
 
@@ -53,7 +55,7 @@ export function parseLedger(text: string): { defects: LedgerDefect[]; records: L
         defects.push({ line: index + 1, message: parsed.error.issues.map((issue) => issue.message).join('; ') });
       }
     } catch (error) {
-      defects.push({ line: index + 1, message: error instanceof Error ? error.message : String(error) });
+      defects.push({ line: index + 1, message: describeError(error) });
     }
   }
   return { defects, records };

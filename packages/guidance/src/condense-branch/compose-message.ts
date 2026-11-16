@@ -1,4 +1,6 @@
 /** Composes a condensed commit's message from its body and the change entries of a branch consolidation. */
+import { describeError } from '@williamthorsen/toolbelt.errors';
+
 import { isRecord } from '../lib/type-guards.ts';
 
 /**
@@ -28,9 +30,7 @@ export function parseChangeEntries(text: string): string[] {
   try {
     record = JSON.parse(text);
   } catch (error) {
-    throw new Error(`consolidation file is not valid JSON: ${error instanceof Error ? error.message : String(error)}`, {
-      cause: error,
-    });
+    throw new Error(`consolidation file is not valid JSON: ${describeError(error)}`, { cause: error });
   }
 
   const entries = isRecord(record) ? record['entries'] : undefined;

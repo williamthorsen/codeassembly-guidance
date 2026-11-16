@@ -5,6 +5,7 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 
+import { describeError } from '@williamthorsen/toolbelt.errors';
 import { z } from 'zod';
 
 import type { StreamlineGit } from './git.ts';
@@ -31,7 +32,7 @@ export function parseCheckInput(json: string): CheckInput[] {
   try {
     parsed = JSON.parse(json);
   } catch (error) {
-    throw new Error(`Invalid check input: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+    throw new Error(`Invalid check input: ${describeError(error)}`, { cause: error });
   }
   const result = CheckInputSchema.safeParse(parsed);
   if (!result.success) {

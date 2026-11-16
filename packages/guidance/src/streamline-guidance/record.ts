@@ -10,6 +10,7 @@
  * Only {@link composeRecord} and {@link stringifyRecord} produce a record, and the helper's `record` command is its one
  * write path.
  */
+import { describeError } from '@williamthorsen/toolbelt.errors';
 import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import { z } from 'zod';
 
@@ -98,7 +99,7 @@ export function parseFold(json: string): RecordFold {
   try {
     parsed = JSON.parse(json);
   } catch (error) {
-    throw new Error(`Invalid fold: ${error instanceof Error ? error.message : String(error)}`, { cause: error });
+    throw new Error(`Invalid fold: ${describeError(error)}`, { cause: error });
   }
   const result = RecordFoldSchema.safeParse(parsed);
   if (!result.success) {

@@ -5,14 +5,8 @@
 import path from 'node:path';
 import process from 'node:process';
 
-import { runValidatePreferences } from '../content/scripts/validate-preferences.mjs';
+import { runValidatePreferencesCommand } from '../content/scripts/validate-preferences.mjs';
 
 const programName = path.basename(process.argv[1] ?? 'codeassembly-validate-preferences', '.js');
 
-try {
-  process.exitCode = await runValidatePreferences(process.argv.slice(2), process.cwd(), programName);
-} catch (error) {
-  const message = error instanceof Error ? error.message : String(error);
-  process.stderr.write(`${programName}: ${message}\n`);
-  process.exitCode = 1;
-}
+process.exitCode = await runValidatePreferencesCommand(process.argv.slice(2), process.cwd(), programName);
