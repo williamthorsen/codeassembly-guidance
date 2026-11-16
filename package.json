@@ -33,7 +33,7 @@
     "@vitest/eslint-plugin": "1.6.28",
     "@williamthorsen/eslint-config-typescript": "21.0.0",
     "@williamthorsen/nmr": "catalog:",
-    "@williamthorsen/release-kit": "18.2.0",
+    "@williamthorsen/release-kit": "18.3.0",
     "@williamthorsen/strict-lint": "14.2.1",
     "@williamthorsen/toolbelt.errors": "catalog:",
     "@williamthorsen/toolbelt.testing": "catalog:",
@@ -51,7 +51,7 @@
     "vite": "catalog:",
     "vitest": "catalog:"
   },
-  "packageManager": "pnpm@12.18.0",
+  "packageManager": "pnpm@12.21.0",
   "engines": {
     "node": ">=24"
   }
