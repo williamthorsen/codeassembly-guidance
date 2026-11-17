@@ -71,13 +71,16 @@ const LINE_WIDTH = 60;
 
 const INDENT_WIDTH = 2;
 
+/** The repository that an `--external` may name: `NAME` or `OWNER/NAME`. */
+const REPOSITORY_PATTERN = /^[^\s/:]+(?:\/[^\s/:]+)?$/;
+
 const execFileAsync = promisify(execFile);
 
 /**
  * Lists the tickets that `argv` names in implementation order. `--ticket OWNER/REPO#N` names a GitHub ticket,
- * `--external KEY=Title` a ticket outside GitHub, and `--edge BLOCKER>BLOCKED` a dependency that GitHub does not
- * record. Closed tickets are left out, as tickets and as blockers. A ticket that has sub-issues is left out of the
- * tickets but stays a blocker.
+ * `--external [REPOSITORY:]KEY=Title` a ticket outside GitHub, optionally in an `OWNER/NAME` or `NAME` repository whose
+ * prefix it then takes, and `--edge BLOCKER>BLOCKED` a dependency that GitHub does not record. Closed tickets are left
+ * out, as tickets and as blockers. A ticket that has sub-issues is left out of the tickets but stays a blocker.
  *
  * Throws on a malformed flag, an edge naming an unknown ticket, and a ticket that cannot be read.
  */
@@ -99,7 +102,7 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
     entries.set(request.listedIds[index] ?? buildId(ticket), ticket);
   }
   for (const external of request.externals) {
-    entries.set(external.key, { external: true, key: external.key, open: true, title: external.title });
+    entries.set(external.key, { external: true, open: true, ...external });
   }
 
   const unlisted = new Set(request.edges.map((edge) => edge.blocker).filter((id) => !entries.has(id)));
@@ -180,6 +183,7 @@ interface ExternalTicket {
   external: true;
   key: string;
   open: true;
+  repository: string | null;
   title: string;
 }
 
@@ -191,7 +195,7 @@ type Described = Omit<ListedBlocker, 'crossRepository'> & { title: string };
 /** What the arguments ask for, with every ticket named by its id. */
 interface Request {
   edges: Edge[];
-  externals: Array<{ key: string; title: string }>;
+  externals: Array<{ key: string; repository: string | null; title: string }>;
   /** The ids of `tickets`, index for index. */
   listedIds: string[];
   /** The ids of the GitHub tickets and the external tickets, in the order in which the arguments name them. */
@@ -211,8 +215,14 @@ function describeEntry(
   prefixes: ReadonlyMap<string, string>,
 ): Described {
   const entry = entries.get(id);
-  if (entry === undefined || 'external' in entry) {
-    return { label: id, number: null, prefix: null, ref: id, repository: null, title: entry?.title ?? '' };
+  if (entry === undefined) {
+    return { label: id, number: null, prefix: null, ref: id, repository: null, title: '' };
+  }
+  if ('external' in entry) {
+    const prefix =
+      entry.repository === null ? null : (prefixes.get(entry.repository) ?? entry.repository.toLowerCase());
+    const label = prefix === null ? id : `${prefix}.${id}`;
+    return { label, number: null, prefix, ref: id, repository: entry.repository, title: entry.title };
   }
   const prefix = prefixes.get(entry.repository) ?? entry.repository.toLowerCase();
   return {
@@ -264,15 +274,26 @@ function parseRequest(argv: readonly string[]): Request {
       }
     } else if (name === 'external') {
       const separator = text.indexOf('=');
-      const key = text.slice(0, Math.max(0, separator)).trim();
+      const declaration = text.slice(0, Math.max(0, separator));
+      const colon = declaration.lastIndexOf(':');
+      const repository = colon === -1 ? null : declaration.slice(0, colon).trim();
+      const key = declaration.slice(colon + 1).trim();
       const title = text.slice(separator + 1).trim();
-      if (key === '' || title === '' || key.includes('>') || parseTicketRef(key) !== undefined) {
-        throw new Error(`--external takes KEY=Title, with a key that contains neither > nor =; got ${text}`);
+      if (
+        key === '' ||
+        title === '' ||
+        key.includes('>') ||
+        parseTicketRef(key) !== undefined ||
+        (repository !== null && !REPOSITORY_PATTERN.test(repository))
+      ) {
+        throw new Error(
+          `--external takes [REPOSITORY:]KEY=Title, with an OWNER/NAME or NAME repository and a key that contains neither > nor =; got ${text}`,
+        );
       }
       if (request.order.includes(key)) {
         throw new Error(`--external names ${key} twice`);
       }
-      request.externals.push({ key, title });
+      request.externals.push({ key, repository, title });
       request.order.push(key);
     }
   }
@@ -302,7 +323,7 @@ function parseEdge(text: string, request: Request): Edge {
 
 /** Returns the `owner/repo` of a GitHub ticket, or `undefined` for any other entry. */
 function readRepository(entry: Entry | undefined): string | undefined {
-  return entry === undefined || 'external' in entry ? undefined : entry.repository;
+  return entry?.repository ?? undefined;
 }
 
 /** Resolves one side of an edge to a ticket id, or returns `undefined` when it names neither kind of ticket. */
