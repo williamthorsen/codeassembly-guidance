@@ -60,9 +60,9 @@ Determine whether the described work has been implemented. The output format dep
 
 ### Advisability
 
-Determine whether the ticket should be implemented as written. Synthesize the four facets defined in `{harness_home_dir}/skills/_data/ticket-evaluation.md` (problem reality, scope correctness, solution soundness, title accuracy) against the codebase and ticket text.
+Determine whether the ticket should be implemented as written. Synthesize the five facets defined in `{harness_home_dir}/skills/_data/ticket-evaluation.md` (problem reality, scope correctness, solution soundness, criterion settleability, title accuracy) against the codebase and ticket text.
 
-1. Apply each facet in turn. Does the underlying observation hold? Is scope right at the appropriate class? Does the proposed solution treat the cause? Does the title accurately describe the work?
+1. Apply each facet in turn. Does the underlying observation hold? Is scope right at the appropriate class? Does the proposed solution treat the cause? Can the pull request of a code ticket show each criterion to hold or fail at merge? Does the title accurately describe the work?
 2. Synthesize a verdict from the facet results.
 3. Emit one prose evidence bullet per concern raised by the facets. Do not prefix a bullet with its facet name. Omit bullets entirely when the verdict is `advisable`.
 
@@ -70,7 +70,7 @@ Bias toward `advisable`: For a recommendation dimension, false-positive concerns
 
 **Verdicts:**
 
-- 🟢 `advisable`: Recommend implementing as written; all four facets pass scrutiny
+- 🟢 `advisable`: Recommend implementing as written; all five facets pass scrutiny
 - 🟠 `questionable`: Recommend with concerns; one or more facets raise issues warranting human review
 - 🔴 `inadvisable`: Recommend against implementing as written; rework needed before proceeding
 
