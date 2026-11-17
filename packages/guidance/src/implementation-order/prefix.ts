@@ -1,9 +1,9 @@
 /**
- * Derives a short prefix for each `owner/name` repository, unique within the set: the upper-case initials of the name's
+ * Derives a short prefix for each `owner/name` repository, unique within the set: the lower-case initials of the name's
  * segments, or the first two letters of a single-segment name. Names whose prefixes collide each take further letters
  * of their last segment until the prefixes differ, and the whole name when the segment is used up. Repositories that
  * share a name under different owners also take letters of the owner, in front. A repository whose prefix still equals
- * another's takes its whole `OWNER/NAME`. Case does not distinguish one repository from another.
+ * another's takes its whole `owner/name`, lower-cased. Case does not distinguish one repository from another.
  */
 export function derivePrefixes(repositories: readonly string[]): Map<string, string> {
   const unique = [...new Set(repositories.map((repository) => repository.toLowerCase()))];
@@ -13,7 +13,7 @@ export function derivePrefixes(repositories: readonly string[]): Map<string, str
   for (const name of byName.keys()) {
     const sharing = unique.filter((repository) => readName(repository) === name);
     const owners = lengthenUntilDistinct(sharing.map(readOwner), (owner, extra) =>
-      sharing.length === 1 ? '' : owner.slice(0, extra + 1).toUpperCase(),
+      sharing.length === 1 ? '' : owner.slice(0, extra + 1),
     );
     for (const repository of sharing) {
       composed.set(repository, `${owners.get(readOwner(repository)) ?? ''}${byName.get(name) ?? ''}`);
@@ -25,7 +25,7 @@ export function derivePrefixes(repositories: readonly string[]): Map<string, str
     repositories.map((repository) => {
       const prefix = composed.get(repository.toLowerCase());
       const isShared = taken.filter((other) => other === prefix).length > 1;
-      return [repository, prefix === undefined || isShared ? repository.toUpperCase() : prefix];
+      return [repository, prefix === undefined || isShared ? repository.toLowerCase() : prefix];
     }),
   );
 }
@@ -39,9 +39,9 @@ function buildNamePrefix(name: string, extra: number): string {
   const leading = segments.slice(0, -1).map((segment) => segment.slice(0, 1));
   const baseLength = segments.length > 1 ? 1 : 2;
   if (baseLength + extra > last.length && extra > 0) {
-    return name.toUpperCase();
+    return name;
   }
-  return [...leading, last.slice(0, baseLength + extra)].join('').toUpperCase();
+  return [...leading, last.slice(0, baseLength + extra)].join('');
 }
 
 /** Lengthens the prefix of every colliding key, one letter per round, until every key's prefix is distinct. */
@@ -63,7 +63,7 @@ function lengthenUntilDistinct(
       extras.set(key, (extras.get(key) ?? 0) + 1);
     }
   }
-  return new Map(keys.map((key) => [key, key.toUpperCase()]));
+  return new Map(keys.map((key) => [key, key]));
 }
 
 /** Returns the part of `owner/name` after the slash. */

@@ -214,7 +214,7 @@ function describeEntry(
   if (entry === undefined || 'external' in entry) {
     return { label: id, number: null, prefix: null, ref: id, repository: null, title: entry?.title ?? '' };
   }
-  const prefix = prefixes.get(entry.repository) ?? entry.repository.toUpperCase();
+  const prefix = prefixes.get(entry.repository) ?? entry.repository.toLowerCase();
   return {
     label: `${prefix}.${entry.number}`,
     number: entry.number,

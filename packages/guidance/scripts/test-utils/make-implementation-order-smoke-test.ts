@@ -40,8 +40,8 @@ function assertBlockedTicketNested(result: unknown): void {
   const summary = tickets.map((ticket: unknown) =>
     isRecord(ticket) ? `${String(ticket['label'])}@${String(ticket['depth'])}` : '',
   );
-  if (summary.join(' ') !== 'CL.1@0 WI.2@1') {
-    throw new Error(`expected CL.1 at depth 0 and WI.2 at depth 1, got ${JSON.stringify(result)}`);
+  if (summary.join(' ') !== 'cl.1@0 wi.2@1') {
+    throw new Error(`expected cl.1 at depth 0 and wi.2 at depth 1, got ${JSON.stringify(result)}`);
   }
 }
 

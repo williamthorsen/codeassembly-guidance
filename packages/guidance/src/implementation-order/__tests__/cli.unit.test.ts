@@ -17,8 +17,8 @@ describe(listImplementationOrder, () => {
     const order = await listImplementationOrder(['--ticket', 'acme/site-tools#2', '--ticket', 'acme/core-lib#1'], gh);
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, label: 'CL.1', otherBlockers: [], ref: 'acme/core-lib#1' },
-      { depth: 1, label: 'ST.2', otherBlockers: [], ref: 'acme/site-tools#2' },
+      { depth: 0, label: 'cl.1', otherBlockers: [], ref: 'acme/core-lib#1' },
+      { depth: 1, label: 'st.2', otherBlockers: [], ref: 'acme/site-tools#2' },
     ]);
     expect(order).toMatchObject({ cycle: [], omitted: [] });
   });
@@ -29,7 +29,7 @@ describe(listImplementationOrder, () => {
     const order = await listImplementationOrder(['--ticket', 'acme/site-tools#2'], gh);
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, otherBlockers: [{ crossRepository: true, label: 'CL.1', ref: 'acme/core-lib#1' }] },
+      { depth: 0, otherBlockers: [{ crossRepository: true, label: 'cl.1', ref: 'acme/core-lib#1' }] },
     ]);
   });
 
@@ -47,7 +47,7 @@ describe(listImplementationOrder, () => {
 
     expect(order.tickets.at(-1)).toMatchObject({
       depth: 1,
-      otherBlockers: [{ crossRepository: false, label: 'AP.1' }],
+      otherBlockers: [{ crossRepository: false, label: 'ap.1' }],
       ref: 'acme/app#3',
     });
   });
@@ -106,7 +106,7 @@ describe(listImplementationOrder, () => {
     );
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, label: 'AP.1' },
+      { depth: 0, label: 'ap.1' },
       { depth: 1, label: 'MAC-7', number: null, prefix: null, repository: null, title: 'Move the board' },
     ]);
   });
@@ -138,7 +138,7 @@ describe(listImplementationOrder, () => {
 
     expect(order.tickets.map(({ lead }) => /^ */.exec(lead)?.[0].length)).toEqual([0, 2]);
     expect(order.tickets.map(({ lead, titleBudget }) => lead.length + titleBudget)).toEqual([60, 60]);
-    expect(order.tickets[1]?.lead).toContain('AP.22 ');
+    expect(order.tickets[1]?.lead).toContain('ap.22 ');
   });
 
   it('writes the blocker line one level under its ticket', async () => {
@@ -146,7 +146,7 @@ describe(listImplementationOrder, () => {
 
     const order = await listImplementationOrder(['--ticket', 'acme/app#2'], gh);
 
-    expect(order.tickets[0]?.blockerLine).toBe('  ⛔ by CL.1, CL.3');
+    expect(order.tickets[0]?.blockerLine).toBe('  ⛔ by cl.1, cl.3');
   });
 
   it('fails the whole run, naming the ticket, when one ticket cannot be read', async () => {
