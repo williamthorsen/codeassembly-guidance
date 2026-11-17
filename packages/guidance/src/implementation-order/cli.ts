@@ -112,6 +112,11 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
       entries.set(id, await fetchTicket(gh, ticket));
     }
   }
+  for (const entry of entries.values()) {
+    if ('external' in entry && entry.repository !== null) {
+      entry.repository = qualifyRepository(entry.repository, entries);
+    }
+  }
   edges.push(...request.edges);
 
   const listed = [...request.order];
@@ -319,6 +324,26 @@ function parseEdge(text: string, request: Request): Edge {
     throw new Error(`--edge names ${blocked} as blocked, but no --ticket or --external names it`);
   }
   return { blocked, blocker };
+}
+
+/**
+ * Resolves a bare `NAME` to the `OWNER/NAME` of the GitHub tickets in that repository, when they name exactly one
+ * owner, so that it takes their prefix; returns any other repository unchanged.
+ */
+function qualifyRepository(repository: string, entries: ReadonlyMap<string, Entry>): string {
+  if (repository.includes('/')) {
+    return repository;
+  }
+  const matches = entries
+    .values()
+    .filter(
+      (entry): entry is GithubTicket =>
+        !('external' in entry) && entry.repository.toLowerCase().split('/', 2)[1] === repository.toLowerCase(),
+    )
+    .map((entry) => entry.repository)
+    .toArray();
+  const owners = new Set(matches.map((match) => match.toLowerCase()));
+  return owners.size === 1 ? (matches[0] ?? repository) : repository;
 }
 
 /** Returns the `owner/repo` of a ticket, or `undefined` when it does not name one. */

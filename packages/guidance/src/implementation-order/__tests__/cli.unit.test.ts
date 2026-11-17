@@ -125,6 +125,24 @@ describe(listImplementationOrder, () => {
     ]);
   });
 
+  it('gives a repository named without its owner the prefix of the GitHub ticket in that repository', async () => {
+    const gh = makeGh({ 'acme/macos-config#1': {} });
+
+    const order = await listImplementationOrder(
+      [
+        '--ticket',
+        'acme/macos-config#1',
+        '--external',
+        'macos-config:MAC-7=Move the board',
+        '--edge',
+        'acme/macos-config#1>MAC-7',
+      ],
+      gh,
+    );
+
+    expect(order.tickets).toMatchObject([{ label: 'mc.1' }, { label: 'mc.MAC-7', repository: 'acme/macos-config' }]);
+  });
+
   it('marks a ticket outside GitHub as in another repository than its blocker', async () => {
     const gh = makeGh({ 'acme/core-lib#1': {} });
 
