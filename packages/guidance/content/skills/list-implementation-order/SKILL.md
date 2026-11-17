@@ -12,7 +12,7 @@ Never invoke this skill on your own initiative, and never suggest it.
 
 ## Process
 
-1. **Collect the tickets.** List every ticket that the conversation created or discussed, in the order in which the conversation reached them. Give a ticket outside GitHub its key and its title. For an umbrella, name its children as well: The list leaves the umbrella out.
+1. **Collect the tickets.** List every ticket that the conversation created or discussed, in the order in which the conversation reached them. Give a ticket outside GitHub its key, its title, and, when the conversation establishes it, the repository in which the ticket is implemented. For an umbrella, name its children as well: The list leaves the umbrella out.
 
    When the conversation does not contain any ticket, say so in one line and stop.
 

@@ -6,10 +6,10 @@ Print open tickets that have work of their own in the order in which to implemen
 
    ```bash
    node {harness_home_dir}/skills/implementation-order/implementation-order.mjs \
-     --ticket {OWNER/REPO#N} --external "{KEY}={Title}" --edge "{BLOCKER}>{BLOCKED}"
+     --ticket {OWNER/REPO#N} --external "{REPOSITORY}:{KEY}={Title}" --edge "{BLOCKER}>{BLOCKED}"
    ```
 
-   Write a GitHub ticket as `OWNER/REPO#N`, taking the repository from the ticket's URL. Repeat each flag once per ticket or edge. Each side of an edge is `OWNER/REPO#N` or a key that an `--external` declares, and the blocked side is a listed ticket. On a non-zero exit, report the helper's stderr and do not print the list: A list that lacks a ticket misstates the order.
+   Write a GitHub ticket as `OWNER/REPO#N`, taking the repository from the ticket's URL. For a ticket outside GitHub, `{REPOSITORY}` is the repository in which the ticket is implemented, as `OWNER/NAME` when the owner is known and `NAME` otherwise; it gives the ticket that repository's prefix. Omit `{REPOSITORY}:` only when the repository is not known. Repeat each flag once per ticket or edge. Each side of an edge is `OWNER/REPO#N` or the key, without its repository, that an `--external` declares, and the blocked side is a listed ticket. On a non-zero exit, report the helper's stderr and do not print the list: A list that lacks a ticket misstates the order.
 
    The helper prints `{"tickets": [...], "omitted": [...], "cycle": [...]}`. `tickets` is in list order. `omitted` names each ticket that the list leaves out, with its `reason`: `closed`, or `umbrella` for an open ticket that has sub-issues.
 
