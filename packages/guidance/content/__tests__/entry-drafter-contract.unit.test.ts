@@ -30,6 +30,18 @@ const CHANGE_EVIDENCE_PHRASES: ReadonlyArray<string> = [
 /** The grounding that let a claim resting on the commit log alone pass as supported. */
 const COMMIT_LOG_GROUNDING_PHRASE = 'what the commit log and the diff show';
 
+/**
+ * Phrases keeping delivery state out of every passage that the merge commit contains, in a subordinate clause as much
+ * as a main one, while admitting a version or configuration condition. Lowercased, so that a sentence's opening
+ * capital still matches.
+ */
+const DURABILITY_RULE_PHRASES: ReadonlyArray<string> = [
+  'stay true after the merge, because the merge commit contains them permanently',
+  'whether in a main clause or a subordinate one',
+  'a condition that names a version or a configuration stays true',
+  'the caller places it in `## notes for reviewers`',
+];
+
 /** The heading under which the drafter returns its entries, which each caller parses as YAML. */
 const ENTRIES_HEADING = '## Entries';
 
@@ -143,6 +155,7 @@ const QUOTING_RULE_PHRASE = '`text` and `migration` are always double-quoted';
 /** Every code under which the caller redispatches, each of which the drafter has to be able to act on. */
 const REJECTION_CODES: ReadonlyArray<string> = [
   'subject',
+  'transient-state',
   'type-mismatch',
   'unmatched-return',
   'unsupported-claim',
@@ -438,6 +451,17 @@ describe('entry-drafter contract', () => {
       'The commit log records the branch’s steps, and a ticket’s `## Problem` can record how the need arose. A ' +
       'drafter that reads either as a statement of what changed describes a copy, a false start, or a state that the ' +
       `default branch never held, and every such sentence is true. These phrases are gone:\n  ${missing.join('\n  ')}`;
+    expect(missing, message).toEqual([]);
+  });
+
+  it('keeps delivery state out of every passage that the merge commit contains', async () => {
+    const text = (await EXPANDED).toLowerCase();
+    const missing = DURABILITY_RULE_PHRASES.filter((phrase) => !text.includes(phrase));
+
+    const message =
+      'The merge commit contains the lede and the entries permanently, so a passage stating that the change is ' +
+      'merged, deployed, or released, or that it takes effect once deployed, turns false soon after the merge. ' +
+      `These phrases are gone:\n  ${missing.join('\n  ')}`;
     expect(missing, message).toEqual([]);
   });
 
