@@ -4,10 +4,10 @@ import { derivePrefixes } from '../prefix.ts';
 
 describe(derivePrefixes, () => {
   it.each([
-    { repository: 'acme/codeassembly-guidance', prefix: 'CG' },
-    { repository: 'acme/node-monorepo-tools', prefix: 'NMT' },
-    { repository: 'acme/configs.macos', prefix: 'CM' },
-    { repository: 'acme/toolbelt', prefix: 'TO' },
+    { repository: 'acme/codeassembly-guidance', prefix: 'cg' },
+    { repository: 'acme/node-monorepo-tools', prefix: 'nmt' },
+    { repository: 'acme/configs.macos', prefix: 'cm' },
+    { repository: 'acme/toolbelt', prefix: 'to' },
   ])('derives $prefix from the segments of $repository', ({ repository, prefix }) => {
     expect(derivePrefixes([repository]).get(repository)).toBe(prefix);
   });
@@ -16,22 +16,22 @@ describe(derivePrefixes, () => {
     const prefixes = derivePrefixes(['acme/top-right', 'acme/team-reimagined', 'acme/toolbelt']);
 
     expect(Object.fromEntries(prefixes)).toEqual({
-      'acme/team-reimagined': 'TRE',
-      'acme/toolbelt': 'TO',
-      'acme/top-right': 'TRI',
+      'acme/team-reimagined': 'tre',
+      'acme/toolbelt': 'to',
+      'acme/top-right': 'tri',
     });
   });
 
   it('uses the whole name when the last segment runs out before the prefixes differ', () => {
     const prefixes = derivePrefixes(['acme/a-bc', 'acme/ab-bc']);
 
-    expect(new Set(prefixes.values())).toEqual(new Set(['A-BC', 'AB-BC']));
+    expect(new Set(prefixes.values())).toEqual(new Set(['a-bc', 'ab-bc']));
   });
 
   it('puts a letter of the owner in front when two owners have a repository of the same name', () => {
     const prefixes = derivePrefixes(['acme/site-tools', 'beta/site-tools']);
 
-    expect(Object.fromEntries(prefixes)).toEqual({ 'acme/site-tools': 'AST', 'beta/site-tools': 'BST' });
+    expect(Object.fromEntries(prefixes)).toEqual({ 'acme/site-tools': 'ast', 'beta/site-tools': 'bst' });
   });
 
   it('gives each repository a distinct prefix when an owner letter makes one prefix equal another', () => {
@@ -45,6 +45,6 @@ describe(derivePrefixes, () => {
   it('gives one prefix to two spellings of a repository that differ only in case', () => {
     const prefixes = derivePrefixes(['acme/Site-Tools', 'acme/site-tools']);
 
-    expect(Object.fromEntries(prefixes)).toEqual({ 'acme/Site-Tools': 'ST', 'acme/site-tools': 'ST' });
+    expect(Object.fromEntries(prefixes)).toEqual({ 'acme/Site-Tools': 'st', 'acme/site-tools': 'st' });
   });
 });

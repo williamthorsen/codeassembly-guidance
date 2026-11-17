@@ -17,8 +17,8 @@ describe(listImplementationOrder, () => {
     const order = await listImplementationOrder(['--ticket', 'acme/site-tools#2', '--ticket', 'acme/core-lib#1'], gh);
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, label: 'CL.1', otherBlockers: [], ref: 'acme/core-lib#1' },
-      { depth: 1, label: 'ST.2', otherBlockers: [], ref: 'acme/site-tools#2' },
+      { depth: 0, label: 'cl.1', otherBlockers: [], ref: 'acme/core-lib#1' },
+      { depth: 1, label: 'st.2', otherBlockers: [], ref: 'acme/site-tools#2' },
     ]);
     expect(order).toMatchObject({ cycle: [], omitted: [] });
   });
@@ -29,7 +29,7 @@ describe(listImplementationOrder, () => {
     const order = await listImplementationOrder(['--ticket', 'acme/site-tools#2'], gh);
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, otherBlockers: [{ crossRepository: true, label: 'CL.1', ref: 'acme/core-lib#1' }] },
+      { depth: 0, otherBlockers: [{ crossRepository: true, label: 'cl.1', ref: 'acme/core-lib#1' }] },
     ]);
   });
 
@@ -47,7 +47,7 @@ describe(listImplementationOrder, () => {
 
     expect(order.tickets.at(-1)).toMatchObject({
       depth: 1,
-      otherBlockers: [{ crossRepository: false, label: 'AP.1' }],
+      otherBlockers: [{ crossRepository: false, label: 'ap.1' }],
       ref: 'acme/app#3',
     });
   });
@@ -106,8 +106,53 @@ describe(listImplementationOrder, () => {
     );
 
     expect(order.tickets).toMatchObject([
-      { depth: 0, label: 'AP.1' },
+      { depth: 0, label: 'ap.1' },
       { depth: 1, label: 'MAC-7', number: null, prefix: null, repository: null, title: 'Move the board' },
+    ]);
+  });
+
+  it('prefixes a ticket outside GitHub with the prefix of its repository, shared with a GitHub ticket there', async () => {
+    const gh = makeGh({ 'acme/macos-config#1': {} });
+
+    const order = await listImplementationOrder(
+      ['--ticket', 'acme/macos-config#1', '--external', 'acme/macos-config:MAC-7=Move the board'],
+      gh,
+    );
+
+    expect(order.tickets).toMatchObject([
+      { label: 'mc.1', prefix: 'mc' },
+      { label: 'mc.MAC-7', prefix: 'mc', ref: 'MAC-7', repository: 'acme/macos-config' },
+    ]);
+  });
+
+  it('gives a repository named without its owner the prefix of the GitHub ticket in that repository', async () => {
+    const gh = makeGh({ 'acme/macos-config#1': {} });
+
+    const order = await listImplementationOrder(
+      [
+        '--ticket',
+        'acme/macos-config#1',
+        '--external',
+        'macos-config:MAC-7=Move the board',
+        '--edge',
+        'acme/macos-config#1>MAC-7',
+      ],
+      gh,
+    );
+
+    expect(order.tickets).toMatchObject([{ label: 'mc.1' }, { label: 'mc.MAC-7', repository: 'acme/macos-config' }]);
+  });
+
+  it('marks a ticket outside GitHub as in another repository than its blocker', async () => {
+    const gh = makeGh({ 'acme/core-lib#1': {} });
+
+    const order = await listImplementationOrder(
+      ['--external', 'workbench:WB-3=Adopt the helper', '--edge', 'acme/core-lib#1>WB-3'],
+      gh,
+    );
+
+    expect(order.tickets).toMatchObject([
+      { label: 'wo.WB-3', otherBlockers: [{ crossRepository: true, label: 'cl.1' }] },
     ]);
   });
 
@@ -138,7 +183,7 @@ describe(listImplementationOrder, () => {
 
     expect(order.tickets.map(({ lead }) => /^ */.exec(lead)?.[0].length)).toEqual([0, 2]);
     expect(order.tickets.map(({ lead, titleBudget }) => lead.length + titleBudget)).toEqual([60, 60]);
-    expect(order.tickets[1]?.lead).toContain('AP.22 ');
+    expect(order.tickets[1]?.lead).toContain('ap.22 ');
   });
 
   it('writes the blocker line one level under its ticket', async () => {
@@ -146,7 +191,7 @@ describe(listImplementationOrder, () => {
 
     const order = await listImplementationOrder(['--ticket', 'acme/app#2'], gh);
 
-    expect(order.tickets[0]?.blockerLine).toBe('  ⛔ by CL.1, CL.3');
+    expect(order.tickets[0]?.blockerLine).toBe('  ⛔ by cl.1, cl.3');
   });
 
   it('fails the whole run, naming the ticket, when one ticket cannot be read', async () => {
@@ -159,7 +204,8 @@ describe(listImplementationOrder, () => {
 
   it.each([
     { argv: ['--ticket', 'app#1'], reason: '--ticket takes OWNER/REPO#N' },
-    { argv: ['--external', 'MAC-7'], reason: '--external takes KEY=Title' },
+    { argv: ['--external', 'MAC-7'], reason: '--external takes [REPOSITORY:]KEY=Title' },
+    { argv: ['--external', 'a/b/c:MAC-7=Move the board'], reason: '--external takes [REPOSITORY:]KEY=Title' },
     { argv: ['--ticket', 'acme/app#1', '--edge', 'MAC-7>acme/app#1'], reason: '--edge takes BLOCKER>BLOCKED' },
     { argv: ['--ticket', 'acme/app#1', '--edge', 'acme/app#1>acme/app#2'], reason: 'as blocked' },
   ])('refuses $argv', async ({ argv, reason }) => {
