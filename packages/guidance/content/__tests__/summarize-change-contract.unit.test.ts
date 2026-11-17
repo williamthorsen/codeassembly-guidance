@@ -27,6 +27,18 @@ const COVERAGE_MANDATE_PHRASES: ReadonlyArray<string> = [
 ];
 
 /**
+ * Phrases that the durability check contains, which rejects delivery state in a subordinate clause that the subject
+ * check passes, and the take-effect fact that `## Notes for reviewers` contains instead. Lowercased, so that a
+ * sentence's opening capital still matches.
+ */
+const DURABILITY_CHECK_PHRASES: ReadonlyArray<string> = [
+  'subordinate clauses included',
+  '`rejection: transient-state`',
+  'a condition that names a version or a configuration stays true and passes',
+  'what must happen for the change to take effect',
+];
+
+/**
  * Phrases that require the skill to record the entries as data: writing them to a file, consolidating the change's
  * record from that file, and ending the body with the rendered block. Without all three the pull request receives the
  * entries as prose alone, which is the state that recording them replaced. Lowercased, so that a sentence's opening
@@ -146,6 +158,17 @@ describe('summarize-change contract', () => {
       'The commit log, the ticket, and the session each support a sentence about how the change came about, which ' +
       'the diff does not contradict. An audit that counts them as support passes the history as the change.';
     expect((await EXPANDED).toLowerCase(), message).toContain(UNSUPPORTED_SOURCE_PHRASE);
+  });
+
+  it('rejects delivery state in any clause of a drafted passage', async () => {
+    const text = (await EXPANDED).toLowerCase();
+    const missing = DURABILITY_CHECK_PHRASES.filter((phrase) => !text.includes(phrase));
+
+    const message =
+      'The subject check rejects a standalone take-effect sentence, and a redispatch answers it by moving the ' +
+      'condition into a subordinate clause, which then reaches the merge commit and turns false after the merge. ' +
+      `These phrases are gone:\n  ${missing.join('\n  ')}`;
+    expect(missing, message).toEqual([]);
   });
 
   it('states `## Why` as purpose rather than backstory', async () => {
