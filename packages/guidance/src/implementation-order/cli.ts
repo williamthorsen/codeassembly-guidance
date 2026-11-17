@@ -18,7 +18,7 @@ import { derivePrefixes } from './prefix.ts';
 
 /** A blocker that a ticket's place in the tree does not state. */
 export interface ListedBlocker {
-  /** Whether the blocker and the blocked ticket are in different GitHub repositories. */
+  /** Whether the blocker and the blocked ticket are in different repositories. */
   crossRepository: boolean;
   label: string;
   number: number | null;
@@ -34,7 +34,7 @@ export interface ListedTicket {
   depth: number;
   /** The start of the line that states a publish gate after this ticket; the caller adds the package and its consumers. */
   gateLead: string;
-  /** The ticket's name in the list: `PREFIX.N`, or the key of a ticket outside GitHub. */
+  /** The ticket's name in the list: `prefix.N`, or a key outside GitHub, after `prefix.` when it names a repository. */
   label: string;
   /** The start of the ticket's line, up to the title: the indent, the dash, and the label. */
   lead: string;
@@ -243,7 +243,7 @@ function findOpenBlockers(id: string, edges: readonly Edge[], entries: ReadonlyM
   return [...new Set(blockers)];
 }
 
-/** Reports whether two tickets are in different GitHub repositories; a ticket outside GitHub is in none. */
+/** Reports whether two tickets are in different repositories; a ticket that does not name one is in none. */
 function isCrossRepository(one: string | null, other: string | null): boolean {
   return one !== null && other !== null && one.toLowerCase() !== other.toLowerCase();
 }
@@ -321,7 +321,7 @@ function parseEdge(text: string, request: Request): Edge {
   return { blocked, blocker };
 }
 
-/** Returns the `owner/repo` of a GitHub ticket, or `undefined` for any other entry. */
+/** Returns the `owner/repo` of a ticket, or `undefined` when it does not name one. */
 function readRepository(entry: Entry | undefined): string | undefined {
   return entry?.repository ?? undefined;
 }
