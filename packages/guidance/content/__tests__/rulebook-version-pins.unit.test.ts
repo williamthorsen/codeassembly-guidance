@@ -110,7 +110,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'williamthorsen-workflow-preferences',
-    { bodyHash: '44e36af44b80afde91dbbf24a0049001d7ec869cbef6c802858be769ec50242f', version: '13' },
+    { bodyHash: '481da5950be0cc17e201cc9fb430741b1e602d63c2d3781d2564a6446fde5ca1', version: '14' },
   ],
   [
     'williamthorsen-writing-preferences',

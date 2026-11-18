@@ -2,7 +2,7 @@
 slug: williamthorsen-workflow-preferences
 description: William Thorsen's personal preferences for how work moves -- scope, branches and worktrees, guidance capture, and the arc of product development.
 delivery: ambient
-version: '13'
+version: '14'
 ---
 
 # William Thorsen's workflow preferences
@@ -19,13 +19,15 @@ version: '13'
 
 Never create a branch or worktree without explicit authorization. Each ticket is implemented in its own worktree, and the developer's tooling relies on that: Do all of one ticket's work in that worktree, never switch a worktree to another branch, and start a new session in another ticket's own worktree for work on that ticket. Which branch or worktree a ticket's work uses is settled, so never ask it.
 
-When a session works in a worktree other than its cwd, pass that worktree to every skill that takes a working directory, such as `create-commit`, or commit inline with `git -C`: A skill with `context: fork` starts in the session's cwd, and the skill listing does not show which skills fork.
+A session works only in its own repository and in its own ticket's worktree. For any other repository or ticket, filing the ticket is the limit of the session's work: Do not create a branch or a worktree there, commit, push, or open a pull request. Reading another repository is not restricted. A request from the developer for that work in this session governs, but a request to file a ticket does not ask for the ticket's work.
+
+When a session works in its own ticket's worktree and that worktree is not its cwd, pass that worktree to every skill that takes a working directory, such as `create-commit`, or commit inline with `git -C`: A skill with `context: fork` starts in the session's cwd, and the skill listing does not show which skills fork.
 
 After a merge, say nothing about worktree or branch state and never offer to manage it. The worktree stays as long as its branch does, so there is nothing to clean up and nothing to ask about.
 
 ## Cross-repo sequencing
 
-When the work would be better done upstream, in a package or repository on which this one depends, default to upstream first: Merge the upstream change, publish it, upgrade the dependency here, then make the downstream change against the upgraded version. Propose that order rather than merging a downstream workaround ahead of it.
+When the work would be better done upstream, in a package or repository on which this one depends, default to upstream first: File the upstream ticket and record it as a blocker of this one, and make the downstream change once the upstream change is merged and published and the dependency is upgraded here. The upstream change belongs to the upstream ticket's own session. Propose that order rather than merging a downstream workaround ahead of it.
 
 Downstream first reads as faster because something is merged sooner, but it requires two downstream changes rather than one: the workaround, then its removal once the upstream change is merged. It also forces upstream to decide without the downstream requirement in hand, so upstream cannot weigh that requirement against its own constraints, and may settle on a shape that the consumer keeps working around.
 
