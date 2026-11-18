@@ -209,6 +209,32 @@ describe('renderReport in Confluence storage format', () => {
     );
   });
 
+  it('renders an ordered list from its start, a loose list as paragraphs, and a hard break', () => {
+    const text: ReportTextFile = {
+      sections: [
+        INVOICING,
+        {
+          ...OTHER,
+          rows: [
+            {
+              details: '3. a\n4. b\n\n- x\n\n- y\n\n  more\n\nline one  \nline two',
+              id: '#3',
+              workItem: 'Saved filters',
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(renderReport(ASSEMBLED, text, 'confluence', [])).toContain(
+      [
+        '<td>Not yet scheduled</td><td><ol start="3"><li>a</li><li>b</li></ol>',
+        '<ul><li><p>x</p></li><li><p>y</p><p>more</p></li></ul>',
+        '<p>line one<br />line two</p></td></tr>',
+      ].join(''),
+    );
+  });
+
   it('renders the update date and the reporting period as date elements', () => {
     const rendered = renderReport(
       { ...ASSEMBLED, period: { end: '2026-11-18', start: '2026-11-01' } },
