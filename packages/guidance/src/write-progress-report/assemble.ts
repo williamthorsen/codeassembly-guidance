@@ -14,6 +14,8 @@ export interface ReportPeriod {
 export type ReportRow = ProgressItem & {
   /** The text of the row's date cell. */
   date: string;
+  /** The date that the row's date cell shows, or null when the row is not yet scheduled. */
+  dateOn: string | null;
   label: string;
   /** Whether the row is open and its date precedes the report's date. */
   overdue: boolean;
@@ -84,6 +86,18 @@ export function assembleReport(
   return { lastUpdated: today, omitted, period, sections: ordered };
 }
 
+/**
+ * Formats a row's date cell: the kind of date that its status uses, then the date as `renderDate` writes it, or the
+ * unscheduled text when the row does not have a date.
+ */
+export function formatDateCell(
+  status: ProgressStatus,
+  dateOn: string | null,
+  renderDate: (date: string) => string = (date) => date,
+): string {
+  return dateOn === null ? 'Not yet scheduled' : `${STATUS_DISPLAY[status].prefix}: ${renderDate(dateOn)}`;
+}
+
 // region | Helpers
 
 /** Returns the status of an item that the report shows, or null for one closed other than as completed. */
@@ -97,12 +111,12 @@ function assignStatus(item: ProgressItem): ProgressStatus | null {
 
 /** Builds a row whose date cell names the kind of date that its status uses. */
 function buildRow(item: ProgressItem, status: ProgressStatus, today: string): ReportRow {
-  const { label, prefix } = STATUS_DISPLAY[status];
   const sortDate = readSortDate(item, status);
   return {
     ...item,
-    date: sortDate === null ? 'Not yet scheduled' : `${prefix}: ${sortDate}`,
-    label,
+    date: formatDateCell(status, sortDate),
+    dateOn: sortDate,
+    label: STATUS_DISPLAY[status].label,
     overdue: status !== 'done' && sortDate !== null && sortDate < today,
     status,
   };

@@ -10,13 +10,13 @@ const ASSEMBLED: AssembledResult = {
   sections: [
     {
       rows: [
-        { date: 'Needed by: 2026-11-25', id: '#1', label: 'Needs input', status: 'needs-input' },
-        { date: 'Done: 2026-11-02', id: '#2', label: 'Done', status: 'done' },
+        { date: 'Needed by: 2026-11-25', dateOn: '2026-11-25', id: '#1', label: 'Needs input', status: 'needs-input' },
+        { date: 'Done: 2026-11-02', dateOn: '2026-11-02', id: '#2', label: 'Done', status: 'done' },
       ],
       workstream: { health: 'at-risk', id: 'ws-a', note: 'Waiting on access.', title: 'Alpha' },
     },
     {
-      rows: [{ date: 'Not yet scheduled', id: '#3', label: 'Planned', status: 'planned' }],
+      rows: [{ date: 'Not yet scheduled', dateOn: null, id: '#3', label: 'Planned', status: 'planned' }],
       workstream: null,
     },
   ],

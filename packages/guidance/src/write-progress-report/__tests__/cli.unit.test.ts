@@ -102,7 +102,12 @@ describe('runCli render', () => {
     lastUpdated: '2026-11-18',
     ok: true,
     period: null,
-    sections: [{ rows: [{ date: 'Done: 2026-11-02', id: '#1', label: 'Done', status: 'done' }], workstream: null }],
+    sections: [
+      {
+        rows: [{ date: 'Done: 2026-11-02', dateOn: '2026-11-02', id: '#1', label: 'Done', status: 'done' }],
+        workstream: null,
+      },
+    ],
   };
   const text = {
     sections: [

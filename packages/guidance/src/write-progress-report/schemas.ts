@@ -65,7 +65,15 @@ export const AssembledResultSchema = z.object({
   period: z.strictObject({ end: CalendarDateSchema, start: CalendarDateSchema }).nullable(),
   sections: z.array(
     z.object({
-      rows: z.array(z.object({ date: z.string(), id: z.string(), label: z.string(), status: ProgressStatusSchema })),
+      rows: z.array(
+        z.object({
+          date: z.string(),
+          dateOn: CalendarDateSchema.nullable(),
+          id: z.string(),
+          label: z.string(),
+          status: ProgressStatusSchema,
+        }),
+      ),
       workstream: WorkstreamSchema.nullable(),
     }),
   ),
