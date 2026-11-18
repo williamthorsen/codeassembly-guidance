@@ -116,6 +116,16 @@ const HOOK_GUARDS: ReadonlyArray<HookGuard> = [
     },
   },
   {
+    hook: 'progress-report-preferences',
+    role: 'writes a progress report for a customer',
+    declaringBodies: [{ label: 'write-progress-report', relativePath: 'skills/write-progress-report/SKILL.md' }],
+    boundRulebooks: [],
+    spliceProbe: {
+      body: { label: 'write-progress-report', relativePath: 'skills/write-progress-report/SKILL.md' },
+      coexisting: ['1. **Heading:**', '## Output'],
+    },
+  },
+  {
     hook: 'ticketing-preferences',
     role: 'decides on or creates tickets',
     declaringBodies: [
