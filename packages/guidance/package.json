@@ -63,6 +63,7 @@
     "esbuild": "catalog:",
     "eslint": "catalog:",
     "happy-dom": "catalog:",
+    "marked": "16.4.2",
     "marklassian": "1.2.1",
     "ulid": "3.0.2",
     "vitest": "catalog:",

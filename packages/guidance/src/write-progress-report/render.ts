@@ -1,9 +1,11 @@
 import type { ProgressStatus } from './assemble.ts';
+import { renderConfluence } from './confluence.ts';
 import { checkLinks } from './links.ts';
+import { RenderError } from './RenderError.ts';
 import type { AssembledResult, Health, ReportTextFile } from './schemas.ts';
 
 /** The formats in which `render` writes a report. */
-export const REPORT_FORMATS = ['markdown'] as const;
+export const REPORT_FORMATS = ['confluence', 'markdown'] as const;
 
 export type ReportFormat = (typeof REPORT_FORMATS)[number];
 
@@ -36,13 +38,6 @@ export interface MergedReport {
   sections: MergedSection[];
 }
 
-/** A report that cannot be rendered: each problem with the place in the text file where it was found. */
-export class RenderError extends Error {
-  constructor(readonly problems: readonly string[]) {
-    super(problems.join('; '));
-  }
-}
-
 const HEALTH_DISPLAY: Readonly<Record<Health, string>> = {
   'at-risk': '🟠 At risk',
   'off-track': '🔴 Off track',
@@ -50,7 +45,10 @@ const HEALTH_DISPLAY: Readonly<Record<Health, string>> = {
 };
 
 /** The writer of each format. */
-const RENDERERS: Readonly<Record<ReportFormat, (report: MergedReport) => string>> = { markdown: renderMarkdown };
+const RENDERERS: Readonly<Record<ReportFormat, (report: MergedReport) => string>> = {
+  confluence: renderConfluence,
+  markdown: renderMarkdown,
+};
 
 const STATUS_GLYPH: Readonly<Record<ProgressStatus, string>> = {
   done: '✅',
