@@ -13,7 +13,8 @@ import type { z } from 'zod';
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { type FlagSpec, scanFlags } from '../lib/parse-flags.ts';
 import { type AssembledReport, assembleReport, type ReportPeriod } from './assemble.ts';
-import { RenderError, renderReport, REPORT_FORMATS, type ReportFormat } from './render.ts';
+import { renderReport, REPORT_FORMATS, type ReportFormat } from './render.ts';
+import { RenderError } from './RenderError.ts';
 import { AssembledResultSchema, CalendarDateSchema, ProgressItemsFileSchema, ReportTextFileSchema } from './schemas.ts';
 
 /** The helper's result: a command's output, or a structured failure that the helper reports at exit 0. */

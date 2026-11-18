@@ -76,7 +76,7 @@ describe(assembleReport, () => {
     expect(readRows(report).map(({ id }) => id)).toStrictEqual(['#3', '#5', '#2', '#1', '#4']);
   });
 
-  it('labels the date cell by the kind of date that its status uses', () => {
+  it('labels the date cell by the kind of date that its status uses, and keeps that date', () => {
     const report = assembleReport(
       [
         makeItem({ id: '#1', neededBy: '2026-11-25', needsInput: true, targetOn: '2026-12-01' }),
@@ -89,11 +89,11 @@ describe(assembleReport, () => {
       TODAY,
     );
 
-    expect(readRows(report).map(({ date }) => date)).toStrictEqual([
-      'Needed by: 2026-11-25',
-      'Done: 2026-11-02',
-      'Target: 2026-12-01',
-      'Not yet scheduled',
+    expect(readRows(report).map(({ date, dateOn }) => [date, dateOn])).toStrictEqual([
+      ['Needed by: 2026-11-25', '2026-11-25'],
+      ['Done: 2026-11-02', '2026-11-02'],
+      ['Target: 2026-12-01', '2026-12-01'],
+      ['Not yet scheduled', null],
     ]);
   });
 

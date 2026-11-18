@@ -102,7 +102,12 @@ describe('runCli render', () => {
     lastUpdated: '2026-11-18',
     ok: true,
     period: null,
-    sections: [{ rows: [{ date: 'Done: 2026-11-02', id: '#1', label: 'Done', status: 'done' }], workstream: null }],
+    sections: [
+      {
+        rows: [{ date: 'Done: 2026-11-02', dateOn: '2026-11-02', id: '#1', label: 'Done', status: 'done' }],
+        workstream: null,
+      },
+    ],
   };
   const text = {
     sections: [
@@ -123,6 +128,16 @@ describe('runCli render', () => {
 
     expect(result).toMatchObject({ format: 'markdown', ok: true });
     expect(result.ok && 'text' in result ? result.text : '').toContain('| Export | ✅ Done | Done: 2026-11-02 |');
+  });
+
+  it('renders Confluence storage format under --format confluence', async () => {
+    const result = await runCli(
+      ['render', '--assembled', 'a.json', '--text', 't.json', '--format', 'confluence'],
+      makeFiles({ 'a.json': assembled, 't.json': text }),
+    );
+
+    expect(result).toMatchObject({ format: 'confluence', ok: true });
+    expect(result.ok && 'text' in result ? result.text : '').toContain('<td>Done: <time datetime="2026-11-02" /></td>');
   });
 
   it('checks the links against every --internal-host', async () => {
@@ -150,8 +165,9 @@ describe('runCli render', () => {
 
     expect(
       await runCli(['render', '--assembled', 'a.json', '--text', 't.json', '--format', 'pdf'], files),
-    ).toMatchObject({
+    ).toStrictEqual({
       error: 'invalid-args',
+      message: '--format must be one of confluence, markdown, got "pdf"',
       ok: false,
     });
     expect(await runCli(['render', '--assembled', 'a.json', '--text', 't.json'], files)).toMatchObject({

@@ -1,41 +1,41 @@
 import type { ProgressStatus } from './assemble.ts';
+import { renderConfluence } from './confluence.ts';
 import { checkLinks } from './links.ts';
+import { RenderError } from './RenderError.ts';
 import type { AssembledResult, Health, ReportTextFile } from './schemas.ts';
 
 /** The formats in which `render` writes a report. */
-export const REPORT_FORMATS = ['markdown'] as const;
+export const REPORT_FORMATS = ['confluence', 'markdown'] as const;
 
 export type ReportFormat = (typeof REPORT_FORMATS)[number];
 
 /** One row of a rendered report. */
-interface MergedRow {
+export interface MergedRow {
   date: string;
+  dateOn: string | null;
   details: string;
   label: string;
   status: ProgressStatus;
+  /** The row's place in the text file, such as `sections.0.rows.2`. */
+  where: string;
   workItem: string;
 }
 
 /** One section of a rendered report. */
-interface MergedSection {
+export interface MergedSection {
   heading: string;
   health: Health;
   note: string | null;
   rows: MergedRow[];
+  /** The section's place in the text file, such as `sections.0`. */
+  where: string;
 }
 
 /** A report whose text and facts are merged and whose links are checked. */
-interface MergedReport {
+export interface MergedReport {
   lastUpdated: string;
   period: AssembledResult['period'];
   sections: MergedSection[];
-}
-
-/** A report that cannot be rendered: each problem with the place in the text file where it was found. */
-export class RenderError extends Error {
-  constructor(readonly problems: readonly string[]) {
-    super(problems.join('; '));
-  }
 }
 
 const HEALTH_DISPLAY: Readonly<Record<Health, string>> = {
@@ -45,7 +45,10 @@ const HEALTH_DISPLAY: Readonly<Record<Health, string>> = {
 };
 
 /** The writer of each format. */
-const RENDERERS: Readonly<Record<ReportFormat, (report: MergedReport) => string>> = { markdown: renderMarkdown };
+const RENDERERS: Readonly<Record<ReportFormat, (report: MergedReport) => string>> = {
+  confluence: renderConfluence,
+  markdown: renderMarkdown,
+};
 
 const STATUS_GLYPH: Readonly<Record<ProgressStatus, string>> = {
   done: '✅',
@@ -137,10 +140,23 @@ function mergeSection(
     const rowWhere = `${where}.rows.${rowText.index}`;
     collectLinkProblems(`${rowWhere}.workItem`, rowText.entry.workItem, internalHosts, problems);
     collectLinkProblems(`${rowWhere}.details`, rowText.entry.details, internalHosts, problems);
-    mergedRows.push({ ...rowText.entry, date: row.date, label: row.label, status: row.status });
+    mergedRows.push({
+      ...rowText.entry,
+      date: row.date,
+      dateOn: row.dateOn,
+      label: row.label,
+      status: row.status,
+      where: rowWhere,
+    });
   }
   // A missing health has already added a problem, so the fallback never reaches a rendered report.
-  return { heading: section.heading, health: section.health ?? declared ?? 'on-track', note, rows: mergedRows };
+  return {
+    heading: section.heading,
+    health: section.health ?? declared ?? 'on-track',
+    note,
+    rows: mergedRows,
+    where,
+  };
 }
 
 /** Adds a problem for each link in `text` that the report may not publish. */
