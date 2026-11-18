@@ -8,24 +8,29 @@ export const REPORT_FORMATS = ['markdown'] as const;
 export type ReportFormat = (typeof REPORT_FORMATS)[number];
 
 /** One row of a rendered report. */
-interface MergedRow {
+export interface MergedRow {
   date: string;
+  dateOn: string | null;
   details: string;
   label: string;
   status: ProgressStatus;
+  /** The row's place in the text file, such as `sections.0.rows.2`. */
+  where: string;
   workItem: string;
 }
 
 /** One section of a rendered report. */
-interface MergedSection {
+export interface MergedSection {
   heading: string;
   health: Health;
   note: string | null;
   rows: MergedRow[];
+  /** The section's place in the text file, such as `sections.0`. */
+  where: string;
 }
 
 /** A report whose text and facts are merged and whose links are checked. */
-interface MergedReport {
+export interface MergedReport {
   lastUpdated: string;
   period: AssembledResult['period'];
   sections: MergedSection[];
@@ -137,10 +142,23 @@ function mergeSection(
     const rowWhere = `${where}.rows.${rowText.index}`;
     collectLinkProblems(`${rowWhere}.workItem`, rowText.entry.workItem, internalHosts, problems);
     collectLinkProblems(`${rowWhere}.details`, rowText.entry.details, internalHosts, problems);
-    mergedRows.push({ ...rowText.entry, date: row.date, label: row.label, status: row.status });
+    mergedRows.push({
+      ...rowText.entry,
+      date: row.date,
+      dateOn: row.dateOn,
+      label: row.label,
+      status: row.status,
+      where: rowWhere,
+    });
   }
   // A missing health has already added a problem, so the fallback never reaches a rendered report.
-  return { heading: section.heading, health: section.health ?? declared ?? 'on-track', note, rows: mergedRows };
+  return {
+    heading: section.heading,
+    health: section.health ?? declared ?? 'on-track',
+    note,
+    rows: mergedRows,
+    where,
+  };
 }
 
 /** Adds a problem for each link in `text` that the report may not publish. */
