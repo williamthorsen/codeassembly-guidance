@@ -19,7 +19,7 @@ export type CommandResult = { error: string; message: string; ok: false } | ({ o
 /** What a command reads from its environment, injected so that tests can supply fixtures. */
 export interface CommandContext {
   readText: (path: string) => Promise<string>;
-  /** Today's date, `YYYY-MM-DD`, used when `--today` is absent. */
+  /** Today's UTC date, `YYYY-MM-DD`, used when `--today` is absent; item dates are UTC dates too. */
   today: string;
 }
 
@@ -66,7 +66,7 @@ async function main(): Promise<void> {
   try {
     const result = await runCli(process.argv.slice(2), {
       readText: (path) => readFile(path, 'utf8'),
-      today: formatLocalDate(new Date()),
+      today: new Date().toISOString().slice(0, 10),
     });
     process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   } catch (error) {
@@ -86,13 +86,6 @@ interface ParsedFlags {
   items: string | undefined;
   period: string | undefined;
   today: string | undefined;
-}
-
-/** Formats a date as the local calendar date, `YYYY-MM-DD`. */
-function formatLocalDate(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 /** Scans the flags of `assemble`, refusing a positional argument and a repeated flag. */

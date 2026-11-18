@@ -33,15 +33,24 @@ describe(runCli, () => {
     await runCli(['list', '--out', 'items.json', '--scope', 'label:customer', '--limit', '20'], fake.context);
 
     expect(fake.calls).toStrictEqual([
-      expect.arrayContaining(['issue', 'list', '--state', 'all', '--limit', '20', '--search', 'label:customer']),
+      expect.arrayContaining(['issue', 'list', '--state', 'all', '--limit', '21', '--search', 'label:customer']),
     ]);
     expect(fake.calls[0]).not.toContain('--repo');
   });
 
-  it('reports truncation when the count reaches the limit', async () => {
+  it('reports truncation and writes only the limit when more issues match', async () => {
+    const fake = makeFake([ISSUE, { ...ISSUE, number: 4 }]);
+
+    const result = await runCli(['list', '--out', 'items.json', '--limit', '1'], fake.context);
+
+    expect(result).toMatchObject({ count: 1, ok: true, truncated: true });
+    expect(fake.calls[0]).toEqual(expect.arrayContaining(['--limit', '2']));
+  });
+
+  it('does not report truncation when exactly the limit matches', async () => {
     const result = await runCli(['list', '--out', 'items.json', '--limit', '1'], makeFake([ISSUE]).context);
 
-    expect(result).toMatchObject({ ok: true, truncated: true });
+    expect(result).toMatchObject({ count: 1, ok: true, truncated: false });
   });
 
   it('reports a failed gh call', async () => {

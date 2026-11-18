@@ -14,28 +14,28 @@ The work does not have to be software, and the items do not have to come from a 
 
 ## Arguments
 
-| Argument                    | Description                                                                                                      | Default                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `--items <path>`            | A JSON file of items in the [item contract](#item-contract). It replaces the source.                             | None                                       |
-| `--source <name>`           | The tracker that supplies the items. `github` is the one with a delegate.                                        | The project's ticket platform              |
-| `--scope <query>`           | Which items to read, in the source's own query language, passed to the delegate as written.                      | Every item that the source holds           |
-| `--period <start>[..<end>]` | The completion dates, inclusive, of the done items to report. In-progress and planned items are always reported. | Every done item; the end defaults to today |
+| Argument                    | Description                                                                                                      | Default                                               |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `--items <path>`            | A JSON file of items in the [item contract](#item-contract). It replaces the source.                             | None                                                  |
+| `--source <name>`           | The tracker that supplies the items. `github` is the one with a delegate.                                        | The project's ticket platform                         |
+| `--scope <query>`           | Which items to read, in the source's own query language, passed to the delegate as written.                      | Every item that the source holds                      |
+| `--period <start>[..<end>]` | The completion dates, inclusive, of the done items to report. In-progress and planned items are always reported. | Every done item; the end defaults to today's UTC date |
 
 ## Item contract
 
 Each item states facts, never a status:
 
-| Field         | Type             | Meaning                                                    |
-| ------------- | ---------------- | ---------------------------------------------------------- |
-| `id`          | string           | The item's identifier in its source                        |
-| `title`       | string           | The item's title in its source                             |
-| `description` | string or `null` | Context for the rewording                                  |
-| `url`         | string or `null` | Where the item lives                                       |
-| `closed`      | boolean          | Whether the item is closed                                 |
-| `completed`   | boolean          | Whether a closed item was closed as completed              |
-| `started`     | boolean          | Whether work on an open item has started                   |
-| `completedOn` | date or `null`   | `YYYY-MM-DD` on which the item was completed               |
-| `expectedOn`  | date or `null`   | `YYYY-MM-DD` by which the item is expected to be completed |
+| Field         | Type             | Meaning                                                        |
+| ------------- | ---------------- | -------------------------------------------------------------- |
+| `id`          | string           | The item's identifier in its source                            |
+| `title`       | string           | The item's title in its source                                 |
+| `description` | string or `null` | Context for the rewording                                      |
+| `url`         | string or `null` | Where the item lives                                           |
+| `closed`      | boolean          | Whether the item is closed                                     |
+| `completed`   | boolean          | Whether a closed item was closed as completed                  |
+| `started`     | boolean          | Whether work on an open item has started                       |
+| `completedOn` | date or `null`   | UTC `YYYY-MM-DD` on which the item was completed               |
+| `expectedOn`  | date or `null`   | UTC `YYYY-MM-DD` by which the item is expected to be completed |
 
 The file is `{ "items": [ ... ] }`. The helper rejects a field that the contract does not define.
 

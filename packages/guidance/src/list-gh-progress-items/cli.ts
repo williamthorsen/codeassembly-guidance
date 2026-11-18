@@ -66,13 +66,13 @@ export async function runCli(argv: readonly string[], context: CommandContext): 
 
     let issues;
     try {
-      issues = await fetchIssues(context.run, context.cwd, { limit, repo: flags.repo, scope: flags.scope });
+      issues = await fetchIssues(context.run, context.cwd, { limit: limit + 1, repo: flags.repo, scope: flags.scope });
     } catch (error) {
       throw new CommandError('gh-failed', `cannot list issues through gh: ${describeError(error)}`);
     }
-    const file: ProgressItemsFile = { items: issues.map(normalizeIssue) };
+    const file: ProgressItemsFile = { items: issues.slice(0, limit).map(normalizeIssue) };
     await context.writeText(flags.out, `${JSON.stringify(file, null, 2)}\n`);
-    return { count: file.items.length, ok: true, path: flags.out, truncated: issues.length >= limit };
+    return { count: file.items.length, ok: true, path: flags.out, truncated: issues.length > limit };
   } catch (error) {
     if (error instanceof CommandError) return { error: error.code, message: error.message, ok: false };
     return { error: 'command-failed', message: describeError(error), ok: false };
