@@ -72,7 +72,12 @@ export function renderReport(
 /** Joins the text to the assembled sections and rows one to one, collecting every mismatch and link violation. */
 function mergeReport(assembled: AssembledResult, text: ReportTextFile, internalHosts: readonly string[]): MergedReport {
   const problems: string[] = [];
-  const textSections = new Map(text.sections.map((section, index) => [section.workstream, { index, section }]));
+  const textSections = indexUnique(
+    text.sections,
+    (section) => section.workstream,
+    (index, firstIndex, id) => `sections.${index}: repeats the section ${describeId(id)} of sections.${firstIndex}`,
+    problems,
+  );
   const assembledIds = new Set(assembled.sections.map(({ workstream }) => workstream?.id ?? null));
   for (const [id, { index }] of textSections) {
     if (!assembledIds.has(id)) problems.push(`sections.${index}: the report does not have a section ${describeId(id)}`);
@@ -86,7 +91,7 @@ function mergeReport(assembled: AssembledResult, text: ReportTextFile, internalH
       problems.push(`sections: the text does not have the section ${describeId(id)}`);
       continue;
     }
-    sections.push(mergeSection(assembledSection, found.section, `sections.${found.index}`, internalHosts, problems));
+    sections.push(mergeSection(assembledSection, found.entry, `sections.${found.index}`, internalHosts, problems));
   }
 
   if (problems.length > 0) throw new RenderError(problems);
@@ -111,8 +116,13 @@ function mergeSection(
   collectLinkProblems(`${where}.heading`, section.heading, internalHosts, problems);
   if (note !== null) collectLinkProblems(`${where}.note`, note, internalHosts, problems);
 
-  const rowTexts = new Map(section.rows.map((row, rowIndex) => [row.id, { row, rowIndex }]));
-  for (const [rowId, { rowIndex }] of rowTexts) {
+  const rowTexts = indexUnique(
+    section.rows,
+    (row) => row.id,
+    (index, firstIndex, rowId) => `${where}.rows.${index}: repeats the item ${rowId} of ${where}.rows.${firstIndex}`,
+    problems,
+  );
+  for (const [rowId, { index: rowIndex }] of rowTexts) {
     if (rows.every((row) => row.id !== rowId)) {
       problems.push(`${where}.rows.${rowIndex}: the section does not have the item ${rowId}`);
     }
@@ -124,10 +134,10 @@ function mergeSection(
       problems.push(`${where}.rows: the text does not have the item ${row.id}`);
       continue;
     }
-    const rowWhere = `${where}.rows.${rowText.rowIndex}`;
-    collectLinkProblems(`${rowWhere}.workItem`, rowText.row.workItem, internalHosts, problems);
-    collectLinkProblems(`${rowWhere}.details`, rowText.row.details, internalHosts, problems);
-    mergedRows.push({ ...rowText.row, date: row.date, label: row.label, status: row.status });
+    const rowWhere = `${where}.rows.${rowText.index}`;
+    collectLinkProblems(`${rowWhere}.workItem`, rowText.entry.workItem, internalHosts, problems);
+    collectLinkProblems(`${rowWhere}.details`, rowText.entry.details, internalHosts, problems);
+    mergedRows.push({ ...rowText.entry, date: row.date, label: row.label, status: row.status });
   }
   // A missing health has already added a problem, so the fallback never reaches a rendered report.
   return { heading: section.heading, health: section.health ?? declared ?? 'on-track', note, rows: mergedRows };
@@ -138,6 +148,26 @@ function collectLinkProblems(where: string, text: string, internalHosts: readonl
   for (const { reason, text: link } of checkLinks(text, internalHosts)) {
     problems.push(`${where}: ${link}: ${reason}`);
   }
+}
+
+/** Indexes entries by key, keeping the first of each and adding a problem for every repeat. */
+function indexUnique<Key, Entry>(
+  entries: readonly Entry[],
+  readKey: (entry: Entry) => Key,
+  describeRepeat: (index: number, firstIndex: number, key: Key) => string,
+  problems: string[],
+): Map<Key, { entry: Entry; index: number }> {
+  const indexed = new Map<Key, { entry: Entry; index: number }>();
+  for (const [index, entry] of entries.entries()) {
+    const key = readKey(entry);
+    const first = indexed.get(key);
+    if (first === undefined) {
+      indexed.set(key, { entry, index });
+    } else {
+      problems.push(describeRepeat(index, first.index, key));
+    }
+  }
+  return indexed;
 }
 
 /** Names a section by its workstream id. */
@@ -188,11 +218,10 @@ function renderCell(markdown: string): string {
   const parts: { html: string; isList: boolean }[] = [];
   for (const block of markdown.trim().split(/\n\s*\n/)) {
     const lines = block.split('\n').map((line) => line.trim());
-    if (lines[0] !== undefined && LIST_ITEM.test(lines[0])) {
-      parts.push({ html: renderList(lines), isList: true });
-    } else {
-      parts.push({ html: escapeCell(lines.join(' ')), isList: false });
-    }
+    const listStart = lines.findIndex((line) => LIST_ITEM.test(line));
+    const textLines = listStart === -1 ? lines : lines.slice(0, listStart);
+    if (textLines.length > 0) parts.push({ html: escapeCell(textLines.join(' ')), isList: false });
+    if (listStart !== -1) parts.push({ html: renderList(lines.slice(listStart)), isList: true });
   }
   return parts
     .map((part, index) => {

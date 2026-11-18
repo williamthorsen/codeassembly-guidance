@@ -102,6 +102,40 @@ describe(renderReport, () => {
     ]);
   });
 
+  it('renders a list that directly follows a line of text as a list', () => {
+    const text: ReportTextFile = {
+      sections: [
+        {
+          ...INVOICING,
+          rows: [
+            { details: 'We need two things:\n- access to the test account\n- a contact', id: '#1', workItem: 'Access' },
+            ...INVOICING.rows.slice(1),
+          ],
+        },
+        OTHER,
+      ],
+    };
+
+    expect(renderReport(ASSEMBLED, text, 'markdown', [])).toContain(
+      '| We need two things:<ul><li>access to the test account</li><li>a contact</li></ul> |',
+    );
+  });
+
+  it('reports a repeated section and a repeated row, naming both places', () => {
+    const text: ReportTextFile = {
+      sections: [
+        { ...INVOICING, rows: [...INVOICING.rows, { details: 'Again.', id: '#1', workItem: 'Again' }] },
+        OTHER,
+        OTHER,
+      ],
+    };
+
+    expect(readProblems(() => renderReport(ASSEMBLED, text, 'markdown', []))).toStrictEqual([
+      'sections.2: repeats the section for the items without a workstream of sections.1',
+      'sections.0.rows.2: repeats the item #1 of sections.0.rows.0',
+    ]);
+  });
+
   it('rejects a link to an internal host, naming where it is', () => {
     const text: ReportTextFile = {
       sections: [
