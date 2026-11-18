@@ -73,3 +73,5 @@ helpers:
     out: skills/condense-branch/condense-branch.mjs
   - entry: ../src/write-progress-report/cli.ts
     out: skills/write-progress-report/write-progress-report.mjs
+  - entry: ../src/list-gh-progress-items/cli.ts
+    out: skills/list-gh-progress-items/list-gh-progress-items.mjs
