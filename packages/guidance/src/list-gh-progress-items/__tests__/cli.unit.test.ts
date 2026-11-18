@@ -8,10 +8,13 @@ const ISSUE = {
   body: '',
   closedAt: null,
   closedByPullRequestsReferences: [],
+  labels: [{ name: 'waiting-on-customer' }],
   milestone: null,
   number: 3,
+  parent: null,
   state: 'OPEN',
   stateReason: '',
+  subIssuesSummary: { total: 0 },
   title: 'Export reports',
   url: 'https://github.com/acme/widgets/issues/3',
 };
@@ -25,6 +28,17 @@ describe(runCli, () => {
     expect(result).toStrictEqual({ count: 2, ok: true, path: 'items.json', truncated: false });
     const written = ProgressItemsFileSchema.parse(JSON.parse(fake.written.get('items.json') ?? ''));
     expect(written.items.map(({ id }) => id)).toStrictEqual(['#3', '#4']);
+  });
+
+  it('marks the issues that have the --needs-input-label as needing input', async () => {
+    const fake = makeFake([ISSUE]);
+
+    await runCli(['list', '--out', 'items.json'], fake.context);
+    const byDefault = ProgressItemsFileSchema.parse(JSON.parse(fake.written.get('items.json') ?? ''));
+    await runCli(['list', '--out', 'items.json', '--needs-input-label', 'waiting-on-customer'], fake.context);
+    const byFlag = ProgressItemsFileSchema.parse(JSON.parse(fake.written.get('items.json') ?? ''));
+
+    expect([byDefault.items[0]?.needsInput, byFlag.items[0]?.needsInput]).toStrictEqual([false, true]);
   });
 
   it('passes the scope to the issue search, with closed issues included', async () => {

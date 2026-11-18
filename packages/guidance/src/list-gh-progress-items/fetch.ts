@@ -4,17 +4,20 @@ import type { CommandRunner } from '../groom-backlog/types.ts';
 
 /** The `gh issue list` fields from which an issue's progress facts are derived. */
 const ISSUE_LIST_FIELDS =
-  'assignees,body,closedAt,closedByPullRequestsReferences,milestone,number,state,stateReason,title,url';
+  'assignees,body,closedAt,closedByPullRequestsReferences,labels,milestone,number,parent,state,stateReason,subIssuesSummary,title,url';
 
 export const GithubIssueSchema = z.object({
   assignees: z.array(z.object({ login: z.string() })),
   body: z.string(),
   closedAt: z.string().nullable(),
   closedByPullRequestsReferences: z.array(z.object({ number: z.number().int().positive() })),
+  labels: z.array(z.object({ name: z.string() })),
   milestone: z.object({ dueOn: z.string().nullable().optional(), title: z.string() }).nullable(),
   number: z.number().int().positive(),
+  parent: z.object({ number: z.number().int().positive(), title: z.string() }).nullable(),
   state: z.enum(['CLOSED', 'OPEN']),
   stateReason: z.string().nullable(),
+  subIssuesSummary: z.object({ total: z.number().int().nonnegative() }),
   title: z.string(),
   url: z.string(),
 });

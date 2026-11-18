@@ -14,7 +14,7 @@ import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { type FlagSpec, scanFlags } from '../lib/parse-flags.ts';
 import type { ProgressItemsFile } from '../write-progress-report/schemas.ts';
 import { fetchIssues } from './fetch.ts';
-import { normalizeIssue } from './normalize.ts';
+import { normalizeIssues } from './normalize.ts';
 
 /** The helper's result: where it wrote the items, or a structured failure that the helper reports at exit 0. */
 export type CommandResult =
@@ -27,10 +27,11 @@ export interface CommandContext {
   writeText: (path: string, text: string) => Promise<void>;
 }
 
-type FlagName = 'limit' | 'out' | 'repo' | 'scope';
+type FlagName = 'limit' | 'needs-input-label' | 'out' | 'repo' | 'scope';
 
 const FLAG_SPECS: ReadonlyArray<FlagSpec<FlagName>> = [
   { name: 'limit', takesValue: true },
+  { name: 'needs-input-label', takesValue: true },
   { name: 'out', takesValue: true },
   { name: 'repo', takesValue: true },
   { name: 'scope', takesValue: true },
@@ -38,6 +39,9 @@ const FLAG_SPECS: ReadonlyArray<FlagSpec<FlagName>> = [
 
 /** The most issues that `list` reads without `--limit`. */
 const DEFAULT_LIMIT = 500;
+
+/** The label that marks an issue as an open ask of the customer without `--needs-input-label`. */
+const DEFAULT_NEEDS_INPUT_LABEL = 'needs-input';
 
 const PROGRAM = 'list-gh-progress-items';
 
@@ -70,7 +74,10 @@ export async function runCli(argv: readonly string[], context: CommandContext): 
     } catch (error) {
       throw new CommandError('gh-failed', `cannot list issues through gh: ${describeError(error)}`);
     }
-    const file: ProgressItemsFile = { items: issues.slice(0, limit).map(normalizeIssue) };
+    const file: ProgressItemsFile = normalizeIssues(
+      issues.slice(0, limit),
+      flags['needs-input-label'] ?? DEFAULT_NEEDS_INPUT_LABEL,
+    );
     await context.writeText(flags.out, `${JSON.stringify(file, null, 2)}\n`);
     return { count: file.items.length, ok: true, path: flags.out, truncated: issues.length > limit };
   } catch (error) {
@@ -114,7 +121,13 @@ function parseFlags(argv: readonly string[]): ParsedFlags {
   if (scanned.positionals.length > 0) {
     throw new CommandError('invalid-args', `unexpected argument: ${scanned.positionals.join(' ')}`);
   }
-  const parsed: ParsedFlags = { limit: undefined, out: undefined, repo: undefined, scope: undefined };
+  const parsed: ParsedFlags = {
+    limit: undefined,
+    'needs-input-label': undefined,
+    out: undefined,
+    repo: undefined,
+    scope: undefined,
+  };
   for (const { name, value } of scanned.flags) {
     if (parsed[name] !== undefined) {
       throw new CommandError('invalid-args', `--${name} may be given only once`);
