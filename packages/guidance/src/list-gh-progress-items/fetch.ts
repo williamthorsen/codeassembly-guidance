@@ -14,7 +14,7 @@ export const GithubIssueSchema = z.object({
   labels: z.array(z.object({ name: z.string() })),
   milestone: z.object({ dueOn: z.string().nullable().optional(), title: z.string() }).nullable(),
   number: z.number().int().positive(),
-  parent: z.object({ number: z.number().int().positive(), title: z.string() }).nullable(),
+  parent: z.object({ title: z.string(), url: z.string() }).nullable(),
   state: z.enum(['CLOSED', 'OPEN']),
   stateReason: z.string().nullable(),
   subIssuesSummary: z.object({ total: z.number().int().nonnegative() }),

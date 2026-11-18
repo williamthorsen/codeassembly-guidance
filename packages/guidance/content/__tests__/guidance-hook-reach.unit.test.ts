@@ -122,7 +122,7 @@ const HOOK_GUARDS: ReadonlyArray<HookGuard> = [
     boundRulebooks: [],
     spliceProbe: {
       body: { label: 'write-progress-report', relativePath: 'skills/write-progress-report/SKILL.md' },
-      coexisting: ['| Status         | Outcome', '## Output'],
+      coexisting: ['1. **Heading:**', '## Output'],
     },
   },
   {

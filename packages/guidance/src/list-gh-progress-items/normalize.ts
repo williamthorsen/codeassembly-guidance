@@ -3,7 +3,8 @@ import type { GithubIssue } from './fetch.ts';
 
 /**
  * States GitHub issues as an items file. An issue that has sub-issues is a workstream rather than an item, and each
- * item's parent issue is its workstream, declared in order of first appearance.
+ * item's parent issue is its workstream, identified by its URL because a parent may be in another repository, and
+ * declared in order of first appearance.
  */
 export function normalizeIssues(issues: readonly GithubIssue[], needsInputLabel: string): ProgressItemsFile {
   const workstreams = new Map<string, Workstream>();
@@ -37,7 +38,7 @@ export function normalizeIssue(issue: GithubIssue, needsInputLabel: string): Pro
     started: issue.assignees.length > 0 || issue.closedByPullRequestsReferences.length > 0,
     targetOn: readUtcDate(issue.milestone?.dueOn ?? null),
     title: issue.title,
-    workstream: issue.parent === null ? null : `#${issue.parent.number}`,
+    workstream: issue.parent?.url ?? null,
   };
 }
 

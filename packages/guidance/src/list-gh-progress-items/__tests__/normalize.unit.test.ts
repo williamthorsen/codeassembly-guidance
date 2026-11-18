@@ -69,20 +69,23 @@ describe(normalizeIssue, () => {
   });
 
   it("names the parent issue as the item's workstream", () => {
-    expect(normalizeIssue(makeIssue({ parent: { number: 4, title: 'Invoicing' } }), NEEDS_INPUT_LABEL).workstream).toBe(
-      '#4',
-    );
+    expect(
+      normalizeIssue(
+        makeIssue({ parent: { title: 'Invoicing', url: 'https://github.com/acme/plans/issues/4' } }),
+        NEEDS_INPUT_LABEL,
+      ).workstream,
+    ).toBe('https://github.com/acme/plans/issues/4');
     expect(normalizeIssue(makeIssue(), NEEDS_INPUT_LABEL).workstream).toBeNull();
   });
 });
 
 describe(normalizeIssues, () => {
   it('declares each parent as a workstream in order of first appearance, and does not list an issue that has sub-issues', () => {
-    const invoicing = { number: 4, title: 'Invoicing' };
+    const invoicing = { title: 'Invoicing', url: 'https://github.com/acme/widgets/issues/4' };
     const file = normalizeIssues(
       [
         makeIssue({ number: 4, subIssuesSummary: { total: 2 } }),
-        makeIssue({ number: 7, parent: { number: 5, title: 'Reporting' } }),
+        makeIssue({ number: 7, parent: { title: 'Reporting', url: 'https://github.com/acme/plans/issues/5' } }),
         makeIssue({ number: 6, parent: invoicing }),
         makeIssue({ number: 8, parent: invoicing }),
         makeIssue({ number: 9 }),
@@ -91,14 +94,14 @@ describe(normalizeIssues, () => {
     );
 
     expect(file.items.map(({ id, workstream }) => [id, workstream])).toStrictEqual([
-      ['#7', '#5'],
-      ['#6', '#4'],
-      ['#8', '#4'],
+      ['#7', 'https://github.com/acme/plans/issues/5'],
+      ['#6', 'https://github.com/acme/widgets/issues/4'],
+      ['#8', 'https://github.com/acme/widgets/issues/4'],
       ['#9', null],
     ]);
     expect(file.workstreams).toStrictEqual([
-      { id: '#5', title: 'Reporting' },
-      { id: '#4', title: 'Invoicing' },
+      { id: 'https://github.com/acme/plans/issues/5', title: 'Reporting' },
+      { id: 'https://github.com/acme/widgets/issues/4', title: 'Invoicing' },
     ]);
   });
 });
