@@ -14,13 +14,13 @@ The work does not have to be software, and the items do not have to come from a 
 
 ## Arguments
 
-| Argument                    | Description                                                                                    | Default                           |
-| --------------------------- | ---------------------------------------------------------------------------------------------- | --------------------------------- |
-| `--items <path>`            | A JSON file of items in the [item contract](#item-contract). It replaces the source.           | None                              |
-| `--source <name>`           | The tracker that supplies the items. `github` is the one with a delegate.                      | The project's ticket platform     |
-| `--scope <query>`           | Which items to read, in the source's own query language, passed to the delegate as written.    | Every item that the source holds  |
-| `--period <start>[..<end>]` | The completion dates, inclusive, of the done items to report. Other items are always reported. | Every done item; the end is today |
-| `--format <name>`           | The format in which to render the report.                                                      | `markdown`                        |
+| Argument                    | Description                                                                                          | Default                           |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `--items <path>`            | A JSON file of items in the [item contract](#item-contract). It replaces the source.                 | None                              |
+| `--source <name>`           | The tracker that supplies the items. `github` is the one with a delegate.                            | The project's ticket platform     |
+| `--scope <query>`           | Which items to read, in the source's own query language, passed to the delegate as written.          | Every item that the source holds  |
+| `--period <start>[..<end>]` | The completion dates, inclusive, of the done items to report. Other items are always reported.       | Every done item; the end is today |
+| `--format <name>`           | The format in which to render the report: `markdown`, or `confluence` for Confluence storage format. | `markdown`                        |
 
 ## Item contract
 
@@ -64,7 +64,7 @@ Create a path with `mktemp "${TMPDIR:-/tmp}/progress-assembled.XXXXXX"`, then wr
 node {harness_home_dir}/skills/write-progress-report/write-progress-report.mjs assemble --items {items path} [--period {period}] > {assembled path}
 ```
 
-Read the result from that file. It contains `sections` in report order, each with its `workstream` (or `null` for the items without one) and its `rows`. Each row contains the item's fields, its `status`, its `label`, its `date` cell, and whether it is `overdue`. The result also contains `lastUpdated`, the `period` or `null`, and the `omitted` items with their reasons.
+Read the result from that file. It contains `sections` in report order, each with its `workstream` (or `null` for the items without one) and its `rows`. Each row contains the item's fields, its `status`, its `label`, its `date` cell, the `dateOn` that the cell shows or `null`, and whether it is `overdue`. The result also contains `lastUpdated`, the `period` or `null`, and the `omitted` items with their reasons.
 
 ### 3. Write the text
 
@@ -91,7 +91,7 @@ Write every word that the customer reads into a file created with `mktemp "${TMP
 1. **Heading:** Name each workstream as the customer knows it. The workstream's `title` comes from the source and may use internal wording.
 2. **Health:** Leave `health` out when the workstream declares one. Otherwise, propose it from the rows: `at-risk` when a row is `overdue`, `off-track` when the rows show that the workstream cannot meet its plan, and `on-track` otherwise. State the reason in `note` when the health is not `on-track`.
 3. **Work item:** A short title in the customer's terms. Never copy the source's title.
-4. **Details:** Markdown of one or more paragraphs or a list. Read the `title` and the `description` for what the item achieves, and state what the customer can now do, will be able to do, or must do, with the caveats and dependencies that the customer needs, such as "verified on our test site, deploying to yours next". For a needs-input row, state the ask and what it unblocks.
+4. **Details:** Markdown of one or more paragraphs or a list, using only links, emphasis, and inline code within them, which every format renders. Read the `title` and the `description` for what the item achieves, and state what the customer can now do, will be able to do, or must do, with the caveats and dependencies that the customer needs, such as "verified on our test site, deploying to yours next". For a needs-input row, state the ask and what it unblocks.
 5. **Links:** Attach each link to words of the text as a Markdown inline link, and link only to a place that the customer can open, such as a deliverable, its documentation, or a demo. Never link to an item's `sources`, and never name an `id` or an internal name unless the bound guidance asks for them.
 
 ## Output
@@ -104,7 +104,7 @@ node {harness_home_dir}/skills/write-progress-report/write-progress-report.mjs r
 
 When the result has `error: invalid-text`, its `message` names each problem by its place in the text file, such as `sections.0.rows.2.details`: Correct the text and render again. Stop on any other failure.
 
-Print the result's `text` as one fenced block, ready to paste. Below the block, state in one line each:
+Print the result's `text` as one fenced block, ready to paste. Under `confluence`, the text is the body of a page in Confluence storage format, in which health and statuses are status lozenges and dates are date elements. Below the block, state in one line each:
 
 - Each health that you proposed, with its reason.
 - That the delegate reported `truncated`, when it did.
