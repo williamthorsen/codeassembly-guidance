@@ -108,7 +108,9 @@ function buildRow(item: ProgressItem, status: ProgressStatus, today: string): Re
   };
 }
 
-/** Orders rows by status, then dated before undated and ascending by date; a stable sort keeps source order for ties. */
+/**
+ * Orders rows by status, then dated before undated and ascending by date; a stable sort keeps source order for ties.
+ */
 function compareRows(left: ReportRow, right: ReportRow): number {
   const byStatus = STATUS_DISPLAY[left.status].rank - STATUS_DISPLAY[right.status].rank;
   if (byStatus !== 0) return byStatus;
