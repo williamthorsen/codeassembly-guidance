@@ -22,7 +22,7 @@ describe(runCli, () => {
     const result = await runCli(['assemble', '--items', 'items.json'], makeContext({ items: [VALID_ITEM] }));
 
     expect(result).toMatchObject({ lastUpdated: '2026-11-18', ok: true, period: null });
-    expect(result.ok ? result.sections.map(({ rows }) => rows.length) : []).toStrictEqual([1]);
+    expect('sections' in result ? result.sections.map(({ rows }) => rows.length) : []).toStrictEqual([1]);
   });
 
   it('ends an open period at --today, and at the context date without it', async () => {
@@ -90,8 +90,72 @@ describe(runCli, () => {
     const context = makeContext({ items: [] });
 
     expect(await runCli(['assemble'], context)).toMatchObject({ error: 'invalid-args', ok: false });
-    expect(await runCli(['render', '--items', 'items.json'], context)).toMatchObject({
+    expect(await runCli(['report', '--items', 'items.json'], context)).toMatchObject({
       error: 'invalid-args',
+      ok: false,
+    });
+  });
+});
+
+describe('runCli render', () => {
+  const assembled = {
+    lastUpdated: '2026-11-18',
+    ok: true,
+    period: null,
+    sections: [{ rows: [{ date: 'Done: 2026-11-02', id: '#1', label: 'Done', status: 'done' }], workstream: null }],
+  };
+  const text = {
+    sections: [
+      {
+        heading: 'Invoicing',
+        health: 'on-track',
+        rows: [{ details: 'See [the ticket](https://tracker.example/1).', id: '#1', workItem: 'Export' }],
+        workstream: null,
+      },
+    ],
+  };
+
+  it('renders Markdown by default', async () => {
+    const result = await runCli(
+      ['render', '--assembled', 'a.json', '--text', 't.json'],
+      makeFiles({ 'a.json': assembled, 't.json': text }),
+    );
+
+    expect(result).toMatchObject({ format: 'markdown', ok: true });
+    expect(result.ok && 'text' in result ? result.text : '').toContain('| Export | ✅ Done | Done: 2026-11-02 |');
+  });
+
+  it('checks the links against every --internal-host', async () => {
+    const result = await runCli(
+      [
+        'render',
+        '--assembled',
+        'a.json',
+        '--text',
+        't.json',
+        '--internal-host',
+        'chat.example',
+        '--internal-host',
+        'tracker.example',
+      ],
+      makeFiles({ 'a.json': assembled, 't.json': text }),
+    );
+
+    expect(result).toMatchObject({ error: 'invalid-text', ok: false });
+    expect(result.ok ? '' : result.message).toContain('internal host tracker.example');
+  });
+
+  it('rejects a format that it does not write, and a text file of the wrong shape', async () => {
+    const files = makeFiles({ 'a.json': assembled, 't.json': { sections: [{ heading: 'x' }] } });
+
+    expect(
+      await runCli(['render', '--assembled', 'a.json', '--text', 't.json', '--format', 'pdf'], files),
+    ).toMatchObject({
+      error: 'invalid-args',
+      ok: false,
+    });
+    expect(await runCli(['render', '--assembled', 'a.json', '--text', 't.json'], files)).toMatchObject({
+      error: 'invalid-input',
       ok: false,
     });
   });
@@ -102,6 +166,19 @@ describe(runCli, () => {
 /** Builds a context whose every read returns `file` as JSON, on 2026-11-18. */
 function makeContext(file: unknown): CommandContext {
   return { readText: () => Promise.resolve(JSON.stringify(file)), today: '2026-11-18' };
+}
+
+/** Builds a context that reads each path in `files` as JSON. */
+function makeFiles(files: Record<string, unknown>): CommandContext {
+  return {
+    readText: (path) => {
+      const content = files[path];
+      return content === undefined
+        ? Promise.reject(new Error(`ENOENT: ${path}`))
+        : Promise.resolve(JSON.stringify(content));
+    },
+    today: '2026-11-18',
+  };
 }
 
 // endregion | Helpers

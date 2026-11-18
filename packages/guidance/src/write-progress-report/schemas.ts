@@ -55,6 +55,47 @@ export const ProgressItemsFileSchema = z.strictObject({
 
 export type ProgressItemsFile = z.infer<typeof ProgressItemsFileSchema>;
 
+/** The status that `assemble` assigns to an item that the report shows. */
+export const ProgressStatusSchema = z.enum(['done', 'in-progress', 'needs-input', 'planned']);
+
+/** The fields of an `assemble` result that `render` reads, whatever else the result contains. */
+export const AssembledResultSchema = z.object({
+  lastUpdated: CalendarDateSchema,
+  ok: z.literal(true),
+  period: z.strictObject({ end: CalendarDateSchema, start: CalendarDateSchema }).nullable(),
+  sections: z.array(
+    z.object({
+      rows: z.array(z.object({ date: z.string(), id: z.string(), label: z.string(), status: ProgressStatusSchema })),
+      workstream: WorkstreamSchema.nullable(),
+    }),
+  ),
+});
+
+export type AssembledResult = z.infer<typeof AssembledResultSchema>;
+
+/** The agent's text for one row, keyed by the item's `id`. */
+export const RowTextSchema = z.strictObject({
+  /** Markdown of one or more paragraphs or a list, with links attached to words. */
+  details: z.string(),
+  id: z.string().min(1),
+  workItem: z.string().min(1),
+});
+
+/** The agent's text for one section, keyed by its workstream's `id`, or null for the items without a workstream. */
+export const SectionTextSchema = z.strictObject({
+  heading: z.string().min(1),
+  /** Required unless the source declares the workstream's health, and then equal to it. */
+  health: HealthSchema.optional(),
+  note: z.string().optional(),
+  rows: z.array(RowTextSchema),
+  workstream: z.string().min(1).nullable(),
+});
+
+/** The file of customer-facing text that the agent writes and `render` merges with the assembled report. */
+export const ReportTextFileSchema = z.strictObject({ sections: z.array(SectionTextSchema) });
+
+export type ReportTextFile = z.infer<typeof ReportTextFileSchema>;
+
 // region | Helpers
 
 /** Returns whether `text` is a `YYYY-MM-DD` date that exists in the calendar. */

@@ -1,7 +1,8 @@
-import type { ProgressItem, Workstream } from './schemas.ts';
+import type { z } from 'zod';
 
-/** The status that `assemble` assigns to an item that the report shows. */
-export type ProgressStatus = 'done' | 'in-progress' | 'needs-input' | 'planned';
+import type { ProgressItem, ProgressStatusSchema, Workstream } from './schemas.ts';
+
+export type ProgressStatus = z.infer<typeof ProgressStatusSchema>;
 
 /** The inclusive range of completion dates within which a done item is reported. */
 export interface ReportPeriod {
@@ -76,8 +77,8 @@ export function assembleReport(
     readSection(sections, item.workstream).rows.push(buildRow(item, status, today));
   }
 
-  const ordered = [...sections.entries()]
-    .sort(([left], [right]) => Number(left === null) - Number(right === null))
+  const ordered = [...sections]
+    .toSorted(([left], [right]) => Number(left === null) - Number(right === null))
     .map(([, section]) => ({ ...section, rows: section.rows.toSorted(compareRows) }))
     .filter((section) => section.rows.length > 0);
   return { lastUpdated: today, omitted, period, sections: ordered };
