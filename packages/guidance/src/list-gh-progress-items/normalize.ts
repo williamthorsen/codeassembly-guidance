@@ -12,11 +12,14 @@ export function normalizeIssue(issue: GithubIssue): ProgressItem {
     completed: closed && issue.stateReason === 'COMPLETED',
     completedOn: readUtcDate(issue.closedAt),
     description: issue.body === '' ? null : issue.body,
-    expectedOn: readUtcDate(issue.milestone?.dueOn ?? null),
     id: `#${issue.number}`,
+    neededBy: null,
+    needsInput: false,
+    sources: [issue.url],
     started: issue.assignees.length > 0 || issue.closedByPullRequestsReferences.length > 0,
+    targetOn: readUtcDate(issue.milestone?.dueOn ?? null),
     title: issue.title,
-    url: issue.url,
+    workstream: null,
   };
 }
 

@@ -11,7 +11,7 @@ import { describeError } from '@williamthorsen/toolbelt.errors';
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { type FlagSpec, scanFlags } from '../lib/parse-flags.ts';
 import { type AssembledReport, assembleReport, type ReportPeriod } from './assemble.ts';
-import { CalendarDateSchema, type ProgressItem, ProgressItemsFileSchema } from './schemas.ts';
+import { CalendarDateSchema, type ProgressItemsFile, ProgressItemsFileSchema } from './schemas.ts';
 
 /** The helper's result: the assembled report, or a structured failure that the helper reports at exit 0. */
 export type CommandResult = { error: string; message: string; ok: false } | ({ ok: true } & AssembledReport);
@@ -53,8 +53,8 @@ export async function runCli(argv: readonly string[], context: CommandContext): 
     const flags = parseFlags(rest);
     const today = flags.today ?? context.today;
     const period = flags.period === undefined ? null : parsePeriod(flags.period, today);
-    const items = await readItems(flags.items, context);
-    return { ok: true, ...assembleReport(items, period) };
+    const file = await readItems(flags.items, context);
+    return { ok: true, ...assembleReport(file.items, file.workstreams ?? [], period, today) };
   } catch (error) {
     if (error instanceof CommandError) return { error: error.code, message: error.message, ok: false };
     return { error: 'command-failed', message: describeError(error), ok: false };
@@ -130,7 +130,7 @@ function parsePeriod(text: string, today: string): ReportPeriod {
 }
 
 /** Reads and validates the items file, naming the item and the field of the first violations. */
-async function readItems(path: string | undefined, context: CommandContext): Promise<ProgressItem[]> {
+async function readItems(path: string | undefined, context: CommandContext): Promise<ProgressItemsFile> {
   if (path === undefined) {
     throw new CommandError('invalid-args', '--items <path> is required');
   }
@@ -148,7 +148,7 @@ async function readItems(path: string | undefined, context: CommandContext): Pro
     });
     throw new CommandError('invalid-items', `${path} violates the item contract: ${issues.join('; ')}`);
   }
-  return result.data.items;
+  return result.data;
 }
 
 // endregion | Helpers

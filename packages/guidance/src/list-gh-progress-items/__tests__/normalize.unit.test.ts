@@ -28,26 +28,26 @@ describe(normalizeIssue, () => {
     expect(normalizeIssue(makeIssue(overrides)).started).toBe(started);
   });
 
-  it("takes the expected completion date from the milestone's UTC due date", () => {
+  it("takes the target date from the milestone's UTC due date", () => {
     const withDue = normalizeIssue(makeIssue({ milestone: { dueOn: '2026-12-01T00:00:00Z', title: 'v2' } }));
     const withoutDue = normalizeIssue(makeIssue({ milestone: { dueOn: null, title: 'v2' } }));
     const withoutMilestone = normalizeIssue(makeIssue({ milestone: null }));
 
-    expect([withDue.expectedOn, withoutDue.expectedOn, withoutMilestone.expectedOn]).toStrictEqual([
+    expect([withDue.targetOn, withoutDue.targetOn, withoutMilestone.targetOn]).toStrictEqual([
       '2026-12-01',
       null,
       null,
     ]);
   });
 
-  it('identifies the item by issue number and keeps its title, body, and URL', () => {
+  it('identifies the item by issue number and keeps its title, body, and URL as its source', () => {
     const item = normalizeIssue(makeIssue({ body: 'Context.', number: 9 }));
 
     expect(item).toMatchObject({
       description: 'Context.',
       id: '#9',
+      sources: ['https://github.com/acme/widgets/issues/9'],
       title: 'Export reports',
-      url: 'https://github.com/acme/widgets/issues/9',
     });
     expect(normalizeIssue(makeIssue({ body: '' })).description).toBeNull();
   });

@@ -3,26 +3,55 @@ import { z } from 'zod';
 /** Matches a `YYYY-MM-DD` string that names a real calendar date. */
 export const CalendarDateSchema = z.string().refine(isCalendarDate, { message: 'expected a YYYY-MM-DD calendar date' });
 
+/** How a workstream stands against its plan. */
+export const HealthSchema = z.enum(['at-risk', 'off-track', 'on-track']);
+
+export type Health = z.infer<typeof HealthSchema>;
+
 /** One work item in the normalized shape that every source supplies: facts about the item, never a status. */
-export const ProgressItemSchema = z.strictObject({
-  closed: z.boolean(),
-  /** Whether the item was closed as completed; ignored for an open item. */
-  completed: z.boolean(),
-  completedOn: CalendarDateSchema.nullable(),
-  /** Context for rewording the item as an outcome; never shown as is. */
-  description: z.string().nullable(),
-  expectedOn: CalendarDateSchema.nullable(),
-  /** The item's identifier in its tracker; the sort's last key, and never shown unless bound guidance asks for it. */
-  id: z.string().min(1),
-  started: z.boolean(),
-  title: z.string(),
-  url: z.string().nullable(),
-});
+export const ProgressItemSchema = z
+  .strictObject({
+    closed: z.boolean(),
+    /** Whether the item was closed as completed; ignored for an open item. */
+    completed: z.boolean(),
+    completedOn: CalendarDateSchema.nullable(),
+    /** Context for writing the item's details; never rendered. */
+    description: z.string().nullable(),
+    /** The item's identifier in its source, which keys the agent's text for the item; never rendered. */
+    id: z.string().min(1),
+    neededBy: CalendarDateSchema.nullable(),
+    /** Whether the item is an open ask of the customer. */
+    needsInput: z.boolean(),
+    /** Where the item is recorded, usually internal; never rendered. */
+    sources: z.array(z.string()),
+    started: z.boolean(),
+    targetOn: CalendarDateSchema.nullable(),
+    title: z.string(),
+    /** The `id` of the item's workstream, declared in the file's `workstreams` or not. */
+    workstream: z.string().min(1).nullable(),
+  })
+  .refine((item) => !(item.closed && item.completed) || item.completedOn !== null, {
+    message: 'a completed item requires completedOn',
+    path: ['completedOn'],
+  });
 
 export type ProgressItem = z.infer<typeof ProgressItemSchema>;
 
+/** A workstream that items name, with its health when the source states one. */
+export const WorkstreamSchema = z.strictObject({
+  health: HealthSchema.optional(),
+  id: z.string().min(1),
+  note: z.string().optional(),
+  title: z.string(),
+});
+
+export type Workstream = z.infer<typeof WorkstreamSchema>;
+
 /** The file that a source writes and `assemble` reads. */
-export const ProgressItemsFileSchema = z.strictObject({ items: z.array(ProgressItemSchema) });
+export const ProgressItemsFileSchema = z.strictObject({
+  items: z.array(ProgressItemSchema),
+  workstreams: z.array(WorkstreamSchema).optional(),
+});
 
 export type ProgressItemsFile = z.infer<typeof ProgressItemsFileSchema>;
 

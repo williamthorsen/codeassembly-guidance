@@ -7,18 +7,22 @@ const VALID_ITEM = {
   completed: true,
   completedOn: '2026-11-02',
   description: null,
-  expectedOn: null,
   id: '#1',
+  neededBy: null,
+  needsInput: false,
+  sources: ['https://tracker.example/1'],
   started: true,
+  targetOn: null,
   title: 'Ship the export',
-  url: null,
+  workstream: null,
 };
 
 describe(runCli, () => {
   it('assembles the report from the items file', async () => {
     const result = await runCli(['assemble', '--items', 'items.json'], makeContext({ items: [VALID_ITEM] }));
 
-    expect(result).toMatchObject({ counts: { done: 1, inProgress: 0, planned: 0 }, ok: true, period: null });
+    expect(result).toMatchObject({ lastUpdated: '2026-11-18', ok: true, period: null });
+    expect(result.ok ? result.sections.map(({ rows }) => rows.length) : []).toStrictEqual([1]);
   });
 
   it('ends an open period at --today, and at the context date without it', async () => {
@@ -52,6 +56,16 @@ describe(runCli, () => {
 
     expect(result).toMatchObject({ error: 'invalid-items', ok: false });
     expect(result.ok ? '' : result.message).toContain('items.1.completedOn');
+  });
+
+  it('rejects a completed item without a completion date', async () => {
+    const result = await runCli(
+      ['assemble', '--items', 'items.json'],
+      makeContext({ items: [{ ...VALID_ITEM, completedOn: null }] }),
+    );
+
+    expect(result).toMatchObject({ error: 'invalid-items', ok: false });
+    expect(result.ok ? '' : result.message).toContain('items.0.completedOn: a completed item requires completedOn');
   });
 
   it('rejects a field that the contract does not define', async () => {

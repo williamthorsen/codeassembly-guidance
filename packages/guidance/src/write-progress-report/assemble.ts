@@ -1,7 +1,7 @@
-import type { ProgressItem } from './schemas.ts';
+import type { ProgressItem, Workstream } from './schemas.ts';
 
 /** The status that `assemble` assigns to an item that the report shows. */
-export type ProgressStatus = 'done' | 'in-progress' | 'planned';
+export type ProgressStatus = 'done' | 'in-progress' | 'needs-input' | 'planned';
 
 /** The inclusive range of completion dates within which a done item is reported. */
 export interface ReportPeriod {
@@ -9,15 +9,21 @@ export interface ReportPeriod {
   start: string;
 }
 
-/** One row of the report: the item, its status with the glyph and label that show it, and its date cell. */
+/** One row of the report: the item, its status with the label that shows it, and its date cell. */
 export type ReportRow = ProgressItem & {
-  /** The text of the row's date cell: empty for an undated row. */
+  /** The text of the row's date cell. */
   date: string;
-  dateKind: 'completed' | 'expected' | null;
-  glyph: string;
   label: string;
+  /** Whether the row is open and its date precedes the report's date. */
+  overdue: boolean;
   status: ProgressStatus;
 };
+
+/** The rows of one workstream, or of the items that do not name one when `workstream` is null. */
+export interface ReportSection {
+  rows: ReportRow[];
+  workstream: Workstream | null;
+}
 
 /** An item that the report leaves out, and why. */
 export interface OmittedItem {
@@ -25,31 +31,38 @@ export interface OmittedItem {
   reason: 'closed-not-completed' | 'outside-period';
 }
 
-/** The report's rows in order, the count per status, and the items left out. */
+/** The report's sections in order, the date that it reports, and the items left out. */
 export interface AssembledReport {
-  counts: { done: number; inProgress: number; planned: number };
+  lastUpdated: string;
   omitted: OmittedItem[];
   period: ReportPeriod | null;
-  rows: ReportRow[];
+  sections: ReportSection[];
 }
 
-/** The glyph and label of each status, in the order in which the sort breaks a tie between statuses. */
-const STATUS_DISPLAY: Readonly<Record<ProgressStatus, { glyph: string; label: string; rank: number }>> = {
-  done: { glyph: '✅', label: 'Done', rank: 0 },
-  'in-progress': { glyph: '🔄', label: 'In progress', rank: 1 },
-  planned: { glyph: '🗓️', label: 'Planned', rank: 2 },
+/** The label of each status, in the order in which a section lists them. */
+const STATUS_DISPLAY: Readonly<Record<ProgressStatus, { label: string; prefix: string; rank: number }>> = {
+  'needs-input': { label: 'Needs input', prefix: 'Needed by', rank: 0 },
+  done: { label: 'Done', prefix: 'Done', rank: 1 },
+  'in-progress': { label: 'In progress', prefix: 'Target', rank: 2 },
+  planned: { label: 'Planned', prefix: 'Target', rank: 3 },
 };
 
-const ID_COLLATOR = new Intl.Collator('en', { numeric: true });
-
 /**
- * Assigns each item its status, leaves out the items that the report does not show, and sorts the rest: dated rows
- * first, ascending by date, then by status, then by id. A done item is dated by its completion and any other by its
- * expected completion.
+ * Assigns each item its status, leaves out the items that the report does not show, and groups the rest into
+ * sections: the declared workstreams in declaration order, then undeclared ones in order of first appearance, then the
+ * items without a workstream. Each section lists its rows by status, then by date with undated rows last, keeping
+ * source order for ties.
  */
-export function assembleReport(items: readonly ProgressItem[], period: ReportPeriod | null): AssembledReport {
+export function assembleReport(
+  items: readonly ProgressItem[],
+  workstreams: readonly Workstream[],
+  period: ReportPeriod | null,
+  today: string,
+): AssembledReport {
   const omitted: OmittedItem[] = [];
-  const rows: ReportRow[] = [];
+  const sections = new Map<string | null, ReportSection>(
+    workstreams.map((workstream) => [workstream.id, { rows: [], workstream }]),
+  );
   for (const item of items) {
     const status = assignStatus(item);
     if (status === null) {
@@ -60,20 +73,14 @@ export function assembleReport(items: readonly ProgressItem[], period: ReportPer
       omitted.push({ id: item.id, reason: 'outside-period' });
       continue;
     }
-    rows.push(buildRow(item, status));
+    readSection(sections, item.workstream).rows.push(buildRow(item, status, today));
   }
-  rows.sort(compareRows);
 
-  return {
-    counts: {
-      done: countStatus(rows, 'done'),
-      inProgress: countStatus(rows, 'in-progress'),
-      planned: countStatus(rows, 'planned'),
-    },
-    omitted,
-    period,
-    rows,
-  };
+  const ordered = [...sections.entries()]
+    .sort(([left], [right]) => Number(left === null) - Number(right === null))
+    .map(([, section]) => ({ ...section, rows: section.rows.toSorted(compareRows) }))
+    .filter((section) => section.rows.length > 0);
+  return { lastUpdated: today, omitted, period, sections: ordered };
 }
 
 // region | Helpers
@@ -83,41 +90,36 @@ function assignStatus(item: ProgressItem): ProgressStatus | null {
   if (item.closed) {
     return item.completed ? 'done' : null;
   }
+  if (item.needsInput) return 'needs-input';
   return item.started ? 'in-progress' : 'planned';
 }
 
-/** Builds a row, dating a done item by its completion and any other by its expected completion. */
-function buildRow(item: ProgressItem, status: ProgressStatus): ReportRow {
-  const { glyph, label } = STATUS_DISPLAY[status];
+/** Builds a row whose date cell names the kind of date that its status uses. */
+function buildRow(item: ProgressItem, status: ProgressStatus, today: string): ReportRow {
+  const { label, prefix } = STATUS_DISPLAY[status];
   const sortDate = readSortDate(item, status);
-  let date = '';
-  let dateKind: ReportRow['dateKind'] = null;
-  if (sortDate !== null) {
-    dateKind = status === 'done' ? 'completed' : 'expected';
-    date = dateKind === 'completed' ? sortDate : `Expected ${sortDate}`;
-  }
-  return { ...item, date, dateKind, glyph, label, status };
+  return {
+    ...item,
+    date: sortDate === null ? 'Not yet scheduled' : `${prefix}: ${sortDate}`,
+    label,
+    overdue: status !== 'done' && sortDate !== null && sortDate < today,
+    status,
+  };
 }
 
-/** Orders dated rows before undated ones, then by date, status, and id. */
+/** Orders rows by status, then dated before undated and ascending by date; a stable sort keeps source order for ties. */
 function compareRows(left: ReportRow, right: ReportRow): number {
+  const byStatus = STATUS_DISPLAY[left.status].rank - STATUS_DISPLAY[right.status].rank;
+  if (byStatus !== 0) return byStatus;
   const leftDate = readSortDate(left, left.status);
   const rightDate = readSortDate(right, right.status);
-  if (leftDate !== rightDate) {
-    if (leftDate === null) return 1;
-    if (rightDate === null) return -1;
-    return leftDate < rightDate ? -1 : 1;
-  }
-  const byStatus = STATUS_DISPLAY[left.status].rank - STATUS_DISPLAY[right.status].rank;
-  return byStatus === 0 ? ID_COLLATOR.compare(left.id, right.id) : byStatus;
+  if (leftDate === rightDate) return 0;
+  if (leftDate === null) return 1;
+  if (rightDate === null) return -1;
+  return leftDate < rightDate ? -1 : 1;
 }
 
-/** Counts the rows that have `status`. */
-function countStatus(rows: readonly ReportRow[], status: ProgressStatus): number {
-  return rows.filter((row) => row.status === status).length;
-}
-
-/** Returns whether a completion date falls within the period; an undated completion cannot fall outside it. */
+/** Returns whether a completion date falls within the period. */
 function isWithinPeriod(completedOn: string | null, period: ReportPeriod | null): boolean {
   if (period === null || completedOn === null) {
     return true;
@@ -125,9 +127,20 @@ function isWithinPeriod(completedOn: string | null, period: ReportPeriod | null)
   return completedOn >= period.start && completedOn <= period.end;
 }
 
-/** Returns the date by which a row sorts. */
+/** Returns the section of a workstream, adding one titled by its id for a workstream that the file does not declare. */
+function readSection(sections: Map<string | null, ReportSection>, id: string | null): ReportSection {
+  let section = sections.get(id);
+  if (section === undefined) {
+    section = { rows: [], workstream: id === null ? null : { id, title: id } };
+    sections.set(id, section);
+  }
+  return section;
+}
+
+/** Returns the date by which a row sorts and which its date cell shows. */
 function readSortDate(item: ProgressItem, status: ProgressStatus): string | null {
-  return status === 'done' ? item.completedOn : item.expectedOn;
+  if (status === 'needs-input') return item.neededBy;
+  return status === 'done' ? item.completedOn : item.targetOn;
 }
 
 // endregion | Helpers

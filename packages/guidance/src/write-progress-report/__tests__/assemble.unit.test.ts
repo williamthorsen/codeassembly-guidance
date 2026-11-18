@@ -3,37 +3,36 @@ import { describe, expect, it } from 'vitest';
 import { assembleReport } from '../assemble.ts';
 import type { ProgressItem } from '../schemas.ts';
 
+const TODAY = '2026-11-18';
+
 describe(assembleReport, () => {
-  it('assigns done, in progress, and planned from the facts that an item states', () => {
+  it('assigns needs-input, done, in progress, and planned from the facts that an item states', () => {
     const report = assembleReport(
       [
-        makeItem({ closed: true, completed: true, id: '#1', started: false }),
-        makeItem({ id: '#2', started: true }),
-        makeItem({ id: '#3' }),
-        makeItem({ completed: true, id: '#4' }),
+        makeItem({ id: '#1', needsInput: true, started: true }),
+        makeDone('#2', '2026-11-01'),
+        makeItem({ id: '#3', started: true }),
+        makeItem({ id: '#4' }),
+        makeItem({ completed: true, id: '#5' }),
       ],
+      [],
       null,
+      TODAY,
     );
 
-    expect(report.rows.map(({ id, status }) => ({ id, status }))).toStrictEqual([
-      { id: '#1', status: 'done' },
-      { id: '#2', status: 'in-progress' },
-      { id: '#3', status: 'planned' },
-      { id: '#4', status: 'planned' },
+    expect(readRows(report).map(({ id, label, status }) => ({ id, label, status }))).toStrictEqual([
+      { id: '#1', label: 'Needs input', status: 'needs-input' },
+      { id: '#2', label: 'Done', status: 'done' },
+      { id: '#3', label: 'In progress', status: 'in-progress' },
+      { id: '#4', label: 'Planned', status: 'planned' },
+      { id: '#5', label: 'Planned', status: 'planned' },
     ]);
-    expect(report.counts).toStrictEqual({ done: 1, inProgress: 1, planned: 2 });
-  });
-
-  it('gives each status its glyph and label', () => {
-    const report = assembleReport([makeItem({ closed: true, completed: true }), makeItem({ started: true })], null);
-
-    expect(report.rows.map(({ glyph, label }) => `${glyph} ${label}`)).toStrictEqual(['✅ Done', '🔄 In progress']);
   });
 
   it('omits an item closed other than as completed', () => {
-    const report = assembleReport([makeItem({ closed: true, completed: false, id: '#7' })], null);
+    const report = assembleReport([makeItem({ closed: true, completed: false, id: '#7' })], [], null, TODAY);
 
-    expect(report.rows).toStrictEqual([]);
+    expect(report.sections).toStrictEqual([]);
     expect(report.omitted).toStrictEqual([{ id: '#7', reason: 'closed-not-completed' }]);
   });
 
@@ -45,12 +44,14 @@ describe(assembleReport, () => {
         makeDone('#2', '2026-10-01'),
         makeDone('#3', '2026-10-31'),
         makeDone('#4', '2026-11-01'),
-        makeItem({ expectedOn: '2026-01-01', id: '#5' }),
+        makeItem({ id: '#5', targetOn: '2026-01-01' }),
       ],
+      [],
       period,
+      TODAY,
     );
 
-    expect(report.rows.map(({ id }) => id)).toStrictEqual(['#5', '#2', '#3']);
+    expect(readRows(report).map(({ id }) => id)).toStrictEqual(['#2', '#3', '#5']);
     expect(report.omitted).toStrictEqual([
       { id: '#1', reason: 'outside-period' },
       { id: '#4', reason: 'outside-period' },
@@ -58,79 +59,121 @@ describe(assembleReport, () => {
     expect(report.period).toStrictEqual(period);
   });
 
-  it('keeps a done item without a completion date within a period', () => {
-    const report = assembleReport([makeItem({ closed: true, completed: true, id: '#1' })], {
-      end: '2026-10-31',
-      start: '2026-10-01',
-    });
-
-    expect(report.rows.map(({ id }) => id)).toStrictEqual(['#1']);
-  });
-
-  it('sorts dated rows by completion or expected date, and puts undated rows after them', () => {
+  it('orders a status group by its date, with undated rows last and ties in source order', () => {
     const report = assembleReport(
       [
         makeItem({ id: '#1' }),
-        makeItem({ expectedOn: '2026-12-01', id: '#2', started: true }),
-        makeDone('#3', '2026-11-15'),
-        makeItem({ completedOn: '2026-01-01', expectedOn: '2026-11-20', id: '#4' }),
-        makeItem({ closed: true, completed: true, expectedOn: '2026-01-01', id: '#5' }),
+        makeItem({ id: '#2', targetOn: '2026-12-01' }),
+        makeItem({ id: '#3', targetOn: '2026-11-20' }),
+        makeItem({ id: '#4' }),
+        makeItem({ id: '#5', targetOn: '2026-11-20' }),
       ],
+      [],
       null,
+      TODAY,
     );
 
-    expect(report.rows.map(({ date, id }) => ({ date, id }))).toStrictEqual([
-      { date: '2026-11-15', id: '#3' },
-      { date: 'Expected 2026-11-20', id: '#4' },
-      { date: 'Expected 2026-12-01', id: '#2' },
-      { date: '', id: '#5' },
-      { date: '', id: '#1' },
-    ]);
-    expect(report.rows.map(({ dateKind }) => dateKind)).toStrictEqual([
-      'completed',
-      'expected',
-      'expected',
+    expect(readRows(report).map(({ id }) => id)).toStrictEqual(['#3', '#5', '#2', '#1', '#4']);
+  });
+
+  it('labels the date cell by the kind of date that its status uses', () => {
+    const report = assembleReport(
+      [
+        makeItem({ id: '#1', neededBy: '2026-11-25', needsInput: true, targetOn: '2026-12-01' }),
+        makeDone('#2', '2026-11-02'),
+        makeItem({ id: '#3', started: true, targetOn: '2026-12-01' }),
+        makeItem({ id: '#4' }),
+      ],
+      [],
       null,
-      null,
+      TODAY,
+    );
+
+    expect(readRows(report).map(({ date }) => date)).toStrictEqual([
+      'Needed by: 2026-11-25',
+      'Done: 2026-11-02',
+      'Target: 2026-12-01',
+      'Not yet scheduled',
     ]);
   });
 
-  it('breaks a date tie by status, then by id compared numerically', () => {
+  it('marks an open row whose date precedes the report date as overdue', () => {
     const report = assembleReport(
       [
-        makeItem({ expectedOn: '2026-11-01', id: '#10' }),
-        makeItem({ expectedOn: '2026-11-01', id: '#9' }),
-        makeItem({ expectedOn: '2026-11-01', id: '#11', started: true }),
-        makeDone('#12', '2026-11-01'),
+        makeItem({ id: '#1', targetOn: '2026-11-17' }),
+        makeItem({ id: '#2', targetOn: TODAY }),
+        makeDone('#3', '2026-11-01'),
       ],
+      [],
       null,
+      TODAY,
     );
 
-    expect(report.rows.map(({ id }) => id)).toStrictEqual(['#12', '#11', '#9', '#10']);
+    expect(readRows(report).map(({ id, overdue }) => ({ id, overdue }))).toStrictEqual([
+      { id: '#3', overdue: false },
+      { id: '#1', overdue: true },
+      { id: '#2', overdue: false },
+    ]);
+  });
+
+  it('groups declared workstreams first, then undeclared ones, then items without one, dropping empty sections', () => {
+    const report = assembleReport(
+      [
+        makeItem({ id: '#1' }),
+        makeItem({ id: '#2', workstream: 'ws-new' }),
+        makeItem({ id: '#3', workstream: 'ws-b' }),
+        makeItem({ id: '#4', workstream: 'ws-a' }),
+      ],
+      [
+        { health: 'at-risk', id: 'ws-a', title: 'Alpha' },
+        { id: 'ws-b', title: 'Beta' },
+        { id: 'ws-empty', title: 'Empty' },
+      ],
+      null,
+      TODAY,
+    );
+
+    expect(report.sections.map(({ rows, workstream }) => [workstream, rows.map(({ id }) => id)])).toStrictEqual([
+      [{ health: 'at-risk', id: 'ws-a', title: 'Alpha' }, ['#4']],
+      [{ id: 'ws-b', title: 'Beta' }, ['#3']],
+      [{ id: 'ws-new', title: 'ws-new' }, ['#2']],
+      [null, ['#1']],
+    ]);
+    expect(report.lastUpdated).toBe(TODAY);
   });
 });
 
 // region | Helpers
 
-/** Builds a done item completed on `completedOn`. */
-function makeDone(id: string, completedOn: string): ProgressItem {
-  return makeItem({ closed: true, completed: true, completedOn, id });
-}
-
-/** Builds an open, unstarted, undated item, overridden by `overrides`. */
-function makeItem(overrides: Partial<ProgressItem> = {}): ProgressItem {
+/** Builds an open, unstarted, undated item without a workstream, overridden by `overrides`. */
+function makeItem(overrides: Partial<ProgressItem>): ProgressItem {
   return {
     closed: false,
     completed: false,
     completedOn: null,
     description: null,
-    expectedOn: null,
-    id: '#1',
+    id: '#0',
+    neededBy: null,
+    needsInput: false,
+    sources: [],
     started: false,
+    targetOn: null,
     title: 'An item',
-    url: null,
+    workstream: null,
     ...overrides,
   };
+}
+
+/** Builds an item closed as completed on `completedOn`. */
+function makeDone(id: string, completedOn: string): ProgressItem {
+  return makeItem({ closed: true, completed: true, completedOn, id });
+}
+
+/** Returns the rows of every section in report order. */
+function readRows(
+  report: ReturnType<typeof assembleReport>,
+): ReturnType<typeof assembleReport>['sections'][number]['rows'] {
+  return report.sections.flatMap(({ rows }) => rows);
 }
 
 // endregion | Helpers
