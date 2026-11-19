@@ -31,6 +31,7 @@ On:
 - The page is self-contained and opens from `file://`, with its demo chrome in a band whose every part is inside an element that has `data-demo`, as the brief that built it required.
 - The band's first line is the page's id and title, `{number}.{version} {title}`, so that the developer reads which version they have open without returning to the index, and the page's `<title>` follows the rule in {skill:index-prototypes} "The set". Every step that sets a new id on the working file sets both.
 - {rulebook:accessibility-conventions} is the floor: Check contrast and size when a command changes a colour or a text size, apply its placement, toggle, and button-at-rest rules when a command adds or moves a control, and apply its glanceable-state rule when a command adds or changes a list.
+- {rulebook:visual-design-conventions} is the floor for layout: Apply its spacing, alignment, mark, and role rules when a command adds or moves a block, a mark, or a control.
 - A new string on the product surface follows {rulebook:ui-copy-conventions}.
 - One working file. A batch edits it in place; a fork is written next to it and is deleted once the developer picks.
 

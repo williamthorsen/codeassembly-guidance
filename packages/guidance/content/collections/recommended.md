@@ -13,6 +13,7 @@ members:
     - readme-conventions
     - shared-data-conventions
     - ui-copy-conventions
+    - visual-design-conventions
   skills:
     - capture-event
     - capture-feedback
@@ -45,3 +46,5 @@ Adding a skill that declares a guidance hook has a drawback that the current mem
 `shared-data-conventions` qualifies on its own terms too. It states a standard practice, expand, migrate, contract, the rule that unmerged code does not write to shared state, and the checks that a skill writing to shared state needs before merge, and it does not name any author, platform, or store: Each repository's `AGENTS.md` names its own. Its body does not contain any invocation token, so its closure is empty.
 
 `ui-copy-conventions` qualifies on its own terms as well. What it asks of the text on a page follows from who reads that text, the person who returns to the page every week, rather than from a preference, and it does not name any author, repository, product, or tool. A project that has content guidelines of its own names them, and they take precedence. Its invocation tokens name one artifact, `accessibility-conventions`, which is already a member, so admitting it does not add any other artifact to what this collection deploys.
+
+`visual-design-conventions` qualifies on its own terms as well. What it asks of a page's marks, spacing, alignment, and roles follows from how a reader sees a page's structure before reading its text, rather than from a preference, and it leaves taste to each author's own rulebooks. It does not name any author, repository, product, or tool, and a project's design system takes precedence. Its invocation tokens name one artifact, `accessibility-conventions`, which is already a member, so admitting it does not add any other artifact to what this collection deploys.
