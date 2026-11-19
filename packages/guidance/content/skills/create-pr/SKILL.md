@@ -21,7 +21,7 @@ Both are passed to `summarize-change`, which records them as overrides beside th
 
 ### 1. Get session context
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `ticket_ref`, `project_slug`, `scm`, `default_branch`, `branch_name`, `artifact_base_dir`, and `pr_initial_state` from it.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `ticket_ref`, `scm`, `default_branch`, `branch_name`, `ticket_dir`, and `pr_initial_state` from it.
 
 ### 2. Check branch sync
 
@@ -125,16 +125,14 @@ If the change summary's body does not end with a block, append the closing line 
 
 Pass the following inputs to the selected delegate per the delegate interface:
 
-| Input               | Value                                                                                                                                                                            |
-| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `title`             | Rendered `pr_title` from step 6 (or bare `title` if the script was unavailable)                                                                                                  |
-| `body`              | Content from `## What` onward in the change summary, `## Notes for reviewers` and `## How to test` included when the summary has them, with the closing line inserted per step 9 |
-| `labels`            | Resolved label names (may be empty list)                                                                                                                                         |
-| `base_branch`       | Bare branch name derived from `default_branch` (strip remote prefix, e.g., `origin/main` -> `main`)                                                                              |
-| `ticket_id`         | From session context                                                                                                                                                             |
-| `project_slug`      | From session context                                                                                                                                                             |
-| `artifact_base_dir` | From session context                                                                                                                                                             |
-| `initial_state`     | `pr_initial_state` from session context: `draft` or `ready`                                                                                                                      |
+| Input           | Value                                                                                                                                                                            |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`         | Rendered `pr_title` from step 6 (or bare `title` if the script was unavailable)                                                                                                  |
+| `body`          | Content from `## What` onward in the change summary, `## Notes for reviewers` and `## How to test` included when the summary has them, with the closing line inserted per step 9 |
+| `labels`        | Resolved label names (may be empty list)                                                                                                                                         |
+| `base_branch`   | Bare branch name derived from `default_branch` (strip remote prefix, e.g., `origin/main` -> `main`)                                                                              |
+| `ticket_dir`    | `ticket_dir` from session context, or the directory that {skill:save-artifact} states when it is null                                                                            |
+| `initial_state` | `pr_initial_state` from session context: `draft` or `ready`                                                                                                                      |
 
 ### 11. Persist the PR URL
 

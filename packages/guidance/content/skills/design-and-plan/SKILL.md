@@ -129,10 +129,10 @@ Present the plan as the second checkpoint, with its `## Decisions taken` section
 Then save both artifacts:
 
 1. Resolve artifact directory using `save-artifact` conventions:
-   - Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_id`, `project_slug`, and `artifact_base_dir` from the manifest JSON emitted on stdout (auto-generate ticket ID as `{YYYYMMDD}-{4 random hex}` if none found)
-   - Target: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
+   - Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_dir` and `project_artifact_dir` from the manifest JSON emitted on stdout
+   - Target: `{ticket_dir}/`, or the directory that {skill:save-artifact} states when `ticket_dir` is null
    - `mkdir -p` the target directory
-   - After an umbrella split, save the plan in the planned child's directory instead, `tickets/{child_id}/`, beside the ticket artifact that `{skill:create-ticket}` saved there
+   - After an umbrella split, save the plan in the planned child's directory instead, `{project_artifact_dir}/tickets/{child_id}/`, beside the ticket artifact that `{skill:create-ticket}` saved there
 
 2. Resolve frontmatter fields for both artifacts. The frontmatter conforms to the [universal artifact frontmatter](../_data/artifact-conventions.md#universal-artifact-frontmatter) schema.
 

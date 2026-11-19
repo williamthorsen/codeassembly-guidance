@@ -61,7 +61,7 @@ The change's identity comes wholly from one source. If any of `--type`, `--scope
 
 ### 1. Resolve the inputs
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `artifact_base_dir`, `project_slug`, `ticket_id`, and `pr_url` from it. `--artifact-dir` is `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`, and `--pr` is the number that `pr_url` ends with.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_dir` and `pr_url` from it. `--artifact-dir` is `{ticket_dir}`, and `--pr` is the number that `pr_url` ends with.
 
 The newest `*_merge.md` artifact in that directory supplies the rest: its `Merge commit:` line is `--merge-commit`, and its `PR:` line is `--pr` when the manifest stored none, which is what the default branch stores.
 

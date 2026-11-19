@@ -50,6 +50,24 @@ describe('recompose on every invocation', () => {
     expect(JSON.parse(await readFile(manifestPathFor(workDir, '100'), 'utf8'))).toEqual(after);
   });
 
+  it('adds the artifact directories to a manifest written before they existed', async () => {
+    const manifestPath = manifestPathFor(workDir, '100');
+    await mkdir(path.dirname(manifestPath), { recursive: true });
+    await writeFile(manifestPath, JSON.stringify({ ticket_id: '100', created_at: '2025-01-01T00:00:00Z' }), 'utf8');
+
+    const after = await deriveSessionContext({
+      git: NO_REMOTE_GIT,
+      cwd: workDir,
+      branch: '100',
+      now: NOW,
+      home: homeDir,
+    });
+    const projectArtifactDir = path.join(homeDir, 'ai-artifacts', 'projects', path.basename(workDir));
+    expect(after.project_artifact_dir).toBe(projectArtifactDir);
+    expect(after.ticket_dir).toBe(path.join(projectArtifactDir, 'tickets', '100'));
+    expect(JSON.parse(await readFile(manifestPath, 'utf8'))).toEqual(after);
+  });
+
   it('follows a change to the global preferences file', async () => {
     await writePrefs(homeDir, 'project:\n  slug: first\n');
     await deriveSessionContext({ git: NO_REMOTE_GIT, cwd: workDir, branch: 'add-cache', now: NOW, home: homeDir });

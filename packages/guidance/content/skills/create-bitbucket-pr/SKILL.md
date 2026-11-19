@@ -12,16 +12,14 @@ Internal delegate that creates a pull request on Bitbucket. Called by `create-pr
 
 This skill receives the following inputs from the orchestrator:
 
-| Input               | Type     | Description                                                                                            |
-| ------------------- | -------- | ------------------------------------------------------------------------------------------------------ |
-| `title`             | string   | Final PR title, already prefixed if applicable                                                         |
-| `body`              | string   | PR body: `## What` onward from the change summary, then the closing line and the `change-record` block |
-| `labels`            | string[] | Resolved label names (may be empty)                                                                    |
-| `base_branch`       | string   | Bare branch name (e.g., `main`, not `origin/main`)                                                     |
-| `ticket_id`         | string   | Ticket ID for artifact path resolution                                                                 |
-| `project_slug`      | string   | Project slug for artifact path resolution                                                              |
-| `artifact_base_dir` | string   | Base directory for artifact storage                                                                    |
-| `initial_state`     | string   | `draft` to open the pull request as a draft, `ready` to open it ready for review                       |
+| Input           | Type     | Description                                                                                            |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------ |
+| `title`         | string   | Final PR title, already prefixed if applicable                                                         |
+| `body`          | string   | PR body: `## What` onward from the change summary, then the closing line and the `change-record` block |
+| `labels`        | string[] | Resolved label names (may be empty)                                                                    |
+| `base_branch`   | string   | Bare branch name (e.g., `main`, not `origin/main`)                                                     |
+| `ticket_dir`    | string   | Ticket artifact directory, in which the artifact is saved                                              |
+| `initial_state` | string   | `draft` to open the pull request as a draft, `ready` to open it ready for review                       |
 
 ## Process
 
@@ -47,7 +45,7 @@ The artifact's label lines keep `create-gh-pr`'s three-field shape: `Labels atte
 
 Save a `pull-request` artifact in the ticket directory.
 
-Ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
+Ticket directory: `{ticket_dir}/`
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 

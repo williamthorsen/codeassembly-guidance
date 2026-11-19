@@ -322,16 +322,16 @@ If Phase 3 did not create any tickets and did not drop any findings (e.g., a res
 
 Resolve the artifact path:
 
-- **Ticket-scoped** (when `ticket_id` from session context is non-null):
+- **Ticket-scoped** (when `ticket_dir` from session context is non-null):
 
   ```
-  {artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/{filename}
+  {ticket_dir}/{filename}
   ```
 
-- **Project-scoped fallback** (when `ticket_id` is null):
+- **Project-scoped fallback** (when `ticket_dir` is null):
 
   ```
-  {artifact_base_dir}/projects/{project_slug}/deferred-findings/{filename}
+  {project_artifact_dir}/deferred-findings/{filename}
   ```
 
 The `deferred-findings/` directory name is hardcoded; do not consult `artifact_paths` for it.

@@ -36,21 +36,19 @@ Run artifacts are saved by the skills that produce them (`review-branch`, `respo
 
 ## Path resolution
 
-Resolve the artifact directory before saving. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `artifact_base_dir`, `project_slug`, and `ticket_id` from the manifest JSON emitted on stdout.
+Resolve the artifact directory before saving. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_dir` and `project_artifact_dir` from the manifest JSON emitted on stdout. The deriver composes both; do not compose either from other manifest fields.
 
 ### Ticket-scoped path
 
-```
-{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/
-```
+The ticket directory, `{ticket_dir}`, is the manifest's `ticket_dir`. When `ticket_dir` is `null`, the branch does not encode a ticket: Generate an ID per [artifact conventions](../_data/artifact-conventions.md#ticket-id), and use `{project_artifact_dir}/tickets/{generated id}`. Every skill that resolves the ticket directory per this skill takes this fallback; it is not restated elsewhere.
 
 Create the directory if needed.
 
 ### Non-ticket paths
 
-Read `artifact_paths` from the session-context manifest for category paths (chats, devlogs, plans). These are relative to the project directory: `{artifact_base_dir}/projects/{project_slug}/{category}/`.
+Read `artifact_paths` from the session-context manifest for category paths (chats, devlogs, plans). These are relative to the project directory: `{project_artifact_dir}/{category}/`.
 
-Devlogs, deferred-findings, feedback-curation, and feedback-triage artifacts use their non-ticket category paths only as a fallback: When a ticket is in session context they are written as ticket-level artifacts under `tickets/{ticket_id}/` instead. See [artifact conventions](../_data/artifact-conventions.md#non-ticket-paths) for the dual-homing rule. For frontmatter shapes, see `create-devlog/SKILL.md` (devlogs), the deferred-findings step in `wrap-up/SKILL.md` (deferred-findings), step 8 of `curate-feedback/SKILL.md` (feedback-curation), and step 8 of `triage-feedback/SKILL.md` (feedback-triage).
+Devlogs, deferred-findings, feedback-curation, and feedback-triage artifacts use their non-ticket category paths only as a fallback: When a ticket is in session context they are written as ticket-level artifacts under `{ticket_dir}/` instead. See [artifact conventions](../_data/artifact-conventions.md#non-ticket-paths) for the dual-homing rule. For frontmatter shapes, see `create-devlog/SKILL.md` (devlogs), the deferred-findings step in `wrap-up/SKILL.md` (deferred-findings), step 8 of `curate-feedback/SKILL.md` (feedback-curation), and step 8 of `triage-feedback/SKILL.md` (feedback-triage).
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 

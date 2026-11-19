@@ -96,11 +96,11 @@ The skill writes two artifacts: the ticket of record on its platform, and a loca
 
 ### Path resolution
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; read `artifact_base_dir`, `project_slug`, and `ticket_id` from it (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; read `ticket_dir` from it (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 
-Ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
+Ticket directory: `{ticket_dir}/`, or the directory that {skill:save-artifact} states when `ticket_dir` is null
 
 Artifact type: `ticket`. Filename format:
 

@@ -13,7 +13,7 @@ The artifact directory is the developer's audit trail of development. Its plans,
 
 ## Directory structure
 
-All artifacts are stored under a configurable base directory (`base_dir`, default `~/ai-artifacts`). Invoke the bundled session-context deriver (`node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs`) to resolve `artifact_base_dir`:
+All artifacts are stored under a configurable base directory (`base_dir`, default `~/ai-artifacts`). Invoke the bundled session-context deriver (`node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs`) to resolve the directories. Its manifest is the source of each: `artifact_base_dir` for `{base_dir}/`, `project_artifact_dir` for `{base_dir}/projects/{project-slug}/`, and `ticket_dir` for `{base_dir}/projects/{project-slug}/tickets/{ticket-id}/`, which is `null` when the branch does not encode a ticket. The tree illustrates the layout; read the paths from the manifest rather than composing them:
 
 ```
 {base_dir}/
@@ -141,7 +141,7 @@ The reader does still hard-fail on malformed YAML, missing git state, and shape 
 {base_dir}/projects/{project-slug}/tickets/{ticket-id}/
 ```
 
-Ticket-level artifacts and run directories are both stored here. Invoke the bundled session-context deriver to obtain `ticket_id`, which includes any prefix other than `#` (see [Ticket ID](#ticket-id)).
+Ticket-level artifacts and run directories are both stored here, in the manifest's `ticket_dir`. Its last segment is `ticket_id`, which includes any prefix other than `#` (see [Ticket ID](#ticket-id)). When `ticket_dir` is `null`, `save-artifact` states the directory to use.
 
 ### Run paths
 
@@ -160,7 +160,7 @@ Ticket-level artifacts and run directories are both stored here. Invoke the bund
 | feedback-triage   | `feedback-triage`   | `{base_dir}/projects/{project-slug}/feedback-triage/`   |
 | plans             | `plans`             | `{base_dir}/projects/{project-slug}/plans/`             |
 
-Non-ticket paths are relative to the project directory. Category names remain configurable via `artifacts.paths.{category}` in preferences.yaml, with three exceptions: `deferred-findings`, `feedback-curation`, and `feedback-triage` are hardcoded and cannot be overridden.
+Non-ticket paths are relative to the project directory, the manifest's `project_artifact_dir`. Category names remain configurable via `artifacts.paths.{category}` in preferences.yaml, with three exceptions: `deferred-findings`, `feedback-curation`, and `feedback-triage` are hardcoded and cannot be overridden.
 
 Devlogs, deferred-findings, feedback-curation, and feedback-triage artifacts are dual-homed: When a ticket is in session context they are written as ticket-level artifacts under `tickets/{ticket-id}/`; otherwise they fall back to the project-scoped paths above (`devlogs/`, `deferred-findings/`, `feedback-curation/`, and `feedback-triage/`). All filenames in these types use the standard `YYYYMMDD-HHMMSSZ` ticket-level timestamp shape regardless of which directory they are written to.
 

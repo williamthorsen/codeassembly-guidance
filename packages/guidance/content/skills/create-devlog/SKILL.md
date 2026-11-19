@@ -55,11 +55,11 @@ Resolve session context and the artifact directory before writing.
 
 ### Path resolution
 
-1. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `project_slug`, `artifact_base_dir`, `artifact_paths`, and `branch_name` from it.
-2. If `ticket_id` is non-null: Save as a ticket-level artifact at:
+1. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_dir`, `project_artifact_dir`, `artifact_paths`, and `branch_name` from it.
+2. If `ticket_dir` is non-null: Save as a ticket-level artifact at:
 
    ```
-   {artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/{filename}
+   {ticket_dir}/{filename}
    ```
 
    Filename uses the ticket-level shape: `{YYYYMMDD-HHMMSSZ}_{slug}_devlog.md`.
@@ -67,7 +67,7 @@ Resolve session context and the artifact directory before writing.
 3. Else (no ticket; research/exploration sessions): Save to the project-scoped fallback at:
 
    ```
-   {artifact_base_dir}/projects/{project_slug}/{artifact_paths.devlogs}/{filename}
+   {project_artifact_dir}/{artifact_paths.devlogs}/{filename}
    ```
 
    Filename uses the ticket-level timestamp and slug without the artifact-type segment: `{YYYYMMDD-HHMMSSZ}_{slug}.md`.

@@ -77,9 +77,9 @@ Run `{harness_home_dir}/scripts/resolve-frontmatter.sh --skill summarize-chat --
 
 ## Saving
 
-Resolve artifact directory by invoking `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `artifact_base_dir`, `project_slug`, and `artifact_paths` from the manifest JSON emitted on stdout. The chats path is `artifact_paths.chats` (default: `chats`).
+Resolve artifact directory by invoking `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `project_artifact_dir` and `artifact_paths` from the manifest JSON emitted on stdout. The chats path is `artifact_paths.chats` (default: `chats`).
 
-Full path: `{artifact_base_dir}/projects/{project_slug}/{chats_path}/`
+Full path: `{project_artifact_dir}/{chats_path}/`
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 

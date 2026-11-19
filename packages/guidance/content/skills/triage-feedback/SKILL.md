@@ -61,8 +61,8 @@ node {harness_home_dir}/skills/triage-feedback/triage-feedback.mjs {command} {fl
 
 ### 1. Preflight
 
-1. Run `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` and read `artifact_base_dir`, `project_slug`, and `ticket_id`.
-2. Fix the artifact's path now, because a deferral references it. The directory is `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/` when `ticket_id` is set, and `{artifact_base_dir}/projects/{project_slug}/feedback-triage/` otherwise; the `feedback-triage/` name is hardcoded. The filename is `{YYYYMMDD-HHMMSSZ}_{slug}_feedback-triage.md`, with the current UTC time and a slug per {skill:save-artifact}, or `triage` when nothing else suits.
+1. Run `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` and read `ticket_dir` and `project_artifact_dir`.
+2. Fix the artifact's path now, because a deferral references it. The directory is `{ticket_dir}/` when the manifest's `ticket_dir` is not null, and `{project_artifact_dir}/feedback-triage/` otherwise; the `feedback-triage/` name is hardcoded. The filename is `{YYYYMMDD-HHMMSSZ}_{slug}_feedback-triage.md`, with the current UTC time and a slug per {skill:save-artifact}, or `triage` when nothing else suits.
 3. Create the work directory `{timestamp}_work/` beside the artifact, where `{timestamp}` is the filename's prefix. Every working file goes there.
 4. Run `gh auth status`. When it fails, report that tickets cannot be filed, and continue only when the developer accepts a run that defers or rates.
 

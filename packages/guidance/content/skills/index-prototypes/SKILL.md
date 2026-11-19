@@ -14,7 +14,7 @@ Publish one index page for a ticket's prototypes instead of one link per prototy
 A ticket has one prototype set, in its artifact directory:
 
 ```
-{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/prototypes/
+{ticket_dir}/prototypes/
 ├── manifest.json        # set title, summary, index URL, one entry per registration
 ├── shots/{slug}-v{n}.png
 └── {slug}-v{n}.html     # prototype sources
@@ -47,7 +47,7 @@ The set has one list of note labels: a few facts that differ from one prototype 
 
 ### 1. Resolve the set directory
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash, and build the set directory from `artifact_base_dir`, `project_slug`, and `ticket_id` as shown above. When `manifest.json` exists there, read it, and [read back the verdicts](#read-back-the-verdicts) before planning the round.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash, and build the set directory from the manifest's `ticket_dir` as shown above. When `manifest.json` exists there, read it, and [read back the verdicts](#read-back-the-verdicts) before planning the round.
 
 Resolve a scratch directory for the rendered page: the scratchpad directory that the environment declares, or, when it declares none, a new one:
 

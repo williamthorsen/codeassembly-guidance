@@ -19,7 +19,7 @@ This skill runs between receiving a code review and implementing fixes. The agen
 
 ## Process
 
-1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `ticket_ref`, `project_slug`, `artifact_base_dir`, and `pr_url` from it.
+1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `ticket_ref`, `ticket_dir`, and `pr_url` from it.
 2. **Locate the review** per the [Locating the review](#locating-the-review) section
 3. **Read prior artifacts** in the review's run directory chronologically for full context
 4. **Parse findings**: Extract all numbered findings (F{n}, W{n}, T{n}, R{n}, S{n}, and legacy variants with `-L` suffix). See [finding scheme](../_data/artifact-conventions.md#finding-scheme-fwtrs--legacy-suffix) for category definitions.
@@ -64,8 +64,8 @@ If a path argument is provided, read the review directly from that path. If the 
 
 If the invocation does not include a path, find the most recent `reviewer_review` in the active run:
 
-1. Resolve the ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
-2. Invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs latest --ticket-dir <ticket-dir>` via Bash. The helper prints `{ "reviewPath": "<path>", "runDir": "<path>" }`: the ticket's active run, per [artifact conventions](../_data/artifact-conventions.md#run-directories), and the newest reviewer or overseer review in it.
+1. Resolve the ticket directory, `{ticket_dir}`, from the session-context manifest.
+2. Invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs latest --ticket-dir {ticket_dir}` via Bash. The helper prints `{ "reviewPath": "<path>", "runDir": "<path>" }`: the ticket's active run, per [artifact conventions](../_data/artifact-conventions.md#run-directories), and the newest reviewer or overseer review in it.
 
 If the helper exits non-zero, the ticket directory does not contain an active run or the active run does not contain a review; stop and report the message that it printed on stderr.
 
@@ -278,7 +278,7 @@ The body following the frontmatter has this structure:
 
 ### Path resolution
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `artifact_base_dir` and `project_slug` from the manifest JSON emitted on stdout (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_dir` from the manifest JSON emitted on stdout (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 

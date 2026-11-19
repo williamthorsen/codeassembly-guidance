@@ -14,7 +14,7 @@ Open the work in a ticket's worktree with one fixed prompt. The skill resolves t
 
 ## Process
 
-1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash, and read `branch_name`, `ticket_id`, `ticket_ref`, `ticket_url`, `pr_url`, `project_slug`, and `artifact_base_dir` from the manifest JSON that it emits.
+1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash, and read `branch_name`, `ticket_id`, `ticket_ref`, `ticket_url`, `pr_url`, and `ticket_dir` from the manifest JSON that it emits.
 
 2. **Resolve the ticket** from the argument, or else by [auto-resolve](../_data/ticket-source-resolution.md#auto-resolve), requesting the ticket's state with its content. When the argument is absent and `ticket_id` is null, as on the default branch, say that the branch does not encode a ticket and ask for the ticket ref. Never guess a ticket from the branch's commits, the artifact directory, or the backlog. When the source resolves to a URL, persist it per [Stored ticket URL](../_data/ticket-source-resolution.md#stored-ticket-url), and report the ticket's open blockers per [Open blockers](../_data/ticket-source-resolution.md#open-blockers). A blocker does not stop the choice; the skill that opens the work decides what it means.
 

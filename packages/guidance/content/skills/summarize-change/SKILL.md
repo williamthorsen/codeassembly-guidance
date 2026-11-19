@@ -319,11 +319,11 @@ When used as a PR description, include **from `## What` onward only**; omit the 
 
 ### Path resolution
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `artifact_base_dir`, `project_slug`, and `ticket_id` from the manifest JSON emitted on stdout (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_dir` from the manifest JSON emitted on stdout (the same invocation in step 1 already populated the manifest file, so this is a fast-path read).
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 
-Ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
+Ticket directory: `{ticket_dir}/`, or the directory that {skill:save-artifact} states when `ticket_dir` is null
 
 Artifact type: `change-summary`. Filename format:
 

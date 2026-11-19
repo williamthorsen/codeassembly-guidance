@@ -64,6 +64,8 @@ export function composeManifest(input: {
     }
   }
 
+  const { projectArtifactDir, ticketDir } = resolveArtifactDirs(artifactBaseDir, projectSlug, ticketResult.ticket_id);
+
   const { ticketBaseUrl, ticketUrl } = resolveTicketUrls(preferences, ticketResult.ticket_id);
   const prUrl = resolvePrUrl(scm, ticketResult.ticket_id, remoteUrl);
 
@@ -80,6 +82,8 @@ export function composeManifest(input: {
     branch_name: branchName,
     artifact_base_dir: artifactBaseDir,
     artifact_paths: artifactPaths,
+    project_artifact_dir: projectArtifactDir,
+    ticket_dir: ticketDir,
     created_at: formatIsoUtc(now),
     ticket_url: ticketUrl,
     ticket_base_url: ticketBaseUrl,
@@ -147,6 +151,17 @@ function resolveMergeDeletionStrategy(preferences: ResolvedPreferences): Deletio
 /** Resolves how `merge-pr` merges a pull request, defaulting to `squash`. */
 function resolveMergeStrategy(preferences: ResolvedPreferences): MergeStrategy {
   return preferences.merge?.strategy ?? DEFAULT_MERGE_STRATEGY;
+}
+
+/** Composes the project artifact directory and, when a ticket id is known, the ticket artifact directory within it. */
+function resolveArtifactDirs(
+  artifactBaseDir: string,
+  projectSlug: string,
+  ticketId: string | null,
+): { projectArtifactDir: string; ticketDir: string | null } {
+  const projectArtifactDir = path.join(artifactBaseDir, 'projects', projectSlug);
+  const ticketDir = ticketId === null ? null : path.join(projectArtifactDir, 'tickets', ticketId);
+  return { projectArtifactDir, ticketDir };
 }
 
 /** Resolves the state in which `create-pr` opens a pull request, defaulting to `draft`. */
