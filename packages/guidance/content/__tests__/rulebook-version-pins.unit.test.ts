@@ -81,6 +81,10 @@ const PINS = new Map<string, RulebookPin>([
     { bodyHash: 'd2e47db61e61110eee7b797db2ae737beea7fbfb1f94b3ec17c81a2847d19f23', version: '2' },
   ],
   [
+    'visual-design-conventions',
+    { bodyHash: '93f48c1ea42cf981761593b23b58519f725f45e2dca2660b9967d3895f521979', version: '1' },
+  ],
+  [
     'williamthorsen-code-layout-preferences',
     { bodyHash: 'f8fcc4e941d25f6f66224201d7cf82ca1cc953b2164cc8ff859f6cb3b36412de', version: '7' },
   ],
@@ -107,6 +111,10 @@ const PINS = new Map<string, RulebookPin>([
   [
     'williamthorsen-typescript-preferences',
     { bodyHash: 'fcbeb0b5f694a7d5fda73a306ef9be96fb33884311ba9b4803206ee41cdd663d', version: '5' },
+  ],
+  [
+    'williamthorsen-visual-design-preferences',
+    { bodyHash: 'd98fc2f9317e46eea72003906c490f808515d417de2641d929f13ac5fe062739', version: '1' },
   ],
   [
     'williamthorsen-workflow-preferences',
