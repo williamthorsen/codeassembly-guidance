@@ -1,11 +1,13 @@
 ---
 slug: accessibility-conventions
-description: 'Accessibility of interfaces: usability before style, contrast and size floors for text, the placement, model, and states of interactive controls, the states for which a reader scans a list, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before designing or placing a control that opens a region or toggles a setting, before designing or reviewing a list, a table, or another surface of repeated items, before defining or changing colour tokens, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
+description: 'Accessibility of interfaces: the aim beyond the floors, usability before style, contrast and size floors for text, the placement, model, and states of interactive controls, the explanation of an action''s consequence at the control, the states for which a reader scans a list, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before designing or placing a control that opens a region or toggles a setting, before designing or reviewing a list, a table, or another surface of repeated items, before defining or changing colour tokens, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
 delivery: [skill]
-version: '5'
+version: '6'
 ---
 
 # Accessibility conventions
+
+The rules below are floors. Aim beyond them, for an interface with which its users work confidently and that they enjoy using, and reach it by following a good established model, as the named-model rule states.
 
 Make an interface usable before making it look refined, and when a style choice conflicts with readability or usability, choose usability whatever the aesthetic: "Subtle" and "refined" never justify small or faint text. These conventions apply to a prototype or a mockup exactly as they apply to a released interface.
 
@@ -23,6 +25,7 @@ Check contrast whenever colour tokens are defined or changed. Compute the WCAG c
 
 - **Named model.** Before designing an affordance, name the established model that the feature most resembles, such as a browser's developer tools, an editor's side panel, or a panel that the product already has, and follow it. Depart from the model only for a reason, and record the reason wherever the design is recorded. Example: An activity drawer follows the editor side-panel model.
 - **Placement.** A control that opens or closes a region sits at that region's edge or in a persistent toolbar, never in an unrelated group of actions. Example: ❌ An "Activity" button among the page header's actions opens a drawer on the right. ✅ The toggle sits at the right end of the toolbar, on the drawer's side.
+- **Consequence at the control.** An action whose consequence is not evident from its label, especially one that publishes, deletes, or hands work to a later step, explains that consequence where the control is, and not only in external documentation. The consequence is not evident when a user who has not read the documentation could not say what the action changes, who sees the result, or whether it can be undone. The explanation of an action that cannot be undone is visible at rest: a helper line beside the control, or, for an action repeated on every row of a list, one line where the list starts. The explanation of an action that can be undone may instead sit in a toggletip: a button beside the control that shows the explanation on click, Enter, and tap, and hides it on Escape. A tooltip that opens only on hover never carries the explanation alone, because touch users and many keyboard users cannot open it, and content that appears on hover or focus meets SC 1.4.13. The control names its explanation through `aria-describedby`. Render every explanation in a product through one shared component, so that every control explains itself the same way. Example: ❌ Each row of a review queue shows Publish and Reject, and nothing more. ✅ One line above the queue states that Publish shows the item to every reader of the site and cannot be undone.
 
 ## Glanceable state
 
@@ -53,6 +56,6 @@ Put the states in a base style or a shared component rather than setting them at
 
 ## Checking in a browser
 
-Check every change to a visible component in a browser before reporting it finished or reviewed. Open the page, then hover over and tab through each new or changed interactive element, and confirm the three states above, or their absence on a disabled element. Toggle each control that toggles, and confirm its on state and its off state. Confirm that each button outside a toolbar has its border or fill at rest, and scan each new or changed list to confirm that its scanned states are visible without reading each item. A test that renders HTML, or a reading of the diff, does not replace this check: Neither shows what the element looks like under the pointer or with focus.
+Check every change to a visible component in a browser before reporting it finished or reviewed. Open the page, then hover over and tab through each new or changed interactive element, and confirm the three states above, or their absence on a disabled element. Toggle each control that toggles, and confirm its on state and its off state. Confirm that each action whose consequence is not evident has its explanation, visible at rest when the action cannot be undone, and otherwise reachable by keyboard and under touch emulation. Confirm that each button outside a toolbar has its border or fill at rest, and scan each new or changed list to confirm that its scanned states are visible without reading each item. A test that renders HTML, or a reading of the diff, does not replace this check: Neither shows what the element looks like under the pointer or with focus.
 
 When a browser is not available, report that the check did not run and name the elements that it would have covered. Never report it as passed.
