@@ -18,7 +18,8 @@ const FORBIDDEN_PATTERNS: ReadonlyArray<string> = [
 const ALLOWLIST: ReadonlyArray<string> = [
   // Its directory tree and path blocks illustrate the layout that the deriver composes.
   'skills/_data/artifact-conventions.md',
-  // It saves the ticket that it creates, whose ID and, for a target repository, project slug differ from the manifest's.
+  // It saves the ticket that it creates, whose ID and, for a target repository, project slug differ from the
+  // manifest's.
   'skills/create-ticket/SKILL.md',
 ];
 
