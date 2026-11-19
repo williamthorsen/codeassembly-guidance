@@ -25,13 +25,13 @@ This skill is the canonical home of the shared review process. `review-pr` invok
 
 > **When invoked by `review-pr`:** Steps 1–3 are already complete: `review-pr` already invoked the bundled session-context deriver and the platform delegate resolved `merge_base_sha` and `spec_sources`. Begin at step 4 with these values in scope.
 
-1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `default_branch`, `ticket_id`, `ticket_ref`, `scm`, `project_slug`, and `artifact_base_dir` from it.
+1. **Get context**: Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `default_branch`, `ticket_id`, `ticket_ref`, `scm`, and `ticket_dir` from it.
 2. **Resolve diff base**: If `--diff-base=<ref>` was provided, use `<ref>`; otherwise use `default_branch`. Compute the merge-base SHA once: `git merge-base HEAD <diff-base>`. Use this SHA for the diff command in step 5.
 3. **Resolve specification sources**: Produce a list of spec sources (each a `{ source_type, label, content, criteria?, provenance, last_updated }` record). `provenance` is `remote` (a live platform fetch, never stale) or `local_snapshot` (a frozen plan-time artifact that can lag the contract); `last_updated` is the source's last-modified timestamp (ISO 8601), or null when the platform does not expose one.
    - **Explicit `--ticket=<source>`**: Resolve per [ticket source resolution](../_data/ticket-source-resolution.md) and append as a `ticket` source. A fetched platform issue is `remote` with its `updatedAt` as `last_updated`; a file or plain-text source is `local_snapshot` with `last_updated` null when unknown. When the source resolves to a URL, persist it per [Stored ticket URL](../_data/ticket-source-resolution.md#stored-ticket-url). `--spec-source` does not apply on this path.
    - **Auto-resolve** (when `--ticket` is omitted): Resolve up to two candidates and choose between them.
      - _Remote candidate_: When `ticket_id` is non-null and resolves to a platform ticket (use `scm` from step 1), fetch the remote issue per [ticket source resolution](../_data/ticket-source-resolution.md#auto-resolve), but substitute the local fallback below for that section's "ask the user" terminal step. Its `last_updated` is the issue's `updatedAt`.
-     - _Local candidate_: The most recent `*_ticket.md` under `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`. Its `last_updated` is the filename's `YYYYMMDD-HHMMSSZ` prefix converted to ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`), so it shares the remote candidate's format; if the prefix is unparseable, treat the local candidate as unavailable. (The artifact filename keeps the compact form per `artifact-conventions.md`; only the recorded `last_updated` is normalized.) Read its frontmatter as well as its filename: `copies_remote` decides the selection below, per [ticket frontmatter](../_data/artifact-conventions.md#ticket-frontmatter). When the selection chooses it and its frontmatter names a `ticket_ref`, add that remote ticket's comments per [Comments](../_data/ticket-source-resolution.md#comments), taking them from the remote candidate when that fetch succeeded.
+     - _Local candidate_: The most recent `*_ticket.md` under `{ticket_dir}/`. Its `last_updated` is the filename's `YYYYMMDD-HHMMSSZ` prefix converted to ISO 8601 (`YYYY-MM-DDTHH:MM:SSZ`), so it shares the remote candidate's format; if the prefix is unparseable, treat the local candidate as unavailable. (The artifact filename keeps the compact form per `artifact-conventions.md`; only the recorded `last_updated` is normalized.) Read its frontmatter as well as its filename: `copies_remote` decides the selection below, per [ticket frontmatter](../_data/artifact-conventions.md#ticket-frontmatter). When the selection chooses it and its frontmatter names a `ticket_ref`, add that remote ticket's comments per [Comments](../_data/ticket-source-resolution.md#comments), taking them from the remote candidate when that fetch succeeded.
      - _Selection_:
        - If `--spec-source=remote|local` is set, use that candidate. If the named candidate is unavailable (e.g. `--spec-source=local` without a snapshot, or `--spec-source=remote` with a failed/offline fetch or null `ticket_id`), stop and report the missing source rather than silently using the other side: An explicit instruction must not be redirected to the wrong contract. State the remedy (drop the flag to re-enable recency) in the message.
        - Otherwise, if a remote candidate exists and the local candidate's frontmatter sets `copies_remote: true`, use the remote candidate. The snapshot's body is a copy of the ticket of record, so the remote contains at least the content that the snapshot froze, and the snapshot's later write time records the copying rather than a newer contract. A snapshot that does not make that claim falls through to the comparison below.
@@ -42,7 +42,7 @@ This skill is the canonical home of the shared review process. `review-pr` invok
 
    `review-pr` may pass additional sources (notably the PR description as `pr_description`). The list is the canonical input for the "Specification compliance" section regardless of who populated it.
 
-4. **Read prior artifacts**: When `ticket_id` is not null, invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs active --ticket-dir {artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/` via Bash. The helper prints `{ "runDir": <path or null> }`: the ticket's active run, per [artifact conventions](../_data/artifact-conventions.md#run-directories). When `runDir` is not null, read all artifacts in it chronologically for context (including any prior dispositions).
+4. **Read prior artifacts**: When `ticket_dir` is not null, invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs active --ticket-dir {ticket_dir}` via Bash. The helper prints `{ "runDir": <path or null> }`: the ticket's active run, per [artifact conventions](../_data/artifact-conventions.md#run-directories). When `runDir` is not null, read all artifacts in it chronologically for context (including any prior dispositions).
 5. **Analyze changes**: `git diff <merge-base-sha>..HEAD`.
 6. **Review thoroughly** following the guidelines below.
 7. **Challenge your own findings**: Re-read each finding and delete every one that you would not defend to a skeptical author asking "why does this matter?" A review may legitimately end with zero findings.
@@ -289,7 +289,7 @@ The score is an honest, at-a-glance quality signal.
 
 ### Path resolution
 
-Use `artifact_base_dir`, `project_slug`, and `ticket_id` from step 1.
+Use `ticket_dir` from step 1.
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
 
@@ -297,8 +297,8 @@ Follow [artifact conventions](../_data/artifact-conventions.md).
 
 The review is saved as a run artifact: `{timestamp}_reviewer_review.md`
 
-1. Resolve ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`. When `ticket_id` is null, auto-generate one in the format `{YYYYMMDD}-{4 random hex}` per [artifact conventions](../_data/artifact-conventions.md#ticket-id); never construct a path with a literal `null` segment.
-2. Open the run directory: Invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs open --ticket-dir <ticket-dir> --timestamp <timestamp>` via Bash, passing this review's UTC `YYYYMMDD-HHMMSSZ` timestamp. The helper prints `{ "runDir": "<path>" }`: the ticket's active run, or a new `{timestamp}-interactive` run when the ticket directory does not contain one. On a malformed timestamp it exits non-zero and names the problem on stderr.
+1. Resolve the ticket directory, `{ticket_dir}`, per {skill:save-artifact}, which states the directory to use when `ticket_dir` is null.
+2. Open the run directory: Invoke `node {harness_home_dir}/scripts/resolve-review-run.mjs open --ticket-dir {ticket_dir} --timestamp <timestamp>` via Bash, passing this review's UTC `YYYYMMDD-HHMMSSZ` timestamp. The helper prints `{ "runDir": "<path>" }`: the ticket's active run, or a new `{timestamp}-interactive` run when the ticket directory does not contain one. On a malformed timestamp it exits non-zero and names the problem on stderr.
 3. Save: `{runDir}/{timestamp}_reviewer_review.md`
 
 Each review is a separate artifact in the run directory. Do not append to existing files: The chronological sequence of files is the history.

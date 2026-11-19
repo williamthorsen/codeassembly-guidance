@@ -17,9 +17,8 @@ This skill does not run a review. The review logic is implemented in `review-bra
 | `pr_id`              | string         | PR number (e.g., `"42"`) or full Bitbucket PR URL |
 | `diff_base_override` | string \| null | `--diff-base` value from `review-pr` if provided  |
 | `ticket_override`    | string \| null | `--ticket` value from `review-pr` if provided     |
-| `project_slug`       | string         | From session context                              |
 | `ticket_id`          | string \| null | From session context                              |
-| `artifact_base_dir`  | string         | From session context                              |
+| `ticket_dir`         | string \| null | From session context                              |
 
 ## Resolved-output contract
 

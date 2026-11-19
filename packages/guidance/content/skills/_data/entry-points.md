@@ -6,7 +6,7 @@ The skill that opens the work in a ticket's worktree follows from the ticket's s
 
 - **The ticket's state**: open or closed, from the platform fetch in [ticket source resolution](ticket-source-resolution.md#platform-specific-fetch).
 - **The branch's pull request**: `pr_url` from the session-context manifest, or else the pull request whose head is `branch_name` in any state (on GitHub, `gh pr list --head {branch_name} --state all --json url,state`). `pr_url` is usually null on a ticket branch, so the lookup is the common case.
-- **The ticket directory**: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`, and the artifact types that [artifact conventions](artifact-conventions.md) defines. The newest plan is the one that the plan resolution of {skill?:implement-plan} selects (its [process](../implement-plan/SKILL.md#process), step 2): the greatest filename prefix across `*_plan.md` and `*_plan-v*.md`, never `*_plan-review.md`. The newest artifact of any other type is the one with the greatest filename prefix.
+- **The ticket directory**: The manifest's `ticket_dir`, and the artifact types that [artifact conventions](artifact-conventions.md) defines. The newest plan is the one that the plan resolution of {skill?:implement-plan} selects (its [process](../implement-plan/SKILL.md#process), step 2): the greatest filename prefix across `*_plan.md` and `*_plan-v*.md`, never `*_plan-review.md`. The newest artifact of any other type is the one with the greatest filename prefix.
 
 ## Routes
 

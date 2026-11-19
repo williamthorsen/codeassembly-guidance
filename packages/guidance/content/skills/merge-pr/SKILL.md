@@ -28,7 +28,7 @@ Three keys in `.agents/preferences.yaml` and `~/.agents/preferences.yaml` set th
 
 ### 1. Get session context
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `project_slug`, `ticket_id`, `artifact_base_dir`, `pr_url`, `merge_approval`, `merge_strategy`, and `merge_deletion_strategy` from it.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_ref`, `branch_name`, `default_branch`, `scm`, `ticket_id`, `ticket_dir`, `pr_url`, `merge_approval`, `merge_strategy`, and `merge_deletion_strategy` from it.
 
 ### 2. Resolve the PR
 
@@ -339,16 +339,14 @@ If it exits non-zero, stop, and end the reply with the [refusal summary](#11-rep
 
 Pass the following inputs to the selected delegate per the delegate interface:
 
-| Input               | Value                                                                |
-| ------------------- | -------------------------------------------------------------------- |
-| `pr_number`         | Resolved PR number                                                   |
-| `title`             | Rendered `merge_title` as step 8 last resolved and the user approved |
-| `body`              | Published body as step 8 last resolved and the user approved         |
-| `strategy`          | Resolved strategy from step 4                                        |
-| `deletion_strategy` | Resolved value from step 4 (`both` \| `remote` \| `none`)            |
-| `ticket_id`         | From session context                                                 |
-| `project_slug`      | From session context                                                 |
-| `artifact_base_dir` | From session context                                                 |
+| Input               | Value                                                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------------------------- |
+| `pr_number`         | Resolved PR number                                                                                    |
+| `title`             | Rendered `merge_title` as step 8 last resolved and the user approved                                  |
+| `body`              | Published body as step 8 last resolved and the user approved                                          |
+| `strategy`          | Resolved strategy from step 4                                                                         |
+| `deletion_strategy` | Resolved value from step 4 (`both` \| `remote` \| `none`)                                             |
+| `ticket_dir`        | `ticket_dir` from session context, or the directory that {skill:save-artifact} states when it is null |
 
 The orchestrator never passes a title that `defects` blocks, or a `prompt` sentinel, to the delegate: All values are concrete by this point.
 

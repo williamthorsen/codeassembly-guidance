@@ -10,16 +10,14 @@ Internal delegate that merges a pull request on GitHub. Called by `merge-pr` wit
 
 ## Delegate interface
 
-| Input               | Type                            | Description                               |
-| ------------------- | ------------------------------- | ----------------------------------------- |
-| `pr_number`         | number                          | PR to merge                               |
-| `title`             | string                          | Pre-rendered merge-commit title           |
-| `body`              | string                          | Pre-composed merge-commit body            |
-| `strategy`          | `squash` \| `merge` \| `rebase` | Concrete strategy (no `prompt` sentinel)  |
-| `deletion_strategy` | `both` \| `remote` \| `none`    | Which branches to delete after merge      |
-| `ticket_id`         | string                          | Ticket ID for artifact path resolution    |
-| `project_slug`      | string                          | Project slug for artifact path resolution |
-| `artifact_base_dir` | string                          | Base directory for artifact storage       |
+| Input               | Type                            | Description                                               |
+| ------------------- | ------------------------------- | --------------------------------------------------------- |
+| `pr_number`         | number                          | PR to merge                                               |
+| `title`             | string                          | Pre-rendered merge-commit title                           |
+| `body`              | string                          | Pre-composed merge-commit body                            |
+| `strategy`          | `squash` \| `merge` \| `rebase` | Concrete strategy (no `prompt` sentinel)                  |
+| `deletion_strategy` | `both` \| `remote` \| `none`    | Which branches to delete after merge                      |
+| `ticket_dir`        | string                          | Ticket artifact directory, in which the artifact is saved |
 
 ## Process
 
@@ -122,7 +120,7 @@ When the helper exits non-zero, it still prints JSON on stdout, containing only 
 
 Save a `merge` artifact in the ticket directory.
 
-Ticket directory: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/`
+Ticket directory: `{ticket_dir}/`
 
 `mkdir -p` the target directory before writing.
 

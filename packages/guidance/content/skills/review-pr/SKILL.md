@@ -22,7 +22,7 @@ This is a thin entry skill: The shared review logic (diff analysis, finding gene
 
 ### 1. Get session context
 
-Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `project_slug`, `ticket_id`, `ticket_ref`, `default_branch`, `artifact_base_dir`, `scm`, and `pr_url` from it. Pass these values into `review-branch`'s steps 4–11 (review header, scoring, saving) so that `review-branch`'s own step 1 does not need to re-run.
+Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash. The bundle emits the session-context manifest JSON to stdout; extract `ticket_id`, `ticket_ref`, `default_branch`, `ticket_dir`, `scm`, and `pr_url` from it. Pass these values into `review-branch`'s steps 4–11 (review header, scoring, saving) so that `review-branch`'s own step 1 does not need to re-run.
 
 ### 2. Resolve the PR
 
@@ -55,9 +55,8 @@ Pass the following inputs to the selected delegate per its delegate interface:
 | `pr_id`              | The PR resolved in step 2. The delegate parses and normalizes it (extracts the PR number from a URL when applicable; the Bitbucket delegate also resolves the workspace and repository that it addresses). |
 | `diff_base_override` | Value of `--diff-base` if provided; otherwise `null`                                                                                                                                                       |
 | `ticket_override`    | Value of `--ticket` if provided; otherwise `null`                                                                                                                                                          |
-| `project_slug`       | From session context                                                                                                                                                                                       |
 | `ticket_id`          | From session context                                                                                                                                                                                       |
-| `artifact_base_dir`  | From session context                                                                                                                                                                                       |
+| `ticket_dir`         | From session context                                                                                                                                                                                       |
 
 The delegate returns a resolved-input record:
 

@@ -54,8 +54,8 @@ Run `{harness_home_dir}/scripts/resolve-frontmatter.sh --skill plan --interactiv
 
 ### Ticket context
 
-1. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_id`, `project_slug`, and `artifact_base_dir` from the manifest JSON emitted on stdout. If the manifest does not contain a ticket ID, auto-generate: `{YYYYMMDD}-{4 random hex}`.
-2. Save as ticket-level artifact: `{artifact_base_dir}/projects/{project_slug}/tickets/{ticket_id}/{timestamp}_{slug}_plan.md`
+1. Invoke `node {harness_home_dir}/skills/derive-session-context/derive-session-context.mjs` via Bash to obtain `ticket_dir` from the manifest JSON emitted on stdout. When it is null, use the directory that {skill:save-artifact} states.
+2. Save as ticket-level artifact: `{ticket_dir}/{timestamp}_{slug}_plan.md`
 3. Slug per [artifact conventions](../_data/artifact-conventions.md#naming-conventions).
 
 Follow [artifact conventions](../_data/artifact-conventions.md).
