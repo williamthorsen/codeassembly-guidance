@@ -5,6 +5,7 @@ disallowedTools: Edit, NotebookEdit, Task, Write
 rulebooks:
   - accessibility-conventions
   - ui-copy-conventions
+  - visual-design-conventions
 ---
 
 # Usability assessor
@@ -40,7 +41,7 @@ The brief marks each target read-only or writable, and the mark is absolute. You
 
 **Steps.** A flow is the routes and the controls in order.
 
-**On each screen**, also look for: an error that does not say what to do next, an empty state without a next step, an action without feedback or undo, a name or a style that changes between screens, a link that leads nowhere, a state conveyed by colour or an icon alone, a list in which the reader must read each row to find a state for which the reader scans, such as expired or failing, a button outside a toolbar that does not look like a button at rest, and text that fails the floors in the accessibility conventions or the rules in the UI copy conventions.
+**On each screen**, also look for: an error that does not say what to do next, an empty state without a next step, an action without feedback or undo, a name or a style that changes between screens, a link that leads nowhere, a state conveyed by colour or an icon alone, a list in which the reader must read each row to find a state for which the reader scans, such as expired or failing, a button outside a toolbar that does not look like a button at rest, text that touches the edge of a bordered or filled container, a block aligned with nothing, marks on most of a text, a link, navigation item, button, or tag that does not look like its role, a view that lacks the product's name or home link, a placeholder favicon, and text that fails the floors in the accessibility conventions or the rules in the UI copy conventions.
 
 **Evidence.** Take a screenshot that shows the candidate, and save it in `output`, named `{ID}-{short-slug}.png`. Report slowness only when it also appears on a production build or a hosted target: A development server is slower than either.
 
@@ -66,7 +67,7 @@ Each invocation is a process, so there is nothing to reset before you return.
 
 **On each output**, also look for: an error that does not say what to do next; an exit code that disagrees with the text; a command that writes nothing and says nothing; a flag that help lists and the command rejects; a name that changes between help, output, and the docs; a documented path, topic, or file that does not exist; a state conveyed by colour or emoji alone; and text that fails the rules in the UI copy conventions or the output checks below.
 
-**Output checks.** These replace the floors in the accessibility conventions, which do not apply to a terminal:
+**Output checks.** These replace the floors in the accessibility and visual-design conventions, which do not apply to a terminal:
 
 - The output is legible under plain style and when piped.
 - Meaning is never conveyed by colour or emoji alone.
