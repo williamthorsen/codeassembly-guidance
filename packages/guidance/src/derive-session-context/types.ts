@@ -86,6 +86,10 @@ export interface BranchManifest {
   readonly branch_name: string;
   readonly artifact_base_dir: string;
   readonly artifact_paths: Readonly<Record<string, string>>;
+  /** The absolute project artifact directory, `{artifact_base_dir}/projects/{project_slug}`. */
+  readonly project_artifact_dir?: string;
+  /** The absolute ticket artifact directory, `{project_artifact_dir}/tickets/{ticket_id}`; `null` without a ticket. */
+  readonly ticket_dir?: string | null;
   readonly created_at: string;
   /** The resolved ticket URL, stored so that consumers can prefer it over reconstructing one from `ticket_id`. */
   readonly ticket_url?: string | null;

@@ -64,6 +64,10 @@ export function composeManifest(input: {
     }
   }
 
+  const projectArtifactDir = path.join(artifactBaseDir, 'projects', projectSlug);
+  const ticketDir =
+    ticketResult.ticket_id === null ? null : path.join(projectArtifactDir, 'tickets', ticketResult.ticket_id);
+
   const { ticketBaseUrl, ticketUrl } = resolveTicketUrls(preferences, ticketResult.ticket_id);
   const prUrl = resolvePrUrl(scm, ticketResult.ticket_id, remoteUrl);
 
@@ -80,6 +84,8 @@ export function composeManifest(input: {
     branch_name: branchName,
     artifact_base_dir: artifactBaseDir,
     artifact_paths: artifactPaths,
+    project_artifact_dir: projectArtifactDir,
+    ticket_dir: ticketDir,
     created_at: formatIsoUtc(now),
     ticket_url: ticketUrl,
     ticket_base_url: ticketBaseUrl,

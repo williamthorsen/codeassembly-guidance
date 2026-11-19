@@ -398,6 +398,43 @@ describe(composeManifest, () => {
       expect(manifest.artifact_base_dir).toBe('/Users/test/ai-artifacts');
     });
 
+    it.each([
+      { branchName: '100', ticketRefPrefix: undefined, ticketDir: 'tickets/100' },
+      { branchName: '100', ticketRefPrefix: 'ABC-', ticketDir: 'tickets/ABC-100' },
+      { branchName: 'PR-12', ticketRefPrefix: undefined, ticketDir: 'tickets/PR-12' },
+    ])('composes ticket_dir for branch $branchName under prefix $ticketRefPrefix', (testCase) => {
+      const manifest = composeManifest({
+        preferences: {
+          project:
+            testCase.ticketRefPrefix === undefined
+              ? { slug: 'x' }
+              : { slug: 'x', ticket_ref_prefix: testCase.ticketRefPrefix },
+        },
+        projectStage: NO_STAGE,
+        subdirectoryStages: [],
+        branchName: testCase.branchName,
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.project_artifact_dir).toBe('/Users/test/ai-artifacts/projects/x');
+      expect(manifest.ticket_dir).toBe(`/Users/test/ai-artifacts/projects/x/${testCase.ticketDir}`);
+    });
+
+    it('emits a null ticket_dir and an absolute project_artifact_dir without a ticket', () => {
+      const manifest = composeManifest({
+        preferences: { project: { slug: 'x' }, artifacts: { base_dir: 'artifacts' } },
+        projectStage: NO_STAGE,
+        subdirectoryStages: [],
+        branchName: 'main',
+        cwd: CWD,
+        home: HOME,
+        now: NOW,
+      });
+      expect(manifest.ticket_dir).toBeNull();
+      expect(manifest.project_artifact_dir).toBe('/Users/test/repos/codeassembly/artifacts/projects/x');
+    });
+
     it('defaults artifact_paths and merges configured overrides', () => {
       const withDefaults = composeManifest({
         preferences: { project: { slug: 'x' } },
