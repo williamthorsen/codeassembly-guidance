@@ -117,7 +117,7 @@ Each batch has a ticket of its own, which covers the assessment that produced th
 
 `triage-spike-findings` supports GitHub and Jira. The platform is where the tickets live, resolved as {skill?:create-ticket} step 3 resolves it, not the code host that the session-context manifest's `scm` names: A Bitbucket repository can keep its tickets in Jira.
 
-On a ticket on any other platform, the skill that produced the findings does not name the triage as its next step: It names the items that the findings leave for disposal by hand, and offers the [closing post](#closing-post) when a ticket governs the run. `triage-spike-findings` stops at its preflight on such a ticket.
+On a ticket on any other platform, the skill that produced the findings does not name the triage as its next step: It names the items that the findings leave for disposal by hand, and offers the [closing post](#closing-post) as it does when the findings leave nothing to triage. `triage-spike-findings` stops at its preflight on such a ticket.
 
 ## Aligning a spike
 

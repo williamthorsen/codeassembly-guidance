@@ -9,7 +9,7 @@ supported-harnesses: [claude]
 
 Find the code and tests in one unit of a codebase that would be written differently if they were written afresh today, and propose one change for each. Each lens is a {subagent:code-health-assessor} that reads the unit without seeing any other lens's report. You run the sensors, write the brief that every lens reads, dispatch the lenses, check every proposal's evidence against the tree, and merge the proposals into one findings artifact.
 
-The skill does not grade anything: The findings artifact is the input of `triage-spike-findings`, which grades each proposal, has a challenger argue against every grade, and decides what becomes a ticket. When the findings leave nothing to triage, its remote writes are the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and the ticket's close, both made on one consent from the developer; otherwise the triage round makes both.
+The skill does not grade anything: The findings artifact is the input of `triage-spike-findings`, which grades each proposal, has a challenger argue against every grade, and decides what becomes a ticket. When the findings leave nothing to triage, or the ticket is not on a [triage platform](../_data/spike-conventions.md#triage-platforms), its remote writes are the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and the ticket's close, both made on one consent from the developer; otherwise the triage round makes both.
 
 ## Inputs
 

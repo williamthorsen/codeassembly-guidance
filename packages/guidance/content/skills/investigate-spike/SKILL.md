@@ -6,7 +6,7 @@ user-invocable: true
 
 # Investigate spike
 
-Carry out a spike plan, the `## Investigation steps` / `## Deliverable` shape defined in [spike conventions](../_data/spike-conventions.md). A spike produces findings rather than a diff: The run ends with a findings artifact and either the offer of the closing post or, when the findings propose work, the recommendation of the triage round that offers it, not with commits. The skill re-resolves everything it needs from the environment, so it works the same in the session that produced the plan and in a fresh one.
+Carry out a spike plan, the `## Investigation steps` / `## Deliverable` shape defined in [spike conventions](../_data/spike-conventions.md). A spike produces findings rather than a diff: The run ends with a findings artifact and either the offer of the closing post or, when the findings propose work on a [triage platform](../_data/spike-conventions.md#triage-platforms), the recommendation of the triage round that offers it, not with commits. The skill re-resolves everything it needs from the environment, so it works the same in the session that produced the plan and in a fresh one.
 
 ## Arguments
 

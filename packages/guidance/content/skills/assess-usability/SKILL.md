@@ -9,7 +9,7 @@ supported-harnesses: [claude]
 
 Find where a product would lead its users to conclude that it is broken or unfinished. Each lens is a {subagent:usability-assessor} that walks its use cases in a browser or, for a command-line product, in a shell, without seeing any other lens's report. You prepare the targets, write the brief that every lens reads, dispatch the lenses one at a time, and merge their reports into one findings artifact.
 
-When the findings leave nothing to triage, the skill's remote writes are the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and the ticket's close, both made on one consent from the developer; otherwise the triage round makes both. It does not create a ticket or edit any other issue. The findings artifact is the input of `triage-spike-findings`, which decides what becomes a ticket.
+When the findings leave nothing to triage, or the ticket is not on a [triage platform](../_data/spike-conventions.md#triage-platforms), the skill's remote writes are the [closing post](../_data/spike-conventions.md#closing-post) on the ticket and the ticket's close, both made on one consent from the developer; otherwise the triage round makes both. It does not create a ticket or edit any other issue. The findings artifact is the input of `triage-spike-findings`, which decides what becomes a ticket.
 
 ## Inputs
 
