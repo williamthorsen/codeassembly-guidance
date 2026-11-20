@@ -160,11 +160,10 @@ describe(`${checkGate.name} on a Jira record`, () => {
     expect(checkGate(record)).toEqual([]);
   });
 
-  it('refuses an umbrella and an item id shaped like a key', () => {
+  it('accepts a key as the umbrella and refuses an item id shaped like a key', () => {
     const record = buildJiraRecord({ umbrella: 'SCRATCHA-281', items: [buildItem({ id: 'AB-1' })] });
 
     expect(checkGate(record)).toEqual([
-      { id: 'umbrella', clause: 'a Jira record does not have an umbrella' },
       { id: 'AB-1', clause: 'an item id on a Jira record is not shaped like a work item key' },
     ]);
   });
@@ -224,8 +223,13 @@ describe(findMissingTickets, () => {
     expect(findMissingTickets(record)).toEqual({ items: [], umbrella: false });
   });
 
-  it('never reports the umbrella of a Jira record missing', () => {
-    expect(findMissingTickets(buildJiraRecord())).toEqual({ items: ['C1'], umbrella: false });
+  it('reports the umbrella of a Jira record missing', () => {
+    expect(findMissingTickets(buildJiraRecord())).toEqual({ items: ['C1'], umbrella: true });
+  });
+
+  it('does not require an umbrella once every ticket item has a ticket', () => {
+    const record = buildJiraRecord({ items: [buildItem({ id: 'C1', ticket: 'SCRATCHA-282' })] });
+    expect(findMissingTickets(record)).toEqual({ items: [], umbrella: false });
   });
 
   it('reports nothing missing once every number is recorded', () => {

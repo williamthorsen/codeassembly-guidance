@@ -102,9 +102,10 @@ describe(renderDispositionsComment, () => {
 });
 
 describe(`${renderDispositionsComment.name} on a Jira record`, () => {
-  it('renders keys verbatim and omits the umbrella sentence', () => {
+  it('renders keys verbatim and names the umbrella', () => {
     const comment = renderDispositionsComment(
       buildJiraRecord({
+        umbrella: 'SCRATCHA-281',
         items: [
           buildItem({ id: 'C1', ticket: 'SCRATCHA-282', blockedBy: ['C2', 'SCRATCHA-9'] }),
           buildItem({ id: 'C2', ticket: 'SCRATCHA-283', value: 'must-have' }),
@@ -119,8 +120,16 @@ describe(`${renderDispositionsComment.name} on a Jira record`, () => {
     );
     expect(comment).toContain('| comment | medium | should-have | SCRATCHA-272 |');
     expect(comment).toContain('## Follow-ups\n\n- Follow-up triage ticket SCRATCHA-290');
-    expect(comment).not.toContain('umbrella');
+    expect(comment).toContain('The umbrella for the new tickets is SCRATCHA-281.');
     expect(comment).not.toContain('#SCRATCHA');
+  });
+
+  it('omits the umbrella sentence when every ticket was created without an umbrella', () => {
+    const comment = renderDispositionsComment(
+      buildJiraRecord({ items: [buildItem({ id: 'C1', ticket: 'SCRATCHA-282' })] }),
+    );
+
+    expect(comment).not.toContain('umbrella');
   });
 });
 

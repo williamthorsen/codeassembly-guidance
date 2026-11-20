@@ -1,7 +1,7 @@
 /** Renders the dispositions comment and the per-issue comments from a dispositions record. */
 import { renderEvidenceBlock } from './evidence.ts';
 import { orderItems } from './order.ts';
-import { type DispositionsRecord, hasTicketItem, type IssueReference, type Item } from './schemas.ts';
+import { type DispositionsRecord, findMissingTickets, type IssueReference, type Item } from './schemas.ts';
 
 /** The text that stands in for a ticket that step 7 has not yet created. */
 export const PENDING = '(pending)';
@@ -13,11 +13,12 @@ export function formatReference(reference: IssueReference): string {
 
 /**
  * Renders the comment that the skill posts on the triage ticket: the table in display order, the challenge, the notes,
- * and the evidence block when any item has evidence. Only a GitHub record names an umbrella.
+ * and the evidence block when any item has evidence. The comment names the umbrella once it exists or while it is
+ * missing.
  */
 export function renderDispositionsComment(record: DispositionsRecord): string {
   const umbrella = record.umbrella === null ? PENDING : formatReference(record.umbrella);
-  const hasUmbrella = record.platform === 'github' && hasTicketItem(record);
+  const hasUmbrella = record.umbrella !== null || findMissingTickets(record).umbrella;
   const umbrellaSentence = hasUmbrella ? ` The umbrella for the new tickets is ${umbrella}.` : '';
   const lines = [
     `## Dispositions of the findings of ${record.source}`,
