@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 import { orderItems } from './order.ts';
-import { CommitSchema, DISPOSITIONS, type DispositionsRecord, type Item } from './schemas.ts';
+import { CommitSchema, DISPOSITIONS, type DispositionsRecord, IssueReferenceSchema, type Item } from './schemas.ts';
 
 const MARKER = 'codeassembly:triage-evidence';
 const VERSION = 1;
@@ -14,7 +14,7 @@ const BLOCK_PATTERN = new RegExp(String.raw`<!-- ${MARKER} v(\d+)\r?\n([\s\S]*?)
 export const EvidenceBlockSchema = z.object({
   version: z.literal(VERSION),
   source: z.string().min(1),
-  triageTicket: z.number().int().positive(),
+  triageTicket: IssueReferenceSchema,
   commit: CommitSchema,
   items: z.array(
     z.object({
@@ -22,7 +22,7 @@ export const EvidenceBlockSchema = z.object({
       key: z.string().min(1),
       paths: z.array(z.string().min(1)).min(1),
       disposition: z.enum(DISPOSITIONS),
-      /** The ticket number of a `ticket` item (null until created), the issue of a `comment`, the target id of a `merge`. */
+      /** The ticket of a `ticket` item (null until created), the issue of a `comment`, the target id of a `merge`. */
       where: z.union([z.number().int().positive(), z.string().min(1), z.null()]),
     }),
   ),

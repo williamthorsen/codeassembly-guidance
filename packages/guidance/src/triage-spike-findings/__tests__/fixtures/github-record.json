@@ -1,0 +1,72 @@
+{
+  "source": "spike #270",
+  "triageTicket": 278,
+  "umbrella": 281,
+  "commit": "0123456789abcdef0123456789abcdef01234567",
+  "items": [
+    {
+      "id": "10",
+      "title": "Header search ranking",
+      "disposition": "ticket",
+      "confidence": "medium",
+      "value": "should-have",
+      "reason": "The one cross-page path to a book cannot find a shared title.",
+      "target": null,
+      "ticket": 282,
+      "blockedBy": ["12", 412],
+      "evidence": { "key": "src/search.ts:ranking", "paths": ["src/search.ts"] },
+      "challenge": {
+        "argument": "The search already ranks by title.",
+        "outcome": "defended",
+        "note": "Authors still collide."
+      }
+    },
+    {
+      "id": "12",
+      "title": "Search index rebuild",
+      "disposition": "ticket",
+      "confidence": "high",
+      "value": "must-have",
+      "reason": "The index is stale after an import.",
+      "target": null,
+      "ticket": 283,
+      "challenge": { "argument": "Imports are rare.", "outcome": "modified", "note": "Scoped to bulk imports." }
+    },
+    {
+      "id": "24",
+      "title": "Sign-in error pattern",
+      "disposition": "comment",
+      "confidence": "medium",
+      "value": "nice-to-have",
+      "reason": "The sign-in ticket already covers the error states.",
+      "target": 272,
+      "ticket": null,
+      "evidence": { "key": "src/sign-in.ts:errors", "paths": ["src/sign-in.ts"] },
+      "challenge": { "argument": "It is a separate concern.", "outcome": "defended", "note": "Same component." }
+    },
+    {
+      "id": "27",
+      "title": "Collection handle rule",
+      "disposition": "merge",
+      "confidence": "medium",
+      "value": "nice-to-have",
+      "reason": "Part of the ranking work.",
+      "target": "10",
+      "ticket": null,
+      "challenge": { "argument": "It stands alone.", "outcome": "defended", "note": "Same query." }
+    },
+    {
+      "id": "16",
+      "title": "Status as a word",
+      "disposition": "drop",
+      "confidence": "low",
+      "value": "questionable",
+      "reason": "The icon already has a label.",
+      "target": null,
+      "ticket": null,
+      "challenge": { "argument": "Some readers miss the icon.", "outcome": "abandoned", "note": "" }
+    }
+  ],
+  "challengeSummary": "A subagent without session context argued against every recommendation.",
+  "notes": ["The labels were created directly.", "Follow-up triage ticket #290 takes the second batch."]
+}

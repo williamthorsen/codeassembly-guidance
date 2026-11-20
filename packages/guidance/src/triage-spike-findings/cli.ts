@@ -102,8 +102,9 @@ async function runCheckLabels(flags: ParsedFlags, context: CommandContext): Prom
 }
 
 /**
- * Writes the dispositions comment and one comment per issue named by a `comment` disposition under `--out`. Without
- * `--preview`, refuses while a `ticket` item or the umbrella does not have a number, and writes nothing.
+ * Writes the dispositions comment and one comment per issue named by a `comment` disposition under `--out`, naming each
+ * comment file for its issue's number or key. Without `--preview`, refuses while a `ticket` item or a GitHub record's
+ * umbrella does not have a ticket, and writes nothing.
  */
 function runRender(flags: ParsedFlags, context: CommandContext): CommandResult {
   const record = readRecord(flags, context);
@@ -127,11 +128,15 @@ function runRender(flags: ParsedFlags, context: CommandContext): CommandResult {
   return { ok: true, preview: flags.has('preview'), dispositionsComment: commentPath, issueComments };
 }
 
-/** Parses the record at `--file`, applies the gate, and reports the item counts and the items' display order. */
+/**
+ * Parses the record at `--file`, applies the gate, and reports the platform, the item counts, and the items' display
+ * order.
+ */
 function runValidate(flags: ParsedFlags, context: CommandContext): CommandResult {
   const record = readRecord(flags, context);
   return {
     ok: true,
+    platform: record.platform,
     items: record.items.length,
     byDisposition: countBy(record.items.map((item) => item.disposition)),
     byConfidence: countBy(record.items.map((item) => item.confidence)),

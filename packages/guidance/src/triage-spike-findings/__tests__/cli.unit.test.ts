@@ -8,7 +8,7 @@ import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
 import { type CommandContext, runCli } from '../cli.ts';
 import { LABEL_FAMILIES } from '../labels.ts';
 import type { DispositionsRecord } from '../schemas.ts';
-import { buildItem, buildRecord } from '../test-utils/build-record.ts';
+import { buildItem, buildJiraRecord, buildRecord } from '../test-utils/build-record.ts';
 
 describe(runCli, () => {
   let root: string;
@@ -56,6 +56,7 @@ describe(runCli, () => {
 
       expect(result).toEqual({
         ok: true,
+        platform: 'github',
         items: 4,
         byDisposition: { comment: 1, drop: 1, merge: 1, ticket: 1 },
         byConfidence: { low: 1, medium: 3 },
@@ -63,6 +64,12 @@ describe(runCli, () => {
         missingTickets: { items: ['10'], umbrella: true },
         order: ['10', '27', '24', '16'],
       });
+    });
+
+    it('reports the platform of a Jira record', async () => {
+      const result = await runCli(['validate', '--file', writeRecord(root, buildJiraRecord())], context);
+
+      expect(result).toMatchObject({ ok: true, platform: 'jira', missingTickets: { items: ['C1'], umbrella: false } });
     });
 
     it('reports record-not-found for a missing file and invalid-record for a malformed one', async () => {
@@ -146,6 +153,23 @@ describe(runCli, () => {
         issueComments: [{ issue: 272, path: path.join(root, 'out', 'comment-272.md') }],
       });
       expect(readFileSync(path.join(root, 'out', 'dispositions-comment.md'), 'utf8')).toContain('#282');
+    });
+
+    it('writes a Jira record without an umbrella, naming each comment file for its key', async () => {
+      const record = buildJiraRecord({
+        items: [
+          buildItem({ id: 'C1', ticket: 'SCRATCHA-282' }),
+          buildItem({ id: 'C2', disposition: 'comment', target: 'SCRATCHA-272' }),
+        ],
+      });
+
+      const result = await runCli(['render', '--file', writeRecord(root, record), '--out', 'out'], context);
+
+      expect(result).toMatchObject({
+        ok: true,
+        preview: false,
+        issueComments: [{ issue: 'SCRATCHA-272', path: path.join(root, 'out', 'comment-SCRATCHA-272.md') }],
+      });
     });
   });
 });
