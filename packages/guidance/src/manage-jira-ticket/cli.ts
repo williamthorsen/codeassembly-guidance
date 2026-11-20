@@ -1,7 +1,8 @@
 /* eslint n/no-process-exit: off -- CLI entry point: The process must exit with the helper's resolved exit code, and `main` runs only behind the `isEntryPoint()` guard, never on import as a library. */
 /* eslint unicorn/no-process-exit: off -- same as above. */
 // CLI entry point for the manage-jira-ticket helper: resolves where a Jira work item goes, compares `acli`'s active site
-// with a ticket's site, converts a Markdown body to ADF, and creates the work item through `acli` exactly once.
+// with a ticket's site, converts a Markdown body to ADF, creates the work item through `acli` exactly once, and closes
+// a work item with an optional post.
 
 import { execFile } from 'node:child_process';
 import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -19,14 +20,16 @@ import { isEnoent, isRecord } from '../lib/type-guards.ts';
 import { loadWorkTypes } from '../lib/work-types.ts';
 import { resolveProjectRoot } from '../shared/resolve-project-root.ts';
 import { readSiteCheck, type SiteCheck } from './check-site.ts';
+import { closeWorkItem, readFirstLine } from './close-work-item.ts';
 import { convertMarkdownToAdf } from './convert-body.ts';
 import { type AcliResult, createWorkItem } from './create-work-item.ts';
-import { readJiraPreferences, resolveTarget, type Target } from './resolve-target.ts';
+import { readJiraPreferences, resolveDoneStatus, resolveTarget, type Target } from './resolve-target.ts';
 
 const execFileAsync = promisify(execFile);
 
 const USAGE = `usage:
   manage-jira-ticket check-site --target <url-or-host>
+  manage-jira-ticket close --key <key> [--post <md>]
   manage-jira-ticket resolve-target --work-type <type>
   manage-jira-ticket convert-body --body-file <md> --out <path>
   manage-jira-ticket create --summary <text> --body-file <md> --work-type <type> [--parent <key>]`;
@@ -38,6 +41,9 @@ async function main(): Promise<void> {
     switch (subcommand) {
       case 'check-site':
         await runCheckSite(argv);
+        break;
+      case 'close':
+        await runClose(argv);
         break;
       case 'convert-body':
         await runConvertBody(argv);
@@ -123,6 +129,30 @@ async function readTicketBaseUrl(projectRoot: string): Promise<string | undefine
   return baseUrl === '' ? undefined : baseUrl;
 }
 
+/**
+ * Compares `acli`'s active site with `baseUrl`'s site and returns the active site, or null when `baseUrl` is unset and
+ * the check does not run. On a mismatch, prints the refusal, prefixing its warning with `action`, and exits 1.
+ */
+async function refuseOnSiteMismatch(baseUrl: string | undefined, action: string): Promise<string | null> {
+  if (baseUrl === undefined) {
+    return null;
+  }
+  const check = await readSiteCheck(baseUrl, runAcli);
+  if (check.match) {
+    return check.activeSite;
+  }
+
+  const warning = `${action}: ${describeSiteMismatch(check)}`;
+  writeJson({
+    activeSite: check.activeSite,
+    fallback: check.activeSite === null ? 'site-unreadable' : 'wrong-site',
+    targetSite: check.targetSite,
+    warning,
+  });
+  process.stderr.write(`manage-jira-ticket: ${warning}\n`);
+  process.exit(1);
+}
+
 /** Runs `acli` without a shell and reports its exit code and output; throws when `acli` cannot be started. */
 async function runAcli(args: readonly string[]): Promise<AcliResult> {
   try {
@@ -155,6 +185,49 @@ async function runCheckSite(argv: readonly string[]): Promise<void> {
 
   process.stderr.write(`manage-jira-ticket: ${describeSiteMismatch(check)}\n`);
   process.exitCode = 1;
+}
+
+/**
+ * Posts `--post` on the work item unless already posted, then transitions it to the repository's done status unless its
+ * status category is done. Exits non-zero, after printing the result, when the site check refuses or a call fails.
+ */
+async function runClose(argv: readonly string[]): Promise<void> {
+  const values = parseValues(
+    argv,
+    [
+      { name: 'key', takesValue: true },
+      { name: 'post', takesValue: true },
+    ],
+    ['key'],
+  );
+  const postFile = values['post'] === '' ? undefined : values['post'];
+  const adf = postFile === undefined ? undefined : convertMarkdownToAdf(await readBody(postFile));
+  const firstLine = adf === undefined ? '' : readFirstLine(adf);
+  if (adf !== undefined && firstLine === '') {
+    throw new Error(`the post's first block does not contain any text: ${postFile}`);
+  }
+
+  const projectRoot = resolveProjectRoot();
+  const doneStatus = resolveDoneStatus(readJiraPreferences(await readProjectPreferences(projectRoot)));
+  await refuseOnSiteMismatch(await readTicketBaseUrl(projectRoot), 'Jira work item not closed');
+
+  const scratchDir = await mkdtemp(path.join(tmpdir(), 'manage-jira-ticket-'));
+  try {
+    let post: { adfPath: string; firstLine: string } | undefined;
+    if (adf !== undefined) {
+      const adfPath = path.join(scratchDir, 'post.json');
+      await writeFile(adfPath, JSON.stringify(adf));
+      post = { adfPath, firstLine };
+    }
+    const outcome = await closeWorkItem({ doneStatus, key: values['key'] ?? '', post }, runAcli);
+    writeJson(outcome.result);
+    if (!outcome.ok) {
+      process.stderr.write(`manage-jira-ticket: ${outcome.result.error ?? 'close failed'}\n`);
+      process.exitCode = 1;
+    }
+  } finally {
+    await rm(scratchDir, { force: true, recursive: true });
+  }
 }
 
 /** Converts the body to ADF and writes it to `--out`. */
@@ -198,23 +271,7 @@ async function runCreate(argv: readonly string[]): Promise<void> {
   }
 
   // Check the site before any other `acli` call, because `acli` acts on its active site whatever the project key names.
-  const baseUrl = await readTicketBaseUrl(projectRoot);
-  let activeSite: string | null = null;
-  if (baseUrl !== undefined) {
-    const check = await readSiteCheck(baseUrl, runAcli);
-    if (!check.match) {
-      const warning = `Jira work item not created: ${describeSiteMismatch(check)}`;
-      writeJson({
-        activeSite: check.activeSite,
-        fallback: check.activeSite === null ? 'site-unreadable' : 'wrong-site',
-        targetSite: check.targetSite,
-        warning,
-      });
-      process.stderr.write(`manage-jira-ticket: ${warning}\n`);
-      process.exit(1);
-    }
-    activeSite = check.activeSite;
-  }
+  const activeSite = await refuseOnSiteMismatch(await readTicketBaseUrl(projectRoot), 'Jira work item not created');
 
   const scratchDir = await mkdtemp(path.join(tmpdir(), 'manage-jira-ticket-'));
   try {
