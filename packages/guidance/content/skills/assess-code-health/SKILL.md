@@ -122,8 +122,8 @@ Save the document with {skill:save-artifact} as a ticket-level `code-health-find
 
 Give the developer the findings artifact's path and one line of counts: proposals ranked, tracked, and dropped.
 
-When the findings rank any proposal, name `triage-spike-findings` as the next step, with the findings artifact's path as its input, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
+When the findings rank any proposal and the ticket is on a [triage platform](../_data/spike-conventions.md#triage-platforms), name `triage-spike-findings` as the next step, with the findings artifact's path as its input, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
 
-Otherwise, offer to close the ticket with the closing post in the same response's action-items block. The post's contents, the consent, and the checks that a rerun relies on are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the counts, and the post names the proposals that a prior disposition or an issue already tracks.
+Otherwise, name the proposals left for disposal by hand when there are any, and offer to close the ticket with the closing post in the same response's action-items block. The post's contents, the consent, and the checks that a rerun relies on are stated in [Closing post](../_data/spike-conventions.md#closing-post). For an assessment, the answers that the post gives are the counts, and the post names the proposals that a prior disposition or an issue already tracks.
 
 <!-- guidance-hook: implementation-preferences -->

@@ -1,6 +1,6 @@
 ---
 name: triage-spike-findings
-description: Dispose of the findings that a spike, a usability assessment, a code-health assessment, or a performance analysis left without a ticket. Inventories every undisposed item, grades each one's confidence and value, has a subagent without session context challenge every grade, and then creates the graded tickets, under an umbrella on GitHub, and records every disposition on the triage ticket, on GitHub or Jira. Use when a findings artifact has proposals or ideas that the existing tickets have not absorbed.
+description: Dispose of the findings that a spike, a usability assessment, a code-health assessment, or a performance analysis left without a ticket. Inventories every undisposed item, grades each one's confidence and value, has a subagent without session context challenge every grade, and then creates the graded tickets, under an umbrella on GitHub, and records every disposition on the triage ticket. Use when a findings artifact has proposals or ideas that the existing tickets have not absorbed.
 user-invocable: true
 ---
 
@@ -18,7 +18,7 @@ Dispose of every item that a findings artifact leaves undisposed: the proposals,
 
 A run triages one [findings batch](../_data/spike-conventions.md#findings-batches) on one triage ticket.
 
-The run supports GitHub, through `gh`, and Jira. Step 1 resolves the platform, and every later step reads it from the record's `platform`. Each step states the GitHub path; a sentence that opens with "On Jira" states that step's Jira counterpart.
+The run supports each [triage platform](../_data/spike-conventions.md#triage-platforms), GitHub through `gh`. Step 1 resolves the platform, and every later step reads it from the record's `platform`. Each step states the GitHub path; a sentence that opens with "On Jira" states that step's Jira counterpart.
 
 ## Grades and dispositions
 
@@ -44,7 +44,7 @@ Resolve `{ticket_dir}` per {skill:save-artifact}, and write every working file u
 
 ### 1. Preflight
 
-1. Resolve the platform as {skill:create-ticket} step 3 resolves it: from the integrations that `.agents/preferences.yaml` enables, then from the git remote. The session-context manifest's `scm` names the code host, which does not decide where the tickets live. On any platform other than GitHub and Jira, stop and report that the skill does not support it.
+1. Resolve the platform as {skill:create-ticket} step 3 resolves it: from the integrations that `.agents/preferences.yaml` enables, then from the git remote. The session-context manifest's `scm` names the code host, which does not decide where the tickets live. On a platform that is not a [triage platform](../_data/spike-conventions.md#triage-platforms), stop and report that the skill does not support it.
 2. On GitHub, run `gh auth status` and `gh repo view --json nameWithOwner`. If either fails, stop and report why. Then run the helper's `check-labels`. When `complete` is false, stop: Name each missing label, and state that the common preset of `release-kit sync-labels` supplies both families (the `confidence:` family from williamthorsen/node-monorepo-tools#1017), so the repository takes them by upgrading release-kit and regenerating its label file rather than by creating them by hand.
 3. On Jira, identify the client per {skill?:update-jira-ticket}. When it is `acli`, run that skill's site check against the triage ticket's URL, or against `ticket.base_url` when the URL is not known. Read the triage ticket through the client, and stop when no client can read it.
 4. Create `{ticket_dir}/triage/`, and save the findings there when they came from a URL.
