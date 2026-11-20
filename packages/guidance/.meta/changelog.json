@@ -1,5 +1,266 @@
 [
   {
+    "version": "0.8.0",
+    "date": "2026-11-20",
+    "sections": [
+      {
+        "title": "🎉 Features",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Changes `review-branch` to reflow each comment line that the diff adds or modifies and that exceeds the `max_line_length` set by `.editorconfig`, commit the reflow with `create-commit`, and list it in a new \"Applied reflows\" section of the review, rather than report it as a finding; a review of a pull request, or of a file with uncommitted changes, still reports the line as a finding. (#196)",
+            "hash": "8a5c2a662f539e576aed2da1034bab779cfa6b77",
+            "entry": 1
+          },
+          {
+            "description": "Adds a width item to the diff-audit checklist used by `implement-plan`, `respond-to-review`, and `revise-comments`, which directs the agent to reflow each comment line in its own hunks that exceeds the `.editorconfig` `max_line_length`, changing only whitespace. (#196)",
+            "hash": "8a5c2a662f539e576aed2da1034bab779cfa6b77",
+            "entry": 2
+          },
+          {
+            "description": "Adds to the `recommended` collection the `cross-repo-migration-conventions` rulebook, which covers the umbrella ticket and its one child per repository, shared runtimes moved before the repositories that use them, contract changes decided before any child acts, and a comment on the umbrella that each child posts before merge. (#197)",
+            "hash": "5e8a4d7f278cf5b61c87741fbf9d8452e220ba91",
+            "entry": 1
+          },
+          {
+            "description": "Adds to `williamthorsen-ticketing-preferences` a reference to `cross-repo-migration-conventions` for a change that migrates many repositories to a new version or convention. (#197)",
+            "hash": "5e8a4d7f278cf5b61c87741fbf9d8452e220ba91",
+            "entry": 2
+          },
+          {
+            "description": "Adds a requirement to the `williamthorsen-ticketing-preferences` rulebook to estimate the layers, subsystems, and approximate source and test lines of work that spans several layers or adds a new subsystem before its ticket count is decided, and to recommend the split when each piece can be merged and verified on its own, and has the `design-and-plan` ticket checkpoint present that split as the recommended option of a menu. (#202)",
+            "hash": "576597d420cc994035242d478d1af6bab3cdffb3",
+            "entry": 1
+          },
+          {
+            "description": "Directs `list-implementation-order` to pass the repository in which a ticket outside GitHub is implemented, through the helper's new `--external \"[REPOSITORY:]KEY=Title\"` form, which the helper uses to label that ticket with the repository's prefix, such as `mc.MAC-7`. (#206)",
+            "hash": "ac868de813bcc018619ed68c3b3d0947ddb18515",
+            "entry": 1
+          },
+          {
+            "description": "Lower-cases the repository prefixes in the implementation-order list, such as `cg.12` in place of `CG.12`, to set them apart from an upper-case Jira key. (#206)",
+            "hash": "ac868de813bcc018619ed68c3b3d0947ddb18515",
+            "entry": 2
+          },
+          {
+            "description": "Adds a durability check to `summarize-change` that rejects a lede, entry, or migration stating the change's delivery state in a main or subordinate clause, and adds a step that the change needs in order to take effect, such as a deploy or a sync, to the facts that `## Notes for reviewers` contains. (#207)",
+            "hash": "67476f398e10c9936af78dca7bef03492c6b7ef6",
+            "entry": 2
+          },
+          {
+            "description": "Adds a convention to `create-ticket`, `design-and-plan`, and `align-ticket-with-implementation` that limits a code ticket's acceptance criteria to those that its pull request's tests, checks, or review can show to hold or fail at merge, and directs the agent to move a criterion that depends on elapsed time, deployed state, or a run against shared data to the ticket that consumes the change. (#208)",
+            "hash": "0af73fb2285962ad29ae43315926613ab2c7d6ea",
+            "entry": 1
+          },
+          {
+            "description": "Adds a criterion-settleability facet to the ticket evaluation used by `design-and-plan` and by the advisability dimension of `assess-ticket`, which reports each acceptance criterion of a code ticket that its pull request cannot show to hold or fail at merge, together with the ticket to which the criterion moves. (#208)",
+            "hash": "0af73fb2285962ad29ae43315926613ab2c7d6ea",
+            "entry": 2
+          },
+          {
+            "description": "Adds the `write-progress-report` skill, which writes a customer-facing progress report from a tracker or an `--items` file, with one section per workstream that states its health and lists the items that need the customer's input, are done, are in progress, or are planned. (#213)",
+            "hash": "57e86c0026c03c7cc0aaf7910cefcea5e0e11968",
+            "entry": 1
+          },
+          {
+            "description": "Adds `list-gh-progress-items`, which `write-progress-report` calls for `--source github` to read a repository's GitHub issues as report items, treating each parent issue as a workstream and each issue labeled `needs-input` as an ask of the customer. (#213)",
+            "hash": "57e86c0026c03c7cc0aaf7910cefcea5e0e11968",
+            "entry": 2
+          },
+          {
+            "description": "Adds `confluence` to the values of the `write-progress-report` skill's `--format` argument, which renders the report in Confluence storage format (the XML that Confluence stores as a page body), with health and statuses as status lozenges and dates as date elements that Confluence shows in the reader's locale. (#215)",
+            "hash": "b5ab073bc60964f3f312a9c7b21fb567475fda46",
+            "entry": 1
+          },
+          {
+            "description": "Adds `project_artifact_dir` (`{artifact_base_dir}/projects/{project_slug}`) and `ticket_dir` (`{project_artifact_dir}/tickets/{ticket_id}`, or `null` when the branch does not name a ticket) to the session-context manifest that `derive-session-context` emits. (#219)",
+            "hash": "34edc29acdf9512685e7f0a5744d7fc38a43e17c",
+            "entry": 1
+          },
+          {
+            "description": "Changes `save-artifact` and every other skill that saves or reads artifacts to take the artifact directories from the manifest, with `save-artifact` stating the fallback for a `null` `ticket_dir`, which generates a ticket ID and saves under `{project_artifact_dir}/tickets/{generated id}`. (#219)",
+            "hash": "34edc29acdf9512685e7f0a5744d7fc38a43e17c",
+            "entry": 2
+          },
+          {
+            "description": "Adds to the `recommended` collection the `visual-design-conventions` rulebook, which states the visual-design rules that hold whatever the style: padding inside a bordered or filled container, alignment with another block, marks only on the exception, colour as a way to tell kinds and states apart, an appearance that follows each element's role, the product's own name and favicon, and a browser check of each changed view. (#220)",
+            "hash": "017980bb12b8013681740e866e26e73606e5e686",
+            "entry": 1
+          },
+          {
+            "description": "Adds to the `williamthorsen` collection the `williamthorsen-visual-design-preferences` rulebook, which prefers a quiet colour scheme, with muted hues on neutral surfaces that each encode a kind or a state, to a monochrome one. (#220)",
+            "hash": "017980bb12b8013681740e866e26e73606e5e686",
+            "entry": 2
+          },
+          {
+            "description": "Adds `visual-design-conventions` beside `accessibility-conventions` to the floor that the planning, building, assessment, and review skills and the `usability-assessor` subagent set for an interface, including the rulebook's browser check of each changed view. (#220)",
+            "hash": "017980bb12b8013681740e866e26e73606e5e686",
+            "entry": 3
+          },
+          {
+            "description": "Adds the \"Consequence at the control\" rule to `accessibility-conventions`, which requires the explanation of an action that cannot be undone to be visible at rest, allows a toggletip for one that can be undone, and never accepts a hover-only tooltip as the only explanation. (#221)",
+            "hash": "1eda2181589f8ba6e19b955ded94b4e150db44e2",
+            "entry": 1
+          },
+          {
+            "description": "Opens `accessibility-conventions` with a statement that its rules are floors, and directs agents to aim beyond them by following an established model, as the named-model rule describes. (#221)",
+            "hash": "1eda2181589f8ba6e19b955ded94b4e150db44e2",
+            "entry": 2
+          },
+          {
+            "description": "Extends the helper-text rule of `ui-copy-conventions` to say what an action's consequence explanation states, and counts that explanation toward the copy budget's one line of helper text. (#221)",
+            "hash": "1eda2181589f8ba6e19b955ded94b4e150db44e2",
+            "entry": 3
+          },
+          {
+            "description": "Adds the consequence-at-the-control rule to the skills and the subagent that list the accessibility rules that they apply, among them `review-criteria`, `prepare-prototype-brief`, and the `usability-assessor` per-screen checklist. (#221)",
+            "hash": "1eda2181589f8ba6e19b955ded94b4e150db44e2",
+            "entry": 4
+          },
+          {
+            "description": "Adds a `close` subcommand to `manage-jira-ticket.mjs`, which posts a Markdown body as a comment unless an existing comment opens with the body's first line, then transitions the work item to the status that the new `integrations.jira.done_status` preference names (default `Done`) unless its status category is already done. (#225)",
+            "hash": "c9dad124c542ea2dc9206866e594c6730fa3c3fd",
+            "entry": 1
+          },
+          {
+            "description": "Extends the closing post of the spike skills and the close of the triage ticket in `triage-spike-findings` to Jira tickets through `manage-jira-ticket.mjs close`; the guidance previously named only `gh issue close`, which does not close a Jira ticket. (#225)",
+            "hash": "c9dad124c542ea2dc9206866e594c6730fa3c3fd",
+            "entry": 2
+          },
+          {
+            "description": "Extends `triage-spike-findings` to run on Jira as well as GitHub, adding a `platform` field to the dispositions record so that the record accepts work item keys such as `PROJ-123`, and creating each Jira ticket under the triage ticket's parent in place of an umbrella. (#227)",
+            "hash": "73f7d6f6f790f8c1127a8b8b3937ac6e9099ed6f",
+            "entry": 1
+          },
+          {
+            "description": "Makes `analyze-performance`, `assess-code-health`, `assess-usability`, and `investigate-spike` name `triage-spike-findings` as the next step only for a ticket on GitHub or Jira, and name the findings left for disposal by hand for a ticket on any other platform. (#227)",
+            "hash": "73f7d6f6f790f8c1127a8b8b3937ac6e9099ed6f",
+            "entry": 2
+          },
+          {
+            "description": "Adds a rule to the `williamthorsen-ticketing-preferences` rulebook that splits adding a package to a monorepo into two tickets: an empty scaffold with its documentation and package references that passes the repository's checks on its own, and the package's functionality, blocked by the scaffold. (#229)",
+            "hash": "a098104295002a9eba5773e7810b80533eb03451",
+            "entry": 1
+          },
+          {
+            "description": "Changes `create-commit` to record a scaffold that passes the repository's checks and is fully wired as a commit of its own, while a scaffold that a later change fills in still goes into that change. (#229)",
+            "hash": "a098104295002a9eba5773e7810b80533eb03451",
+            "entry": 2
+          },
+          {
+            "description": "Requires in the `visual-design-conventions` rulebook that text and elements within a block be start-aligned and a column of numbers end-aligned, limits centring to a viewport-centred dialog, a single-line label in a button or a tag, and an icon in a square control, and adds a matching item to the rulebook's browser check. (#231)",
+            "hash": "20fe892fe4444395510fe4cc3f0c5c6df874d78d",
+            "entry": 1
+          },
+          {
+            "description": "Adds the `--umbrella` flag to `create-ticket`, which on Jira creates the ticket at the issue type that the new `integrations.jira.umbrella_issue_type` preference sets, `Epic` by default, so that Jira accepts it as the parent of its child tickets. (#232)",
+            "hash": "7adea702846e20e626db2b7dd60e5ffe334242a2",
+            "entry": 2
+          }
+        ]
+      },
+      {
+        "title": "🐛 Bug fixes",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Fixes the issue that `assess-ticket` prescribed a plain numbered list of next-step actions, which the ambient option format overrode on every run, by including the shared option format and marking each action at the strength that the evidence behind its verdict supports. (#193)",
+            "hash": "a86f92f7f832c43f80087150da2a50dcfff978e6",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `condense-branch` left uncommitted changes in a stash shared by every worktree of the repository, or folded them into the condensed commit through `git add --all` when the stash was skipped. (#195)",
+            "hash": "e9f5f9b3e0086fb406a3bcdcaec9b72f0419a3c2",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `review-pr` passed its session-context values only to `review-branch`'s steps 4–9, which left out the step that saves the review. (#196)",
+            "hash": "8a5c2a662f539e576aed2da1034bab779cfa6b77",
+            "entry": 3
+          },
+          {
+            "description": "Fixes the issue that `list-implementation-order` listed an umbrella ticket, one that has sub-issues, as a ticket to implement, although its children do its work. (#199)",
+            "hash": "7db2b098233dddb213ec4cf4bcc45346ce44935e",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `entry-drafter` could write a change's delivery state, such as \"takes effect once deployed\", into the lede or an entry, which the merge commit keeps after the statement becomes false. (#207)",
+            "hash": "67476f398e10c9936af78dca7bef03492c6b7ef6",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `williamthorsen-workflow-preferences` did not stop a session from creating a branch, a worktree, or commits in a repository or ticket other than its own, and that its cross-repo sequencing rule told the session to make the upstream change itself. (#214)",
+            "hash": "38817a1523f1ccb3a58023dc4a0c5cb125eb104e",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `create-ticket` reversed a Jira blocked-by link by putting the blocker in the `--out` option of `acli jira workitem link create`, when `--in` is the option that names the blocker. (#227)",
+            "hash": "73f7d6f6f790f8c1127a8b8b3937ac6e9099ed6f",
+            "entry": 3
+          },
+          {
+            "description": "Fixes the issue that `triage-spike-findings` did not create an umbrella on Jira and parented each new ticket to the triage ticket's parent, by having it create the umbrella on Jira as on GitHub and parent each child ticket to it. (#232)",
+            "hash": "7adea702846e20e626db2b7dd60e5ffe334242a2",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that `create-ticket` gave a Jira child of a level-0 parent, such as a `Task`, the child's own issue type, which Jira rejects under that parent, and makes `create-ticket` create the child as a subtask at the type that the new `integrations.jira.subtask_issue_type` setting declares (`Subtask` by default). (#233)",
+            "hash": "c7d89d68a51daaa5187df82f9676918733f35d1f",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "⚡ Performance",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Cuts about 110 words from the shared `AGENTS.md` and the plain-speech partial, both loaded into every session, by removing a redundant example, a sentence of rationale, a repeated repair, and three sentences that describe skills or tickets without directing the agent. (#190)",
+            "hash": "c7776a100d7c8bd092d85302109cd9e57b9ecb6f",
+            "entry": 1
+          },
+          {
+            "description": "Cuts the prompt-formatting rules that the option-format and action-items guidance already states from the ambient `williamthorsen-collaboration-preferences` rulebook, which shrinks from 11,919 to 6,031 bytes in every session that loads it. (#191)",
+            "hash": "34a5760788c19ad9f96604f1e9b164156384d990",
+            "entry": 1
+          },
+          {
+            "description": "Removes the note \"(Reinforces the rule in `AGENTS.md`: intentional redundancy.)\" from the option-format directive in the skills that link to the option format, because the rulebook no longer states that rule. (#191)",
+            "hash": "34a5760788c19ad9f96604f1e9b164156384d990",
+            "entry": 2
+          },
+          {
+            "description": "Cuts the `williamthorsen-writing-preferences` rulebook from 9,234 to 7,246 bytes by moving three rarely needed reduced-object-relative cases into `skills/_data/reduced-object-relatives.md`, which the rule links to, and by removing passages that the remaining rules already direct. (#192)",
+            "hash": "1b5fc588292711ce63d38af5a7e8509eb01ea6db",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "♻️ Refactoring",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Replaces the inline `error instanceof Error ? error.message : String(error)` expression in the guidance helpers with `describeError` from `@williamthorsen/toolbelt.errors`, and moves the error report of the `codeassembly-validate-preferences` bin into a new `runValidatePreferencesCommand` function, which the bin and the helper's entry point both call. (#201)",
+            "hash": "32e94300de37e89f9ae13f24a038d36c6e6564c4",
+            "entry": 2
+          }
+        ]
+      },
+      {
+        "title": "⚙️ Tooling",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Regenerates the tracked `revise-prose.mjs` bundle from its current source, a rebuild that changes only identifiers renamed by the minifier. (#219)",
+            "hash": "34edc29acdf9512685e7f0a5744d7fc38a43e17c",
+            "entry": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.7.0",
     "date": "2026-11-14",
     "sections": [
