@@ -23,14 +23,20 @@ import { readSiteCheck, type SiteCheck } from './check-site.ts';
 import { closeWorkItem, readFirstLine } from './close-work-item.ts';
 import { convertMarkdownToAdf } from './convert-body.ts';
 import { type AcliResult, createWorkItem } from './create-work-item.ts';
-import { readJiraPreferences, resolveDoneStatus, resolveTarget, type Target } from './resolve-target.ts';
+import {
+  readJiraPreferences,
+  resolveChildIssueType,
+  resolveDoneStatus,
+  resolveTarget,
+  type Target,
+} from './resolve-target.ts';
 
 const execFileAsync = promisify(execFile);
 
 const USAGE = `usage:
   manage-jira-ticket check-site --target <url-or-host>
   manage-jira-ticket close --key <key> [--post <md>]
-  manage-jira-ticket resolve-target --work-type <type> [--umbrella]
+  manage-jira-ticket resolve-target --work-type <type> [--umbrella] [--parent-level <n>]
   manage-jira-ticket convert-body --body-file <md> --out <path>
   manage-jira-ticket create --summary <text> --body-file <md> --work-type <type> [--parent <key>] [--umbrella]`;
 
@@ -109,6 +115,17 @@ async function readBody(bodyFile: string): Promise<string> {
     }
   }
   throw new Error(`Body file missing or empty: ${bodyFile}`);
+}
+
+/** Reads `--parent-level` as an integer, treating an absent value as no parent. Throws on any other value. */
+function readParentLevel(value: string | undefined): number | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (!/^-?\d+$/.test(value)) {
+    throw new Error(`--parent-level must be an integer, not '${value}'`);
+  }
+  return Number(value);
 }
 
 /**
@@ -304,18 +321,33 @@ async function runCreate(argv: readonly string[]): Promise<void> {
   }
 }
 
-/** Resolves and prints the target for `--work-type`, as an umbrella under `--umbrella`. */
+/**
+ * Resolves and prints the target for `--work-type`, as an umbrella under `--umbrella`. Under `--parent-level`, the
+ * issue type is the one that the work item takes under a parent at that level, and `parentAllowed` reports whether
+ * Jira accepts that parent for it.
+ */
 async function runResolveTarget(argv: readonly string[]): Promise<void> {
   const { switches, values } = parseFlags(
     argv,
     [
+      { name: 'parent-level', takesValue: true },
       { name: 'umbrella', takesValue: false },
       { name: 'work-type', takesValue: true },
     ],
     ['work-type'],
   );
+  const parentLevel = readParentLevel(values['parent-level']);
   const preferences = await readProjectPreferences(resolveProjectRoot());
-  writeJson(await readTarget(values['work-type'] ?? '', preferences, switches.has('umbrella')));
+  const target = await readTarget(values['work-type'] ?? '', preferences, switches.has('umbrella'));
+  if ('fallback' in target) {
+    writeJson(target);
+    return;
+  }
+  if (parentLevel === undefined) {
+    writeJson({ issueType: target.issueType, projectKey: target.projectKey });
+    return;
+  }
+  writeJson({ ...resolveChildIssueType(target, parentLevel), projectKey: target.projectKey });
 }
 
 /** Writes `value` to stdout as indented JSON. */

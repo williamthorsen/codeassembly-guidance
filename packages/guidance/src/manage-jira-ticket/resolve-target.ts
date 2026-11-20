@@ -6,6 +6,7 @@ export interface JiraPreferences {
   doneStatus: string | undefined;
   issueTypes: Readonly<Record<string, string>>;
   projectKey: string | undefined;
+  subtaskIssueType: string | undefined;
   ticketRefPrefix: string | undefined;
   umbrellaIssueType: string | undefined;
 }
@@ -15,8 +16,19 @@ export interface TargetOptions {
   umbrella: boolean;
 }
 
-/** Where a work item is created, or the reason that the preferences do not name a project. */
-export type Target = { issueType: string; projectKey: string } | { fallback: 'no-project-key'; warning: string };
+/**
+ * Where a work item is created, or the reason that the preferences do not name a project. `subtaskIssueType` is the
+ * type that the work item takes under a level-0 parent, and is undefined for an umbrella, which cannot be a subtask.
+ */
+export type Target =
+  | { issueType: string; projectKey: string; subtaskIssueType: string | undefined }
+  | { fallback: 'no-project-key'; warning: string };
+
+/** The issue type that a work item takes under its parent, and whether Jira accepts that parent for it. */
+export interface ChildPlacement {
+  issueType: string;
+  parentAllowed: boolean;
+}
 
 /**
  * Projects the merged preferences to the Jira settings that target resolution reads. Throws with the offending key path
@@ -41,9 +53,32 @@ export function readJiraPreferences(merged: Readonly<Record<string, unknown>>): 
     doneStatus: readString(jira['done_status'], 'integrations.jira.done_status'),
     issueTypes,
     projectKey: readString(jira['project_key'], 'integrations.jira.project_key'),
+    subtaskIssueType: readString(jira['subtask_issue_type'], 'integrations.jira.subtask_issue_type'),
     ticketRefPrefix: readString(project['ticket_ref_prefix'], 'project.ticket_ref_prefix'),
     umbrellaIssueType: readString(jira['umbrella_issue_type'], 'integrations.jira.umbrella_issue_type'),
   };
+}
+
+/**
+ * Places a work item under a parent at `parentLevel` in Jira's hierarchy, which puts a child exactly one level below
+ * its parent. A standard work item takes the subtask type under a level-0 parent and keeps its own under a level-1
+ * parent; an umbrella, at level 1, takes a parent at level 2 or higher. Any other parent is not allowed. A work item
+ * keeps its own type in every case but the subtask.
+ */
+export function resolveChildIssueType(
+  target: Readonly<{ issueType: string; subtaskIssueType: string | undefined }>,
+  parentLevel: number | undefined,
+): ChildPlacement {
+  if (parentLevel === undefined) {
+    return { issueType: target.issueType, parentAllowed: true };
+  }
+  if (target.subtaskIssueType === undefined) {
+    return { issueType: target.issueType, parentAllowed: parentLevel >= 2 };
+  }
+  if (parentLevel === 0) {
+    return { issueType: target.subtaskIssueType, parentAllowed: true };
+  }
+  return { issueType: target.issueType, parentAllowed: parentLevel === 1 };
 }
 
 /** Resolves the status to which a close transitions a work item: `integrations.jira.done_status`, else `Done`. */
@@ -56,7 +91,8 @@ export function resolveDoneStatus(preferences: JiraPreferences): string {
  * else `project.ticket_ref_prefix` without its trailing separator. The issue type of an umbrella is
  * `integrations.jira.umbrella_issue_type`, else `Epic`, because Jira accepts only an epic as the parent of a standard
  * work item. The issue type of any other work item is the `issue_types` entry whose key names the same work type,
- * matched through the taxonomy's aliases, else the map's `default` entry, else `Task`.
+ * matched through the taxonomy's aliases, else the map's `default` entry, else `Task`; its subtask type is
+ * `integrations.jira.subtask_issue_type`, else `Subtask`.
  *
  * Throws when `workType` is not declared by the taxonomy, so that a misspelled type does not fall through to `default`.
  */
@@ -80,11 +116,14 @@ export function resolveTarget(
     };
   }
 
-  const issueType =
-    options?.umbrella === true
-      ? (nonEmpty(preferences.umbrellaIssueType) ?? 'Epic')
-      : resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes);
-  return { issueType, projectKey };
+  if (options?.umbrella === true) {
+    return { issueType: nonEmpty(preferences.umbrellaIssueType) ?? 'Epic', projectKey, subtaskIssueType: undefined };
+  }
+  return {
+    issueType: resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes),
+    projectKey,
+    subtaskIssueType: nonEmpty(preferences.subtaskIssueType) ?? 'Subtask',
+  };
 }
 
 // region | Helpers

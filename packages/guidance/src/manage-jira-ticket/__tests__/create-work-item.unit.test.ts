@@ -7,8 +7,11 @@ const REQUEST: CreateRequest = {
   issueType: 'Task',
   parent: undefined,
   projectKey: 'ABC',
+  subtaskIssueType: 'Subtask',
   summary: 'Add the thing',
 };
+
+const VIEW_ARGS = ['jira', 'workitem', 'view', 'ABC-1', '--json', '--fields', 'issuetype'];
 
 const CREATE_ARGS = [
   'jira',
@@ -35,31 +38,80 @@ describe(createWorkItem, () => {
     expect(outcome).toEqual({
       diagnostics: [],
       ok: true,
-      result: { key: 'ABC-12', parentSkipped: false, rawOutput: '{"key":"ABC-12","id":"10001"}' },
+      result: { issueType: 'Task', key: 'ABC-12', parentSkipped: false, rawOutput: '{"key":"ABC-12","id":"10001"}' },
     });
   });
 
-  it('passes a parent that the pre-flight accepts to the create call', async () => {
-    const acli = fakeAcli({ create: ok('{"key":"ABC-13"}'), view: ok('{"key":"ABC-1"}') });
+  it('creates a child of an epic with its own issue type', async () => {
+    const acli = fakeAcli({ create: ok('{"key":"ABC-13"}'), view: ok(viewOutput(1)) });
+
+    const outcome = await createWorkItem({ ...REQUEST, parent: 'ABC-1' }, acli.run);
+
+    expect(acli.calls).toEqual([VIEW_ARGS, [...CREATE_ARGS, '--parent', 'ABC-1']]);
+    expect(outcome.result).toEqual({
+      issueType: 'Task',
+      key: 'ABC-13',
+      parentSkipped: false,
+      rawOutput: '{"key":"ABC-13"}',
+    });
+  });
+
+  it('creates a child of a level-0 parent as a subtask', async () => {
+    const acli = fakeAcli({ create: ok('{"key":"ABC-13"}'), view: ok(viewOutput(0)) });
 
     const outcome = await createWorkItem({ ...REQUEST, parent: 'ABC-1' }, acli.run);
 
     expect(acli.calls).toEqual([
-      ['jira', 'workitem', 'view', 'ABC-1'],
-      [...CREATE_ARGS, '--parent', 'ABC-1'],
+      VIEW_ARGS,
+      [...CREATE_ARGS.map((arg) => (arg === 'Task' ? 'Subtask' : arg)), '--parent', 'ABC-1'],
     ]);
-    expect(outcome.result.parentSkipped).toBe(false);
+    expect(outcome.result).toMatchObject({ issueType: 'Subtask', parentSkipped: false });
   });
 
   it('creates the work item without a parent that the pre-flight rejects, and reports the skip', async () => {
     const acli = fakeAcli({ create: ok('{"key":"ABC-14"}'), view: { exitCode: 1, stderr: 'not found', stdout: '' } });
 
-    const outcome = await createWorkItem({ ...REQUEST, parent: 'ABC-999' }, acli.run);
+    const outcome = await createWorkItem({ ...REQUEST, parent: 'ABC-1' }, acli.run);
 
-    expect(acli.calls).toEqual([['jira', 'workitem', 'view', 'ABC-999'], CREATE_ARGS]);
+    expect(acli.calls).toEqual([VIEW_ARGS, CREATE_ARGS]);
     expect(outcome.ok).toBe(true);
-    expect(outcome.result).toEqual({ key: 'ABC-14', parentSkipped: true, rawOutput: '{"key":"ABC-14"}' });
-    expect(outcome.diagnostics).toEqual([expect.stringContaining('parent ABC-999 rejected')]);
+    expect(outcome.result).toEqual({
+      issueType: 'Task',
+      key: 'ABC-14',
+      parentSkipped: true,
+      rawOutput: '{"key":"ABC-14"}',
+    });
+    expect(outcome.diagnostics).toEqual([expect.stringContaining('parent ABC-1 rejected')]);
+  });
+
+  it.each([
+    ['not JSON', 'ABC-1: Parent'],
+    ['missing the issue type', '{"key":"ABC-1","fields":{}}'],
+    ['a level that is not an integer', '{"key":"ABC-1","fields":{"issuetype":{"hierarchyLevel":"0"}}}'],
+  ])('skips a parent whose view is %s', async (_label, stdout) => {
+    const acli = fakeAcli({ create: ok('{"key":"ABC-17"}'), view: ok(stdout) });
+
+    const outcome = await createWorkItem({ ...REQUEST, parent: 'ABC-1' }, acli.run);
+
+    expect(acli.calls).toEqual([VIEW_ARGS, CREATE_ARGS]);
+    expect(outcome.result).toMatchObject({ issueType: 'Task', parentSkipped: true });
+    expect(outcome.diagnostics).toEqual([
+      expect.stringContaining('could not read the hierarchy level of parent ABC-1'),
+    ]);
+  });
+
+  it.each([
+    ['a subtask', REQUEST, -1],
+    ['an initiative', REQUEST, 2],
+    ['an umbrella under a level-0 parent', { ...REQUEST, issueType: 'Epic', subtaskIssueType: undefined }, 0],
+  ])('skips a parent that cannot take %s', async (_label, request, level) => {
+    const acli = fakeAcli({ create: ok('{"key":"ABC-18"}'), view: ok(viewOutput(level)) });
+
+    const outcome = await createWorkItem({ ...request, parent: 'ABC-1' }, acli.run);
+
+    expect(acli.calls[1]).not.toContain('--parent');
+    expect(outcome.result).toMatchObject({ issueType: request.issueType, parentSkipped: true });
+    expect(outcome.diagnostics).toEqual([expect.stringContaining(`at hierarchy level ${String(level)}`)]);
   });
 
   it('reports unparseable create output without running the create again', async () => {
@@ -69,7 +121,12 @@ describe(createWorkItem, () => {
 
     expect(acli.calls).toEqual([CREATE_ARGS]);
     expect(outcome.ok).toBe(false);
-    expect(outcome.result).toEqual({ key: null, parentSkipped: false, rawOutput: '✓ Work item ABC-15 created' });
+    expect(outcome.result).toEqual({
+      issueType: 'Task',
+      key: null,
+      parentSkipped: false,
+      rawOutput: '✓ Work item ABC-15 created',
+    });
   });
 
   it('reports JSON output without a top-level key as unparsed', async () => {
@@ -111,6 +168,11 @@ function fakeAcli(results: { create: AcliResult; view?: AcliResult }) {
 /** Builds a successful `acli` result with the given stdout. */
 function ok(stdout: string): AcliResult {
   return { exitCode: 0, stderr: '', stdout };
+}
+
+/** Builds `acli`'s JSON view of a parent whose issue type is at `hierarchyLevel`. */
+function viewOutput(hierarchyLevel: number): string {
+  return JSON.stringify({ fields: { issuetype: { hierarchyLevel, name: 'Parent type' } }, key: 'ABC-1' });
 }
 
 // endregion | Helpers
