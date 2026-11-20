@@ -81,6 +81,10 @@
               "type": "string",
               "description": "Key of the Jira project to create work items in (e.g., `MAC`). Overrides the key derived from `project.ticket_ref_prefix` minus its trailing separator."
             },
+            "subtask_issue_type": {
+              "type": "string",
+              "description": "Jira issue-type name of a work item that `create-ticket` creates under a level-0 parent, such as a `Task`, under which Jira accepts only a subtask (e.g., `Subtask`, or `Sub-task` on older sites). Overrides the `Subtask` default; the work type does not apply."
+            },
             "umbrella_issue_type": {
               "type": "string",
               "description": "Jira issue-type name of an umbrella, a work item that `create-ticket --umbrella` creates for its children to be parented to (e.g., `Epic`). Overrides the `Epic` default; the work type does not apply."

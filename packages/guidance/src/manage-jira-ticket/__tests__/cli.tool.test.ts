@@ -16,7 +16,8 @@ const CLI_PATH = fileURLToPath(new URL('../cli.ts', import.meta.url));
 
 // An `acli` stand-in: It appends its argv, and the content of any `--description-file` or `--body-file`, to the log as
 // one JSON line. `auth status` reports `STUB_SITE` as the active site, or fails as an unauthenticated `acli` when it is
-// unset. `comment list` reports `STUB_COMMENTS`, a JSON array of bodies, and `view` reports `STUB_STATUS_CATEGORY`.
+// unset. `comment list` reports `STUB_COMMENTS`, a JSON array of bodies, and `view` reports `STUB_STATUS_CATEGORY` and
+// an issue type at `STUB_HIERARCHY_LEVEL`.
 const ACLI_STUB = String.raw`#!${process.execPath}
 const fs = require('node:fs');
 const args = process.argv.slice(2);
@@ -35,7 +36,12 @@ if (args[1] === 'auth' && args[2] === 'status') {
   process.stdout.write(JSON.stringify({ comments, isLast: true, total: comments.length }));
 } else if (args[2] === 'view') {
   const category = process.env.STUB_STATUS_CATEGORY || 'new';
-  process.stdout.write(JSON.stringify({ fields: { status: { name: 'Status', statusCategory: { key: category } } } }));
+  const hierarchyLevel = Number(process.env.STUB_HIERARCHY_LEVEL || '1');
+  process.stdout.write(
+    JSON.stringify({
+      fields: { issuetype: { hierarchyLevel }, status: { name: 'Status', statusCategory: { key: category } } },
+    }),
+  );
 } else {
   process.stdout.write(args[2] === 'create' ? '{"key":"ABC-7"}' : '');
 }
@@ -80,6 +86,7 @@ describe('manage-jira-ticket CLI', () => {
     expect(result.exitCode).toBe(0);
     expect(JSON.parse(result.stdout)).toEqual({
       activeSite: null,
+      issueType: 'Bug',
       key: 'ABC-7',
       parentSkipped: false,
       rawOutput: '{"key":"ABC-7"}',
@@ -111,6 +118,22 @@ describe('manage-jira-ticket CLI', () => {
     const calls = await readCalls();
     expect(calls).toHaveLength(1);
     expect(calls[0]).toMatchObject({ args: expect.arrayContaining(['--type', 'Epic']) });
+  });
+
+  it('creates a child of a level-0 parent at the configured subtask issue type', async () => {
+    await writePreferences('integrations:\n  jira:\n    project_key: ABC\n    subtask_issue_type: Sub-task\n');
+    const bodyFile = await writeInput('body.md', 'Body\n');
+
+    const result = await runCli(
+      ['create', '--summary', 'Fix it', '--body-file', bodyFile, '--work-type', 'fix', '--parent', 'ABC-1'],
+      { STUB_HIERARCHY_LEVEL: '0' },
+    );
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toMatchObject({ issueType: 'Sub-task', parentSkipped: false });
+    expect(await readSubcommands()).toEqual(['workitem view', 'workitem create']);
+    const calls = await readCalls();
+    expect(calls[1]).toMatchObject({ args: expect.arrayContaining(['--type', 'Sub-task', '--parent', 'ABC-1']) });
   });
 
   it('creates once on the target site when the active site matches the base URL', async () => {
@@ -283,6 +306,25 @@ describe('manage-jira-ticket CLI', () => {
     const result = await runCli(['resolve-target', '--work-type', 'feat', '--umbrella']);
 
     expect(JSON.parse(result.stdout)).toEqual({ issueType: 'Initiative', projectKey: 'ABC' });
+  });
+
+  it('resolves the issue type and parent acceptance under --parent-level', async () => {
+    await writePreferences('integrations:\n  jira:\n    project_key: ABC\n');
+
+    const child = await runCli(['resolve-target', '--work-type', 'feat', '--parent-level', '0']);
+    const umbrella = await runCli(['resolve-target', '--work-type', 'feat', '--umbrella', '--parent-level', '0']);
+
+    expect(JSON.parse(child.stdout)).toEqual({ issueType: 'Subtask', parentAllowed: true, projectKey: 'ABC' });
+    expect(JSON.parse(umbrella.stdout)).toEqual({ issueType: 'Epic', parentAllowed: false, projectKey: 'ABC' });
+  });
+
+  it('rejects a --parent-level that is not an integer', async () => {
+    await writePreferences('integrations:\n  jira:\n    project_key: ABC\n');
+
+    const result = await runCli(['resolve-target', '--work-type', 'feat', '--parent-level', 'epic']);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("--parent-level must be an integer, not 'epic'");
   });
 
   it('prints a match and exits zero when the active site is the target', async () => {

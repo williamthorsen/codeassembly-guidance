@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
 import { loadWorkTypes } from '../../lib/work-types.ts';
-import { type JiraPreferences, readJiraPreferences, resolveDoneStatus, resolveTarget } from '../resolve-target.ts';
+import {
+  type JiraPreferences,
+  readJiraPreferences,
+  resolveChildIssueType,
+  resolveDoneStatus,
+  resolveTarget,
+} from '../resolve-target.ts';
 
 const workTypes = await loadWorkTypes();
 if (workTypes === null) {
@@ -12,13 +18,13 @@ describe(resolveTarget, () => {
   it('takes integrations.jira.project_key over the ticket-reference prefix', () => {
     const target = resolveTarget('feat', preferences({ projectKey: 'JIRA', ticketRefPrefix: 'ABC-' }), workTypes);
 
-    expect(target).toEqual({ issueType: 'Task', projectKey: 'JIRA' });
+    expect(target).toEqual({ issueType: 'Task', projectKey: 'JIRA', subtaskIssueType: 'Subtask' });
   });
 
   it('derives the project key from the ticket-reference prefix without its separator', () => {
     const target = resolveTarget('feat', preferences({ ticketRefPrefix: 'ABC-' }), workTypes);
 
-    expect(target).toEqual({ issueType: 'Task', projectKey: 'ABC' });
+    expect(target).toEqual({ issueType: 'Task', projectKey: 'ABC', subtaskIssueType: 'Subtask' });
   });
 
   it('falls back when neither the project key nor the prefix is set', () => {
@@ -85,7 +91,7 @@ describe(resolveTarget, () => {
       { umbrella: true },
     );
 
-    expect(target).toEqual({ issueType: 'Epic', projectKey: 'ABC' });
+    expect(target).toEqual({ issueType: 'Epic', projectKey: 'ABC', subtaskIssueType: undefined });
   });
 
   it('takes integrations.jira.umbrella_issue_type for an umbrella when it is set', () => {
@@ -119,8 +125,39 @@ describe(resolveTarget, () => {
     expect(target).toHaveProperty('issueType', 'Task');
   });
 
+  it('takes integrations.jira.subtask_issue_type as the subtask type when it is set', () => {
+    const target = resolveTarget('feat', preferences({ projectKey: 'ABC', subtaskIssueType: 'Sub-task' }), workTypes);
+
+    expect(target).toHaveProperty('subtaskIssueType', 'Sub-task');
+  });
+
+  it('takes Subtask as the subtask type when the subtask issue type is empty', () => {
+    const target = resolveTarget('feat', preferences({ projectKey: 'ABC', subtaskIssueType: '' }), workTypes);
+
+    expect(target).toHaveProperty('subtaskIssueType', 'Subtask');
+  });
+
   it('throws on a work type that the taxonomy does not declare', () => {
     expect(() => resolveTarget('feature-ish', preferences({}), workTypes)).toThrow("unknown work type 'feature-ish'");
+  });
+});
+
+describe(resolveChildIssueType, () => {
+  const standard = { issueType: 'Task', subtaskIssueType: 'Subtask' };
+  const umbrella = { issueType: 'Epic', subtaskIssueType: undefined };
+
+  it.each([
+    ['without a parent', standard, undefined, { issueType: 'Task', parentAllowed: true }],
+    ['under a subtask', standard, -1, { issueType: 'Task', parentAllowed: false }],
+    ['under a level-0 parent', standard, 0, { issueType: 'Subtask', parentAllowed: true }],
+    ['under an epic', standard, 1, { issueType: 'Task', parentAllowed: true }],
+    ['under an initiative', standard, 2, { issueType: 'Task', parentAllowed: false }],
+    ['as an umbrella without a parent', umbrella, undefined, { issueType: 'Epic', parentAllowed: true }],
+    ['as an umbrella under a level-0 parent', umbrella, 0, { issueType: 'Epic', parentAllowed: false }],
+    ['as an umbrella under an epic', umbrella, 1, { issueType: 'Epic', parentAllowed: false }],
+    ['as an umbrella under an initiative', umbrella, 2, { issueType: 'Epic', parentAllowed: true }],
+  ])('places a work item %s', (_label, target, parentLevel, expected) => {
+    expect(resolveChildIssueType(target, parentLevel)).toEqual(expected);
   });
 });
 
@@ -144,6 +181,7 @@ describe(readJiraPreferences, () => {
           enabled: true,
           issue_types: { fix: 'Bug' },
           project_key: 'ABC',
+          subtask_issue_type: 'Sub-task',
           umbrella_issue_type: 'Epic',
         },
       },
@@ -154,6 +192,7 @@ describe(readJiraPreferences, () => {
       doneStatus: 'Closed',
       issueTypes: { fix: 'Bug' },
       projectKey: 'ABC',
+      subtaskIssueType: 'Sub-task',
       ticketRefPrefix: 'ABC-',
       umbrellaIssueType: 'Epic',
     });
@@ -164,6 +203,7 @@ describe(readJiraPreferences, () => {
       doneStatus: undefined,
       issueTypes: {},
       projectKey: undefined,
+      subtaskIssueType: undefined,
       ticketRefPrefix: undefined,
       umbrellaIssueType: undefined,
     });
@@ -173,6 +213,12 @@ describe(readJiraPreferences, () => {
     const merged = { integrations: { jira: { issue_types: { fix: 3 } } } };
 
     expect(() => readJiraPreferences(merged)).toThrow("'integrations.jira.issue_types.fix' must be a string");
+  });
+
+  it('throws with the key path when the subtask issue type is not a string', () => {
+    const merged = { integrations: { jira: { subtask_issue_type: 1 } } };
+
+    expect(() => readJiraPreferences(merged)).toThrow("'integrations.jira.subtask_issue_type' must be a string");
   });
 
   it('throws with the key path when the umbrella issue type is not a string', () => {
@@ -190,6 +236,7 @@ function preferences(fields: Partial<JiraPreferences>): JiraPreferences {
     doneStatus: undefined,
     issueTypes: {},
     projectKey: undefined,
+    subtaskIssueType: undefined,
     ticketRefPrefix: undefined,
     umbrellaIssueType: undefined,
     ...fields,

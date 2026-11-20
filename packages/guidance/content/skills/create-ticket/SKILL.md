@@ -15,7 +15,7 @@ Create a ticket on the appropriate platform. The remote platform (e.g., GitHub) 
 
 | Argument              | Effect                                                                                                                                                                                                                                                                             |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--parent <ref>`      | Make the new ticket a child of the referenced ticket. One reference; a ticket has one parent.                                                                                                                                                                                      |
+| `--parent <ref>`      | Make the new ticket a child of the referenced ticket. One reference; a ticket has one parent. On Jira, a child of a level-0 parent, such as a `Task`, is created as a subtask, at the issue type that `integrations.jira.subtask_issue_type` sets (`Subtask` by default).          |
 | `--blocked-by <refs>` | Mark the new ticket as blocked by the referenced tickets.                                                                                                                                                                                                                          |
 | `--blocking <refs>`   | Mark the new ticket as blocking the referenced tickets.                                                                                                                                                                                                                            |
 | `--label <labels>`    | Apply these labels with the ones that step 5 resolves. GitHub only.                                                                                                                                                                                                                |
@@ -110,6 +110,8 @@ For a [target repository](#another-repository), do not infer any relationship fr
 
 On Jira, an `--umbrella` ticket does not take a parent that this step infers: An umbrella is an epic by default, and Jira rejects a level-0 work item or another epic as an epic's parent, which would fail the creation itself. Report the inferred parent skipped in the completion output. A parent given through `--parent` is passed through, because the caller may name a higher-level item, such as an initiative.
 
+On Jira, a parent decides the child's issue type, because Jira places a child exactly one level below its parent: Under a level-0 parent, such as a `Task`, the child is created as a subtask, at the type that `integrations.jira.subtask_issue_type` sets (`Subtask` by default). This applies to an inferred parent and a passed one alike. A parent at a level that cannot take the child, such as a subtask, is skipped and reported, and the ticket is created without it. Step 6 states how each client applies this.
+
 **Most tickets have none, and for those, say nothing.** When nothing applies, continue to step 5 without asking.
 
 When one or more apply, state each relationship and its target in the project's own reference form and confirm before anything is created, so that a wrong target is visible while it is still free to correct. A relationship supplied through an argument is one that the caller has already confirmed: State it in the completion output and do not ask about it; the confirmation covers the inferred relationships alone. If the platform resolved in step 3 cannot express one of them, say so here rather than reporting it as a skip in step 7.
@@ -189,6 +191,8 @@ Identify the client per {skill?:update-jira-ticket}, which ranks the three clien
 
 <!-- include: ../_partials/jira-task-list-flattening.md / -->
 
+**A parent on a connected tool.** When step 4 decided a parent, read its `issuetype.hierarchyLevel` before creating, through the Jira read tool that [ticket source resolution](../_data/ticket-source-resolution.md#platform-specific-fetch) ranks for Jira, asked for the `issuetype` field. Pass it to `resolve-target` as `--parent-level {level}`, which then also prints `parentAllowed`, and create with the `issueType` that it prints. When it prints `parentAllowed: false`, or the read fails, report the parent skipped per step 7. When the type is a subtask, pass the parent in the creation call, because a subtask cannot exist without one; a tool that does not take a parent at creation cannot create the child, so report the parent skipped and create at the type that `resolve-target` prints without `--parent-level`.
+
 - **`contentFormat` tool** (e.g. `createJiraIssue`): `projectKey`, `issueTypeName`, `summary` (`ticket_title`), and the step-2 body as a top-level `description` with `contentFormat: "markdown"`. Take any further required argument from the tool's own schema, which a connected server may extend.
 - **HTML tool** (e.g. `create_jira_issue`): The same target and summary, with the body as `description_html`, rendered to the allowlist and passed through that skill's pre-flight checker before the call.
 - **`acli`**: Write the step-2 body as Markdown to a scratch file per [gh body file](#gh-body-file), naming it `jira-body-{timestamp}.md`, and run the helper once:
@@ -199,7 +203,7 @@ Identify the client per {skill?:update-jira-ticket}, which ranks the three clien
 
   `{parent_flag}` is `--parent {parent}` when step 4 decided a parent, and empty otherwise; `{umbrella_flag}` is as for `resolve-target`. Pass the body path as the literal absolute path, unquoted, without a shell variable or a guard: The helper refuses a missing or empty file before it calls `acli`.
 
-  When `ticket.base_url` is set, in the repository's preferences or the global file, the helper first compares `acli`'s active site with the base URL's host, because `acli` creates on whichever site it is signed in to. It then converts the body to ADF, checks a parent with `acli jira workitem view`, and runs `acli jira workitem create` exactly once. It prints `{"key": "ABC-123", "rawOutput": "...", "parentSkipped": false, "activeSite": "..."}`, in which `activeSite` is null when `ticket.base_url` is unset. `parentSkipped: true` means that Jira rejected the parent reference and the work item was created without it; report the parent skipped per step 7.
+  When `ticket.base_url` is set, in the repository's preferences or the global file, the helper first compares `acli`'s active site with the base URL's host, because `acli` creates on whichever site it is signed in to. It then converts the body to ADF, reads a parent's hierarchy level with `acli jira workitem view`, and runs `acli jira workitem create` exactly once. It prints `{"issueType": "Task", "key": "ABC-123", "rawOutput": "...", "parentSkipped": false, "activeSite": "..."}`, in which `issueType` is the type with which the work item was created and `activeSite` is null when `ticket.base_url` is unset. `parentSkipped: true` means that Jira rejected the parent reference, or that the parent's level could not be read or cannot take the work item, and the work item was created without it; report the parent skipped per step 7, with the reason that stderr states. Report a child created at the subtask type as a subtask.
 
   On a non-zero exit, read what it printed:
   - `{"fallback": "no-project-key"}`: As under [Resolve the target](#resolve-the-target), and `acli` was not called.
@@ -257,7 +261,7 @@ These flags are native to `gh` 2.94 and later. They are not the REST dependencie
 
 #### Jira path
 
-**Parent.** On a connected tool the parent is set here, after the work item exists, through the update tool's `fields`, which takes it as an object rather than a bare key: `"parent": { "key": "{parent}" }`. A reference rejected by Jira then fails only the relationship, as this step's general rule intends. Report the parent skipped when the update tool does not expose a parent field.
+**Parent.** On a connected tool the parent is set here, after the work item exists, through the update tool's `fields`, which takes it as an object rather than a bare key: `"parent": { "key": "{parent}" }`. A reference rejected by Jira then fails only the relationship, as this step's general rule intends. Report the parent skipped when the update tool does not expose a parent field. A subtask is the exception: Its parent is set in the creation call, per step 6.
 
 `acli` is the exception, and the only one: `acli jira workitem edit` does not have a `--parent` flag, so the step-6 helper sets the parent in the creation call, after checking the reference. Report the parent skipped when the helper printed `parentSkipped: true`.
 
