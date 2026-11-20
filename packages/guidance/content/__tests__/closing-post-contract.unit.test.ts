@@ -23,6 +23,13 @@ describe('closing post contract', () => {
     expect(text).toContain('`gh issue close {number} --reason completed` only while its state is `OPEN`');
   });
 
+  it('closes a Jira ticket through the helper, which transitions it only while its status category is not done', async () => {
+    const text = await CONVENTIONS;
+
+    expect(text).toContain('/scripts/manage-jira-ticket.mjs close --key {key} --post {body file}`');
+    expect(text).toContain('transitions the ticket only while its status category is not `done`');
+  });
+
   it('keeps the triage ticket open only when the developer declines', async () => {
     const text = await readContentFile('skills/triage-spike-findings/SKILL.md');
 
@@ -37,6 +44,7 @@ describe('closing post contract', () => {
     expect(skill).toContain('the close of the triage ticket as completed. Confirm once');
     expect(skill).toContain('On a run given **The batch**, close the triage ticket without a closing post');
     expect(skill).toContain('`gh issue close {triage ticket} --reason completed` only while the state is `OPEN`');
+    expect(skill).toContain('/scripts/manage-jira-ticket.mjs close --key {triage ticket}` without `--post`');
     expect(await CONVENTIONS).toContain('`triage-spike-findings` closes it as completed, without a post');
   });
 });

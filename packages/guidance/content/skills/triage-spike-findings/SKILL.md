@@ -115,7 +115,7 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
 
    Keep the URL that `gh issue comment` prints for the dispositions comment; when the post was skipped, keep the `url` of the matching comment instead. Step 8 links it.
 
-7. On a run given **The batch**, close the triage ticket without a closing post, because its dispositions comment is its record: Read `gh issue view {triage ticket} --json state`, and run `gh issue close {triage ticket} --reason completed` only while the state is `OPEN`.
+7. On a run given **The batch**, close the triage ticket without a closing post, because its dispositions comment is its record: Read `gh issue view {triage ticket} --json state`, and run `gh issue close {triage ticket} --reason completed` only while the state is `OPEN`. On Jira, run `node {harness_home_dir}/scripts/manage-jira-ticket.mjs close --key {triage ticket}` without `--post`; it transitions the ticket only while its status category is not `done`.
 8. Save `dispositions-comment.md`, with frontmatter, as the ticket-level `dispositions` artifact per {skill:save-artifact}.
 
 ### 8. Report

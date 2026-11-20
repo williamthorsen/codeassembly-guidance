@@ -104,7 +104,8 @@ Offer the post and the close as one item in the closing action-items block of th
 Before writing, read the ticket's comments and its state, and decide each write on its own, so that a rerun neither posts the conclusion twice nor fails on a closed ticket:
 
 - Post the conclusion unless a comment already opens with the post's first line. Pass the body through a file, per [gh body file](ticket-source-resolution.md#gh-body-file).
-- Close the ticket with `gh issue close {number} --reason completed` only while its state is `OPEN`.
+- Close a GitHub ticket with `gh issue close {number} --reason completed` only while its state is `OPEN`.
+- Make both writes on a Jira ticket with `node {harness_home_dir}/scripts/manage-jira-ticket.mjs close --key {key} --post {body file}`, which makes both checks and transitions the ticket only while its status category is not `done`. The repository's `integrations.jira.done_status` preference names the status to which it transitions. When `acli` is unavailable or signed in to another site, make the same two checks through the Jira client that {skill?:update-jira-ticket} names.
 
 ## Findings batches
 
