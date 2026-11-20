@@ -153,14 +153,27 @@ function fail(result: CloseResult, error: string): CloseOutcome {
   return { ok: false, result: { ...result, error } };
 }
 
-/** Reads each comment's plain-text body from `comment list --json` output, or null when the output has another shape. */
+/**
+ * Reads each comment's plain-text body from `comment list --paginate --json` output, which prints one JSON object per
+ * page, one after another. Returns null when any page has another shape.
+ */
 function parseCommentBodies(stdout: string): string[] | null {
-  const parsed = parseJson(stdout);
-  const comments = isRecord(parsed) ? parsed['comments'] : undefined;
-  if (!Array.isArray(comments)) {
+  const pages = splitJsonObjects(stdout);
+  if (pages === null) {
     return null;
   }
-  return comments.map((comment) => (isRecord(comment) && typeof comment['body'] === 'string' ? comment['body'] : ''));
+  const bodies: string[] = [];
+  for (const page of pages) {
+    const parsed = parseJson(page);
+    const comments = isRecord(parsed) ? parsed['comments'] : undefined;
+    if (!Array.isArray(comments)) {
+      return null;
+    }
+    for (const comment of comments) {
+      bodies.push(isRecord(comment) && typeof comment['body'] === 'string' ? comment['body'] : '');
+    }
+  }
+  return bodies;
 }
 
 /** Parses `text` as JSON, returning undefined when it is not valid JSON. */
@@ -182,6 +195,52 @@ function parseStatus(stdout: string): CloseResult['status'] {
     return null;
   }
   return typeof category['key'] === 'string' ? { category: category['key'], name: status['name'] } : null;
+}
+
+/**
+ * Splits concatenated top-level JSON objects into their source texts, tracking strings so that a brace inside one does
+ * not count. Returns null when the text contains anything other than whitespace between objects, or none at all.
+ */
+function splitJsonObjects(text: string): string[] | null {
+  const objects: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let index = 0; index < text.length; index += 1) {
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    const char = text.charAt(index);
+    if (inString) {
+      escaped = char === '\\';
+      inString = char !== '"';
+      continue;
+    }
+    switch (char) {
+      case '"':
+        inString = true;
+        break;
+      case '{':
+        if (depth === 0) {
+          start = index;
+        }
+        depth += 1;
+        break;
+      case '}':
+        depth -= 1;
+        if (depth === 0) {
+          objects.push(text.slice(start, index + 1));
+        }
+        break;
+      default:
+        if (depth === 0 && !/\s/.test(char)) {
+          return null;
+        }
+    }
+  }
+  return depth === 0 && !inString && objects.length > 0 ? objects : null;
 }
 
 // endregion | Helpers

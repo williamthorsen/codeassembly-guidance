@@ -4,8 +4,9 @@ import { type CloseRequest, closeWorkItem, readFirstLine } from '../close-work-i
 import { convertMarkdownToAdf } from '../convert-body.ts';
 import type { AcliResult } from '../create-work-item.ts';
 
-// The shapes follow `acli`'s JSON output: `comment list --json` gives each body as plain text with collapsed
-// whitespace and a leading space, and `view --json --fields status` nests the status category under `fields.status`.
+// The shapes follow `acli`'s JSON output: `comment list --paginate --json` prints one object per page, one after
+// another, and gives each body as plain text with collapsed whitespace; `view --json --fields status` nests the status
+// category under `fields.status`.
 const NO_COMMENTS = JSON.stringify({ comments: [], isLast: true, maxResults: 50, startAt: 0, total: 0 });
 
 const REQUEST: CloseRequest = {
@@ -46,6 +47,25 @@ describe(closeWorkItem, () => {
 
     expect(acli.calls).toEqual([LIST_ARGS, VIEW_ARGS, TRANSITION_ARGS]);
     expect(outcome.result).toMatchObject({ posted: 'skipped', transitioned: 'made' });
+  });
+
+  it('reads the comments of every page, including bodies that contain braces and quotes', async () => {
+    const pages = `${commentsJson([' Note with {braces} and a \\"quote\\"'])}\n${commentsJson([' Conclusion of the spike'])}\n`;
+    const acli = fakeAcli({ list: ok(pages), view: ok(statusJson('Done', 'done')) });
+
+    const outcome = await closeWorkItem(REQUEST, acli.run);
+
+    expect(acli.calls).toEqual([LIST_ARGS, VIEW_ARGS]);
+    expect(outcome.result).toMatchObject({ posted: 'skipped', transitioned: 'skipped' });
+  });
+
+  it('stops when a page of the comment output cannot be read', async () => {
+    const acli = fakeAcli({ list: ok(`${NO_COMMENTS}\nWarning: rate limited\n`) });
+
+    const outcome = await closeWorkItem(REQUEST, acli.run);
+
+    expect(acli.calls).toEqual([LIST_ARGS]);
+    expect(outcome.result.error).toBe('could not read the output of acli jira workitem comment list');
   });
 
   it('skips the transition when the status category is done under another status name', async () => {
