@@ -64,7 +64,7 @@ export function resolveTarget(
   workType: string,
   preferences: JiraPreferences,
   workTypes: ReadonlyMap<string, WorkType>,
-  options: TargetOptions = { umbrella: false },
+  options?: TargetOptions,
 ): Target {
   const resolved = resolveWorkType(workType, workTypes);
   if (resolved === null) {
@@ -80,9 +80,10 @@ export function resolveTarget(
     };
   }
 
-  const issueType = options.umbrella
-    ? (nonEmpty(preferences.umbrellaIssueType) ?? 'Epic')
-    : resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes);
+  const issueType =
+    options?.umbrella === true
+      ? (nonEmpty(preferences.umbrellaIssueType) ?? 'Epic')
+      : resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes);
   return { issueType, projectKey };
 }
 
