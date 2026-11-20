@@ -1,0 +1,24 @@
+## Dispositions of the findings of spike #270
+
+Every item that the findings left undisposed, with its disposition and grades. Confidence grades advisability: `high` is clearly worth doing, `medium` is worth doing but arguable, `low` is not worth a ticket now. Value grades how much the item matters. The umbrella for the new tickets is #281.
+
+| Item | Disposition | Confidence | Value | Where | Blocked by | Reason |
+| --- | --- | --- | --- | --- | --- | --- |
+| 12 Search index rebuild | ticket | high | must-have | #283 |  | The index is stale after an import. |
+| 10 Header search ranking | ticket | medium | should-have | #282 | #283, #412 | The one cross-page path to a book cannot find a shared title. |
+| 27 Collection handle rule | merge | medium | nice-to-have | merged into 10 |  | Part of the ranking work. |
+| 24 Sign-in error pattern | comment | medium | nice-to-have | #272 |  | The sign-in ticket already covers the error states. |
+| 16 Status as a word | drop | low | questionable |  |  | The icon already has a label. |
+
+## Challenge
+
+A subagent without session context argued against every recommendation.
+
+## Labels and follow-ups
+
+- The labels were created directly.
+- Follow-up triage ticket #290 takes the second batch.
+
+<!-- codeassembly:triage-evidence v1
+{"version":1,"source":"spike #270","triageTicket":278,"commit":"0123456789abcdef0123456789abcdef01234567","items":[{"id":"10","key":"src/search.ts:ranking","paths":["src/search.ts"],"disposition":"ticket","where":282},{"id":"24","key":"src/sign-in.ts:errors","paths":["src/sign-in.ts"],"disposition":"comment","where":272}]}
+-->

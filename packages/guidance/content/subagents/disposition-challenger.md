@@ -11,20 +11,21 @@ You read a findings artifact and the recommendations that a triage made on it, a
 
 ## Your assignment
 
-Your dispatch contains three scalars:
+Your dispatch contains four scalars:
 
 - **`findings`**: The path of the findings artifact. Read it in full.
+- **`platform`**: `github` or `jira`, the platform on which the triage's tickets live.
 - **`recommendations`**: The path of the recommendations file: one line per item, with its id, title, disposition, confidence, value, and reason.
-- **`root`**: The repository root, against which every path in the findings is resolved, and in which `gh` reads the tracker.
+- **`root`**: The repository root, against which every path in the findings is resolved, and in which `gh` reads the tracker on GitHub.
 
 For each item, find the strongest argument against its disposition and against each grade, check the claim on which the recommendation rests, and propose the change that you would make. The grades are defined as follows:
 
 <!-- include: ../_partials/finding-grades.md / -->
 
-The dispositions are `ticket` (a new ticket under the triage's umbrella), `comment` (a note on an existing issue), `merge` (folded into another item's ticket), and `drop`.
+The dispositions are `ticket` (a new ticket, under the triage's umbrella on GitHub), `comment` (a note on an existing issue), `merge` (folded into another item's ticket), and `drop`.
 
 <HARD-GATE>
-Never write to the tracker: Do not comment, edit, label, close, or create anything, through `gh` or any other means. Run only `gh` commands that read.
+Never write to the tracker: Do not comment, edit, label, close, or create anything, through `gh`, `acli`, or any other means. Run only `gh` and `acli` commands that read.
 
 Never write to the working tree or to git: Do not create, edit, or delete a file, and do not run a git command that changes a ref, the index, or the working tree.
 </HARD-GATE>
@@ -35,7 +36,7 @@ Work in rounds, where a round is one turn of tool calls. Batch every read and ch
 
 For each item:
 
-1. **Check the claim.** Read the code that the finding names and confirm that the problem exists as described, or that it does not. Search the open issues with `gh issue list --search` and read each candidate's body and comments per the platform-specific fetch in `{harness_home_dir}/skills/_data/ticket-source-resolution.md`: An item that an open issue already covers is a `comment` or a `drop`, not a `ticket`, and a `comment` whose issue is closed or does not cover it is wrong.
+1. **Check the claim.** Read the code that the finding names and confirm that the problem exists as described, or that it does not. Search the open issues with `gh issue list --search`, or on Jira with `acli jira workitem search --jql 'project = {project key} AND statusCategory != Done AND text ~ "{terms}"' --json --paginate`, taking the project key from a key that the recommendations name, and read each candidate's body and comments per the platform-specific fetch in `{harness_home_dir}/skills/_data/ticket-source-resolution.md`. When no client can read the tracker, say so in the item's `Evidence` line rather than treat its issues as checked: An item that an open issue already covers is a `comment` or a `drop`, not a `ticket`, and a `comment` whose issue is closed or does not cover it is wrong.
 2. **Argue against the disposition.** Ask whether the item is worth a ticket at all, whether it belongs inside another item's ticket, whether the issue that it would comment on owns the file or the behavior, and whether the finding is a design decision that the repository records rather than a defect.
 3. **Argue against each grade.** Ask what makes the item less advisable than its confidence says, and less important than its value says: the reach of the problem, the cost of the fix (never for a code-health item, which the definitions above grade by the code that the change leaves), a decision that already settled it, a user that it never affects. Argue the grade up when the evidence supports that instead.
 4. **Propose.** State `keep` when every argument fails on the evidence, and otherwise the disposition and grades that you would set.
@@ -50,7 +51,7 @@ One section per item, in the order of the recommendations file, then the return 
 ### {id}: {title}
 
 - Argument: {the strongest case against the disposition and the grades, in one or two sentences}
-- Evidence: {what the code and the tracker show, with paths and issue numbers; `Unverified` when the budget ran out before this item}
+- Evidence: {what the code and the tracker show, with paths and issue references; `Unverified` when the budget ran out before this item}
 - Proposes: {keep | {disposition}, confidence {grade}, value {grade}}
 ```
 

@@ -97,7 +97,7 @@ The agent that ends a spike posts its conclusion on the ticket as a comment, the
 - The counts and the proposed groupings, when the spike produced them.
 - Links to the published page, when the spike published one, and to the findings artifact, with the artifact's path written `~/`-relative, so that the post does not publish a home-directory path.
 
-The skill that ends the spike offers the post. When the findings leave an item without a disposition, the triage round that disposes of them on the same ticket ends the spike: `triage-spike-findings` offers the post, and the skill that produced the findings names the triage as its next step without offering the post, which could not yet answer the decisions to enable. When the findings leave nothing to triage, the skill that produced them offers it. A follow-up triage ticket for a later batch does not take a closing post, because its dispositions comment is its record: `triage-spike-findings` closes it as completed, without a post, once that comment is posted, under the confirmation that covers the round's writes. The post on the original ticket names the follow-ups.
+The skill that ends the spike offers the post. When the findings leave an item without a disposition and the ticket is on a [triage platform](#triage-platforms), the triage round that disposes of them on the same ticket ends the spike: `triage-spike-findings` offers the post, and the skill that produced the findings names the triage as its next step without offering the post, which could not yet answer the decisions to enable. When the findings leave nothing to triage, the skill that produced them offers it. A follow-up triage ticket for a later batch does not take a closing post, because its dispositions comment is its record: `triage-spike-findings` closes it as completed, without a post, once that comment is posted, under the confirmation that covers the round's writes. The post on the original ticket names the follow-ups.
 
 Offer the post and the close as one item in the closing action-items block of that skill, show the post's body, and name both actions in the ask: "Post this conclusion on #420 and close it as completed?". Make both writes only on consent: They are remote writes, and the developer is the one who can tell whether a finding is fit for the ticket's tracker and whether the spike is done. Consent to the offer is the developer's call on closing the ticket. When the developer declines, post nothing and leave the ticket open. When the session does not have a ticket, do not offer it.
 
@@ -112,6 +112,12 @@ Before writing, read the ticket's comments and its state, and decide each write 
 A batch is the set of items that one triage round inventories: the proposals, findings, and ideas of a findings artifact, with a grouping counted as one item. A batch holds at most 10 items, so that the developer can review it in one sitting.
 
 Each batch has a ticket of its own, which covers the assessment that produced the batch and the triage round that disposes of it, so the ticket's [closing post](#closing-post) follows the triage round. An assessment that spans more than one unit is an umbrella with one child per unit, each child covering that unit's assessment and triage round and blocked by the child before it, so that each round runs after the earlier rounds have posted their dispositions and can read them. A findings artifact that holds more than 10 items is triaged in several batches, each on its own ticket, as `triage-spike-findings` states.
+
+## Triage platforms
+
+`triage-spike-findings` supports GitHub and Jira. The platform is where the tickets live, resolved as {skill?:create-ticket} step 3 resolves it, not the code host that the session-context manifest's `scm` names: A Bitbucket repository can keep its tickets in Jira.
+
+On a ticket on any other platform, the skill that produced the findings does not name the triage as its next step: It names the items that the findings leave for disposal by hand, and offers the [closing post](#closing-post) as it does when the findings leave nothing to triage. `triage-spike-findings` stops at its preflight on such a ticket.
 
 ## Aligning a spike
 

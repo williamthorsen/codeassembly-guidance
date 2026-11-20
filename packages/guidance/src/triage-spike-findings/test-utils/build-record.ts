@@ -16,9 +16,26 @@ export function buildItem(overrides: Partial<Item> = {}): Item {
   };
 }
 
+/** Builds a valid Jira record with one item per disposition, before any ticket exists, overridden by `overrides`. */
+export function buildJiraRecord(overrides: Partial<DispositionsRecord> = {}): DispositionsRecord {
+  return buildRecord({
+    platform: 'jira',
+    source: 'spike SCRATCHA-270',
+    triageTicket: 'SCRATCHA-278',
+    items: [
+      buildItem({ id: 'C1' }),
+      buildItem({ id: 'C2', title: 'Sign-in error pattern', disposition: 'comment', target: 'SCRATCHA-272' }),
+      buildItem({ id: 'C3', title: 'Collection handle rule', disposition: 'merge', target: 'C1' }),
+      buildItem({ id: 'C4', title: 'Status as a word', disposition: 'drop', confidence: 'low', value: 'questionable' }),
+    ],
+    ...overrides,
+  });
+}
+
 /** Builds a valid record with one item per disposition, before any ticket exists, overridden by `overrides`. */
 export function buildRecord(overrides: Partial<DispositionsRecord> = {}): DispositionsRecord {
   return {
+    platform: 'github',
     source: 'spike #270',
     triageTicket: 278,
     umbrella: null,

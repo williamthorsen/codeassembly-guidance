@@ -6,7 +6,7 @@ user-invocable: true
 
 # Investigate spike
 
-Carry out a spike plan, the `## Investigation steps` / `## Deliverable` shape defined in [spike conventions](../_data/spike-conventions.md). A spike produces findings rather than a diff: The run ends with a findings artifact and either the offer of the closing post or, when the findings propose work, the recommendation of the triage round that offers it, not with commits. The skill re-resolves everything it needs from the environment, so it works the same in the session that produced the plan and in a fresh one.
+Carry out a spike plan, the `## Investigation steps` / `## Deliverable` shape defined in [spike conventions](../_data/spike-conventions.md). A spike produces findings rather than a diff: The run ends with a findings artifact and either the offer of the closing post or, when the findings propose work on a [triage platform](../_data/spike-conventions.md#triage-platforms), the recommendation of the triage round that offers it, not with commits. The skill re-resolves everything it needs from the environment, so it works the same in the session that produced the plan and in a fresh one.
 
 ## Arguments
 
@@ -40,8 +40,8 @@ The plan artifact is read-only. It records what was planned, and a later reader 
 7. **Report** the answers and the recommendations against the ticket's questions and decisions, naming any question left unanswered and any departure from the plan, and give the artifact's path.
 
 8. **Close** with an action-items block:
-   - When the findings propose work, recommend {skill?:triage-spike-findings} with the artifact path and the ticket, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
-   - Otherwise, when a ticket governs the run, offer to close it with the closing post, with the post's body shown; on consent, post it and close the ticket as that section states.
+   - When the findings propose work and the ticket is on a [triage platform](../_data/spike-conventions.md#triage-platforms), recommend {skill?:triage-spike-findings} with the artifact path and the ticket, and do not offer the closing post: The triage round ends the spike and offers it, as [Closing post](../_data/spike-conventions.md#closing-post) states.
+   - Otherwise, when a ticket governs the run, name the proposals left for disposal by hand when there are any, and offer to close it with the closing post, with the post's body shown; on consent, post it and close the ticket as that section states.
 
 <!-- include: ../_partials/action-items.md / -->
 

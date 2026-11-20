@@ -1,0 +1,3 @@
+A triage of the findings of spike #270 (#278) assigns the following to this issue:
+
+- **Sign-in error pattern** (confidence medium, value nice-to-have): The sign-in ticket already covers the error states.

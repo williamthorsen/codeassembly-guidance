@@ -273,10 +273,10 @@ node {harness_home_dir}/scripts/manage-jira-ticket.mjs check-site --target {tick
 Then:
 
 ```bash
-acli jira workitem link create --out "{blocker}" --in "{blocked}" --type Blocks --yes
+acli jira workitem link create --out "{blocked}" --in "{blocker}" --type Blocks --yes
 ```
 
-Because `--out` names the blocker, the two relationships differ only in which side the new key occupies: blocked-by puts the referenced key in `--out`, and blocking puts the new key there.
+`--in` names the blocker, although the confirmation that `acli` prints names the `--out` side as the blocker. The two relationships differ only in which side the new key occupies: blocked-by puts the referenced key in `--in`, and blocking puts the new key there.
 
 If the available clients do not offer a link surface, report each link as skipped, naming the client.
 

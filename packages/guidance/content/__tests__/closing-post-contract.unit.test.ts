@@ -61,3 +61,23 @@ describe.each([
     expect(text).toContain(offer);
   });
 });
+
+describe.each([
+  'analyze-performance',
+  'assess-code-health',
+  'assess-usability',
+  'investigate-spike',
+  'triage-spike-findings',
+])('%s triage routing', (skill) => {
+  it('routes to triage only on a triage platform', async () => {
+    const text = await readContentFile(`skills/${skill}/SKILL.md`);
+
+    expect(text).toContain('[triage platform](../_data/spike-conventions.md#triage-platforms)');
+  });
+});
+
+describe('triage platforms', () => {
+  it('states the supported platforms in the spike conventions alone', async () => {
+    expect(await CONVENTIONS).toContain('## Triage platforms\n\n`triage-spike-findings` supports GitHub and Jira.');
+  });
+});

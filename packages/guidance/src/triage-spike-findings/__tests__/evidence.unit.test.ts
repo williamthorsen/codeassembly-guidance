@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { parseEvidenceBlock, renderEvidenceBlock } from '../evidence.ts';
 import { renderDispositionsComment } from '../render.ts';
-import { buildItem, buildRecord } from '../test-utils/build-record.ts';
+import { buildItem, buildJiraRecord, buildRecord } from '../test-utils/build-record.ts';
 
 const COMMIT = '0123456789abcdef0123456789abcdef01234567';
 
@@ -40,6 +40,22 @@ describe(parseEvidenceBlock, () => {
         { id: '27', key: 'src/b.ts:dup', paths: ['src/b.ts', 'src/c.ts'], disposition: 'merge', where: '10' },
         { id: '16', key: 'src/d.ts:dead-code', paths: ['src/d.ts'], disposition: 'drop', where: null },
       ],
+    });
+  });
+
+  it('reads back the key of a Jira triage ticket and of a Jira ticket', () => {
+    const comment = renderDispositionsComment(
+      buildJiraRecord({
+        commit: COMMIT,
+        items: [
+          buildItem({ id: 'C1', ticket: 'SCRATCHA-282', evidence: { key: 'src/a.ts:dup', paths: ['src/a.ts'] } }),
+        ],
+      }),
+    );
+
+    expect(parseEvidenceBlock(comment)).toMatchObject({
+      triageTicket: 'SCRATCHA-278',
+      items: [{ id: 'C1', where: 'SCRATCHA-282' }],
     });
   });
 

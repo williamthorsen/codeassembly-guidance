@@ -9,6 +9,7 @@ import { describeError } from '@williamthorsen/toolbelt.errors';
 import { z } from 'zod';
 
 import { type EvidenceBlock, parseEvidenceBlock } from '../triage-spike-findings/evidence.ts';
+import { formatReference } from '../triage-spike-findings/render.ts';
 import type { CommandRunner } from '../triage-spike-findings/types.ts';
 import type { Proposal } from './schemas.ts';
 
@@ -129,13 +130,13 @@ function findBlockMatch(
     if (item === undefined) continue;
     const changed = dependencies.changedSince(root, block.commit, item.paths);
     if (changed === true) continue;
-    const where = item.where === null ? '' : ` (${typeof item.where === 'number' ? `#${item.where}` : item.where})`;
+    const where = item.where === null ? '' : ` (${formatReference(item.where)})`;
     const unknown = changed === undefined ? '; git could not compare its paths with that commit' : '';
     return {
       id: proposal.id,
       key: proposal.key,
       source,
-      reason: `triage of #${block.triageTicket} disposed of it as ${item.disposition}${where} at ${block.commit.slice(0, 12)}${unknown}`,
+      reason: `triage of ${formatReference(block.triageTicket)} disposed of it as ${item.disposition}${where} at ${block.commit.slice(0, 12)}${unknown}`,
     };
   }
   return undefined;
