@@ -2,7 +2,7 @@
 slug: williamthorsen-ticketing-preferences
 description: William Thorsen's preferences for how work is split across tickets, how the relationships between them are recorded, and which figures a ticket body states.
 delivery: hook
-version: '9'
+version: '10'
 ---
 
 # William Thorsen's ticketing preferences
@@ -14,6 +14,8 @@ When work deserves more than one pull request, give each pull request its own ti
 A piece gets its own ticket when it can be merged and verified on its own, not when it looks large enough to deserve one. When the count is a judgment, cut finer: Merging two tickets that turned out to be one costs an edit and a close, while splitting one that turned out to be four costs a rewrite of the original, new children, a re-cut plan, and whatever was committed against the superseded contract.
 
 Before deciding the ticket count of work that spans several layers or adds a new subsystem, estimate its size: the layers and subsystems that it touches, and the approximate source and test lines. State the estimate wherever the count is decided. When the pieces of such work can each be merged and verified on their own, recommend the split, and do not offer one ticket at equal strength. That only the last piece is visible to a user is not a reason to keep the work whole: An earlier piece is verified through its tests and its API.
+
+Adding a package to a monorepo is two tickets. The first adds the empty scaffold with its documentation and its package references, such as the workspace lists, labels, lockfile, README, and identity checks, and it passes the repository's checks on its own. The second adds the package's functionality and is blocked by the first.
 
 A ticket covers work in one repository. When a change needs work in two or more repositories, give each repository its own ticket, even when one repository's share is small, and record the merge order, upstream first, as blocked-by relations. The repository boundary does not need a judgment: A pull request lives in one repository, so a ticket that spans two cannot close on a single merge. When the change migrates many repositories to a new version or convention, consult {rulebook:cross-repo-migration-conventions} for the umbrella and its children.
 

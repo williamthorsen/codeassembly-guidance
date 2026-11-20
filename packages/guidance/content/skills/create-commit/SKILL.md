@@ -27,7 +27,7 @@ It writes the commit message file and the commit, and nothing else. It never edi
 
 ## What one commit contains
 
-One logical unit of work, together with whatever that unit needs to stand on its own. Work that does not stand alone -- a scaffold filled in by a later change -- goes into the change that completes it rather than becoming a commit of its own.
+One logical unit of work, together with whatever that unit needs to stand on its own. Work that does not stand alone, such as a scaffold that a later change fills in, goes into the change that completes it rather than becoming a commit of its own. A scaffold that passes the repository's checks and is fully wired stands alone: A new package's empty scaffold, with its documentation and its package references, is a commit of its own.
 
 Record each unit as it is finished. Several single-concern commits read better than one that bundles them, and each can be reverted without taking the others with it.
 
