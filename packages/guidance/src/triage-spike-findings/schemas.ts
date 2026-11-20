@@ -86,10 +86,10 @@ export interface GateViolation {
 
 /**
  * Checks a parsed record against the gate: every issue reference takes the form of the record's platform; a Jira record
- * does not have an item id shaped like a key; a `low` item never takes a ticket; a `merge` targets a
- * `ticket` item by id; a `comment` targets an issue; a `ticket` or `drop` item does not have a target; only a `ticket`
- * item has a ticket or blockers; a blocker that is not an issue names another `ticket` item, once; the blockers do not
- * form a cycle; an item has evidence only when the record has a commit; and ids are unique.
+ * does not have an item id shaped like a key; a `low` item never takes a ticket; a `merge` targets a `ticket` item by
+ * id; a `comment` targets an issue; a `ticket` or `drop` item does not have a target; only a `ticket` item has a ticket
+ * or blockers; a blocker that is not an issue names another `ticket` item, once; the blockers do not form a cycle; an
+ * item has evidence only when the record has a commit; and ids are unique.
  * Returns every violation, so that one run reports them all.
  */
 export function checkGate(record: DispositionsRecord): GateViolation[] {
