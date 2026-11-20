@@ -6,7 +6,7 @@ allowBuilds:
 catalog:
   '@types/node': '24.19.2'
   '@williamthorsen/change-grammar': '0.4.1'
-  '@williamthorsen/nmr': '2.2.3'
+  '@williamthorsen/nmr': '2.3.0'
   '@williamthorsen/toolbelt.errors': '0.11.3'
   '@williamthorsen/toolbelt.terminal': '0.3.2'
   '@williamthorsen/toolbelt.testing': '0.8.7'
