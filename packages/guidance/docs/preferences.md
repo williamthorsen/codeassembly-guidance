@@ -224,13 +224,14 @@ The project and global values resolve per the [cascade](../README.md#preferences
 
 ### `integrations`
 
-| Key                                     | Type    | Default                                                  | Description                                                                                                                                                                                                |
-| --------------------------------------- | ------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `integrations.jira.done_status`         | string  | `Done`                                                   | Status to which `manage-jira-ticket.mjs close` transitions a work item whose status category is not done. Read from the repository's preferences alone.                                                    |
-| `integrations.jira.enabled`             | boolean | `false`                                                  | Enable Jira integration for ticket creation and referencing.                                                                                                                                               |
-| `integrations.jira.issue_types`         | object  | none                                                     | Maps work-type keys and aliases to Jira issue-type names, plus a `default` entry covering every unmapped work type. A work type matching neither falls back to the `Task` type.                            |
-| `integrations.jira.project_key`         | string  | `project.ticket_ref_prefix` minus its trailing separator | Key of the Jira project to create work items in. Set it when the derivation is wrong or when `ticket_ref_prefix` is absent.                                                                                |
-| `integrations.jira.umbrella_issue_type` | string  | `Epic`                                                   | Issue type of an umbrella that `create-ticket --umbrella` creates, in place of the work type's issue type, so that Jira accepts it as its children's parent. Read from the repository's preferences alone. |
+| Key                                     | Type    | Default                                                  | Description                                                                                                                                                                                                                                                             |
+| --------------------------------------- | ------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `integrations.jira.done_status`         | string  | `Done`                                                   | Status to which `manage-jira-ticket.mjs close` transitions a work item whose status category is not done. Read from the repository's preferences alone.                                                                                                                 |
+| `integrations.jira.enabled`             | boolean | `false`                                                  | Enable Jira integration for ticket creation and referencing.                                                                                                                                                                                                            |
+| `integrations.jira.issue_types`         | object  | none                                                     | Maps work-type keys and aliases to Jira issue-type names, plus a `default` entry covering every unmapped work type. A work type matching neither falls back to the `Task` type.                                                                                         |
+| `integrations.jira.project_key`         | string  | `project.ticket_ref_prefix` minus its trailing separator | Key of the Jira project to create work items in. Set it when the derivation is wrong or when `ticket_ref_prefix` is absent.                                                                                                                                             |
+| `integrations.jira.subtask_issue_type`  | string  | `Subtask`                                                | Issue type of a work item that `create-ticket` creates under a level-0 parent, such as a `Task`, in place of the work type's issue type, because Jira accepts only a subtask there. Older sites name the type `Sub-task`. Read from the repository's preferences alone. |
+| `integrations.jira.umbrella_issue_type` | string  | `Epic`                                                   | Issue type of an umbrella that `create-ticket --umbrella` creates, in place of the work type's issue type, so that Jira accepts it as its children's parent. Read from the repository's preferences alone.                                                              |
 
 ### `editors`
 
@@ -303,6 +304,7 @@ integrations:
       feat: Story
       fix: Bug
     project_key: MAC
+    subtask_issue_type: Subtask
     umbrella_issue_type: Epic
 
 editors:
