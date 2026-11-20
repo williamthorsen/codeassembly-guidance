@@ -30,9 +30,9 @@ const execFileAsync = promisify(execFile);
 const USAGE = `usage:
   manage-jira-ticket check-site --target <url-or-host>
   manage-jira-ticket close --key <key> [--post <md>]
-  manage-jira-ticket resolve-target --work-type <type>
+  manage-jira-ticket resolve-target --work-type <type> [--umbrella]
   manage-jira-ticket convert-body --body-file <md> --out <path>
-  manage-jira-ticket create --summary <text> --body-file <md> --work-type <type> [--parent <key>]`;
+  manage-jira-ticket create --summary <text> --body-file <md> --work-type <type> [--parent <key>] [--umbrella]`;
 
 /** Runs the subcommand named by `process.argv`, writing its JSON result to stdout and every diagnostic to stderr. */
 async function main(): Promise<void> {
@@ -77,8 +77,11 @@ function describeSiteMismatch(check: SiteCheck): string {
     : `acli's active site is ${check.activeSite}, but the ticket is on ${check.targetSite}. Run \`${switchCommand}\`.`;
 }
 
-/** Parses `argv` against `specs` into a value map, rejecting positional arguments and absent required flags. */
-function parseValues(argv: readonly string[], specs: readonly FlagSpec[], required: readonly string[]) {
+/**
+ * Parses `argv` against `specs` into a value map and the set of boolean flags given, rejecting positional arguments and
+ * absent required flags.
+ */
+function parseFlags(argv: readonly string[], specs: readonly FlagSpec[], required: readonly string[]) {
   const { flags, positionals } = scanFlags(argv, specs);
   if (positionals.length > 0) {
     throw new Error(`unexpected argument: ${positionals.join(' ')}`);
@@ -89,7 +92,8 @@ function parseValues(argv: readonly string[], specs: readonly FlagSpec[], requir
       throw new Error(`--${name} is required`);
     }
   }
-  return values;
+  const switches = new Set(flags.filter((flag) => flag.value === null).map((flag) => flag.name));
+  return { switches, values };
 }
 
 /** Reads the Markdown body; throws when the file is absent or empty, so that a description is never silently dropped. */
@@ -111,12 +115,16 @@ async function readBody(bodyFile: string): Promise<string> {
  * Resolves the target for `workType` from the repository's preferences, which the caller reads from the repository's
  * file alone, so that a project key in the user's global file never sends a repository's work items to another project.
  */
-async function readTarget(workType: string, preferences: Readonly<Record<string, unknown>>): Promise<Target> {
+async function readTarget(
+  workType: string,
+  preferences: Readonly<Record<string, unknown>>,
+  umbrella: boolean,
+): Promise<Target> {
   const workTypes = await loadWorkTypes();
   if (workTypes === null) {
     throw new Error('the work-type taxonomy could not be read');
   }
-  return resolveTarget(workType, readJiraPreferences(preferences), workTypes);
+  return resolveTarget(workType, readJiraPreferences(preferences), workTypes, { umbrella });
 }
 
 /**
@@ -176,7 +184,7 @@ async function runAcli(args: readonly string[]): Promise<AcliResult> {
 
 /** Prints the site check for `--target`, exiting non-zero and naming the switch command unless the sites match. */
 async function runCheckSite(argv: readonly string[]): Promise<void> {
-  const values = parseValues(argv, [{ name: 'target', takesValue: true }], ['target']);
+  const { values } = parseFlags(argv, [{ name: 'target', takesValue: true }], ['target']);
   const check = await readSiteCheck(values['target'] ?? '', runAcli);
   writeJson(check);
   if (check.match) {
@@ -192,7 +200,7 @@ async function runCheckSite(argv: readonly string[]): Promise<void> {
  * status category is done. Exits non-zero, after printing the result, when the site check refuses or a call fails.
  */
 async function runClose(argv: readonly string[]): Promise<void> {
-  const values = parseValues(
+  const { values } = parseFlags(
     argv,
     [
       { name: 'key', takesValue: true },
@@ -232,7 +240,7 @@ async function runClose(argv: readonly string[]): Promise<void> {
 
 /** Converts the body to ADF and writes it to `--out`. */
 async function runConvertBody(argv: readonly string[]): Promise<void> {
-  const values = parseValues(
+  const { values } = parseFlags(
     argv,
     [
       { name: 'body-file', takesValue: true },
@@ -251,19 +259,24 @@ async function runConvertBody(argv: readonly string[]): Promise<void> {
  * preferences do not name a project or the create did not yield a key.
  */
 async function runCreate(argv: readonly string[]): Promise<void> {
-  const values = parseValues(
+  const { switches, values } = parseFlags(
     argv,
     [
       { name: 'body-file', takesValue: true },
       { name: 'parent', takesValue: true },
       { name: 'summary', takesValue: true },
+      { name: 'umbrella', takesValue: false },
       { name: 'work-type', takesValue: true },
     ],
     ['body-file', 'summary', 'work-type'],
   );
   const markdown = await readBody(values['body-file'] ?? '');
   const projectRoot = resolveProjectRoot();
-  const target = await readTarget(values['work-type'] ?? '', await readProjectPreferences(projectRoot));
+  const target = await readTarget(
+    values['work-type'] ?? '',
+    await readProjectPreferences(projectRoot),
+    switches.has('umbrella'),
+  );
   if ('fallback' in target) {
     writeJson(target);
     process.stderr.write(`manage-jira-ticket: ${target.warning}\n`);
@@ -291,10 +304,18 @@ async function runCreate(argv: readonly string[]): Promise<void> {
   }
 }
 
-/** Resolves and prints the target for `--work-type`. */
+/** Resolves and prints the target for `--work-type`, as an umbrella under `--umbrella`. */
 async function runResolveTarget(argv: readonly string[]): Promise<void> {
-  const values = parseValues(argv, [{ name: 'work-type', takesValue: true }], ['work-type']);
-  writeJson(await readTarget(values['work-type'] ?? '', await readProjectPreferences(resolveProjectRoot())));
+  const { switches, values } = parseFlags(
+    argv,
+    [
+      { name: 'umbrella', takesValue: false },
+      { name: 'work-type', takesValue: true },
+    ],
+    ['work-type'],
+  );
+  const preferences = await readProjectPreferences(resolveProjectRoot());
+  writeJson(await readTarget(values['work-type'] ?? '', preferences, switches.has('umbrella')));
 }
 
 /** Writes `value` to stdout as indented JSON. */

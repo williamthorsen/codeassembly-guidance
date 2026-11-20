@@ -7,6 +7,12 @@ export interface JiraPreferences {
   issueTypes: Readonly<Record<string, string>>;
   projectKey: string | undefined;
   ticketRefPrefix: string | undefined;
+  umbrellaIssueType: string | undefined;
+}
+
+/** How a work item is resolved: `umbrella` marks an umbrella, whose children do its work. */
+export interface TargetOptions {
+  umbrella: boolean;
 }
 
 /** Where a work item is created, or the reason that the preferences do not name a project. */
@@ -36,6 +42,7 @@ export function readJiraPreferences(merged: Readonly<Record<string, unknown>>): 
     issueTypes,
     projectKey: readString(jira['project_key'], 'integrations.jira.project_key'),
     ticketRefPrefix: readString(project['ticket_ref_prefix'], 'project.ticket_ref_prefix'),
+    umbrellaIssueType: readString(jira['umbrella_issue_type'], 'integrations.jira.umbrella_issue_type'),
   };
 }
 
@@ -46,8 +53,10 @@ export function resolveDoneStatus(preferences: JiraPreferences): string {
 
 /**
  * Resolves the project key and issue type for a work item of `workType`. The key is `integrations.jira.project_key`,
- * else `project.ticket_ref_prefix` without its trailing separator. The issue type is the `issue_types` entry whose key
- * names the same work type, matched through the taxonomy's aliases, else the map's `default` entry, else `Task`.
+ * else `project.ticket_ref_prefix` without its trailing separator. The issue type of an umbrella is
+ * `integrations.jira.umbrella_issue_type`, else `Epic`, because Jira accepts only an epic as the parent of a standard
+ * work item. The issue type of any other work item is the `issue_types` entry whose key names the same work type,
+ * matched through the taxonomy's aliases, else the map's `default` entry, else `Task`.
  *
  * Throws when `workType` is not declared by the taxonomy, so that a misspelled type does not fall through to `default`.
  */
@@ -55,6 +64,7 @@ export function resolveTarget(
   workType: string,
   preferences: JiraPreferences,
   workTypes: ReadonlyMap<string, WorkType>,
+  options: TargetOptions = { umbrella: false },
 ): Target {
   const resolved = resolveWorkType(workType, workTypes);
   if (resolved === null) {
@@ -70,7 +80,10 @@ export function resolveTarget(
     };
   }
 
-  return { issueType: resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes), projectKey };
+  const issueType = options.umbrella
+    ? (nonEmpty(preferences.umbrellaIssueType) ?? 'Epic')
+    : resolveIssueType(resolved.workType.key, preferences.issueTypes, workTypes);
+  return { issueType, projectKey };
 }
 
 // region | Helpers

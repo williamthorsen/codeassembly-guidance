@@ -92,6 +92,27 @@ describe('manage-jira-ticket CLI', () => {
     });
   });
 
+  it('creates an umbrella at the umbrella issue type', async () => {
+    await writePreferences('integrations:\n  jira:\n    project_key: ABC\n    issue_types:\n      bugfix: Bug\n');
+    const bodyFile = await writeInput('body.md', '## Problem\n\nSplit it.\n');
+
+    const result = await runCli([
+      'create',
+      '--summary',
+      'Split it',
+      '--body-file',
+      bodyFile,
+      '--work-type',
+      'fix',
+      '--umbrella',
+    ]);
+
+    expect(result.exitCode).toBe(0);
+    const calls = await readCalls();
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ args: expect.arrayContaining(['--type', 'Epic']) });
+  });
+
   it('creates once on the target site when the active site matches the base URL', async () => {
     await writePreferences(SITE_PREFERENCES);
     const bodyFile = await writeInput('body.md', 'Body\n');
@@ -245,13 +266,23 @@ describe('manage-jira-ticket CLI', () => {
     await mkdir(path.join(homeDir, '.agents'));
     await writeFile(
       path.join(homeDir, '.agents', 'preferences.yaml'),
-      'integrations:\n  jira:\n    project_key: GLOBAL\nproject:\n  ticket_ref_prefix: GLB-\n',
+      'integrations:\n  jira:\n    project_key: GLOBAL\n    umbrella_issue_type: Initiative\nproject:\n  ticket_ref_prefix: GLB-\n',
     );
     await writePreferences('project:\n  ticket_ref_prefix: XYZ-\n');
 
     const result = await runCli(['resolve-target', '--work-type', 'feat']);
+    const umbrella = await runCli(['resolve-target', '--work-type', 'feat', '--umbrella']);
 
     expect(JSON.parse(result.stdout)).toEqual({ issueType: 'Task', projectKey: 'XYZ' });
+    expect(JSON.parse(umbrella.stdout)).toEqual({ issueType: 'Epic', projectKey: 'XYZ' });
+  });
+
+  it('resolves an umbrella to the configured umbrella issue type', async () => {
+    await writePreferences('integrations:\n  jira:\n    project_key: ABC\n    umbrella_issue_type: Initiative\n');
+
+    const result = await runCli(['resolve-target', '--work-type', 'feat', '--umbrella']);
+
+    expect(JSON.parse(result.stdout)).toEqual({ issueType: 'Initiative', projectKey: 'ABC' });
   });
 
   it('prints a match and exits zero when the active site is the target', async () => {
