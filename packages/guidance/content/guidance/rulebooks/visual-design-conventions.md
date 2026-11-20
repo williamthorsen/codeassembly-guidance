@@ -2,7 +2,7 @@
 slug: visual-design-conventions
 description: 'Visual design of interfaces: marks for the exception, colour as an encoding channel, padding inside bounded containers, alignment, an appearance that follows each element''s role, tags, product identity, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
 delivery: [skill]
-version: '1'
+version: '2'
 ---
 
 # Visual design conventions
@@ -25,7 +25,9 @@ Text never touches the edge of a container that has a visible boundary, such as 
 
 ## Alignment
 
-Every block aligns with an edge or an axis of another block on the page. A block does not float in the vertical middle of a region that it does not fill: It starts where the region's content starts, and an empty state sits where the content that it replaces would begin. A dialog centered in the viewport over the page is not such a block. Example: ❌ An empty-list message floats in the middle of a tall panel, aligned with nothing. ✅ The message starts at the top of the panel, on the list's left edge.
+Every block aligns with an edge or an axis of another block on the page. A block does not float in the vertical middle of a region that it does not fill: It starts where the region's content starts, and an empty state sits where the content that it replaces would begin. A dialog centred in the viewport over the page is not such a block. Example: ❌ An empty-list message floats in the middle of a tall panel, aligned with nothing. ✅ The message starts at the top of the panel, on the list's left edge.
+
+Within a block, text and elements are start-aligned, so that each one shares an edge with its neighbours: Everything aligns with something. A column of numbers aligns on its end edge instead, so that digits of the same place value line up. Centring is the rare exception, and it is permitted only for a dialog centred in the viewport, as above, a short single-line label inside a button or a tag, and an icon in a square control. Centred multi-line text never qualifies: Each of its lines starts at a different place, and the reader's eye has to find each start. Example: ❌ A dialog centres its heading and its three-line body, and each line starts at a different place. ✅ The heading and the body start on the dialog's left edge.
 
 ## Roles
 
@@ -48,6 +50,7 @@ Check every change to a visible component in a browser before reporting it finis
 
 - The text in each bordered or filled container has padding on every side.
 - Each block aligns with another block, and each block that does not fill its region starts where the region's content starts.
+- Text and the elements within each block are start-aligned, a column of numbers is end-aligned, and centred text appears only in a button's or a tag's single-line label.
 - Marks fall on exceptions only.
 - Each link, navigation item, button, and tag looks like its role.
 - The product's name and home link are visible, and the favicon is the product's own.
