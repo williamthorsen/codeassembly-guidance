@@ -67,6 +67,7 @@ Send one {tool:Task} call, `subagent_type: disposition-challenger`, with this bl
 
 ```dispatch
 findings: {ticket_dir}/triage/findings.md
+platform: {the platform from step 1}
 recommendations: {ticket_dir}/triage/recommendations.md
 root: {repository root}
 ```
