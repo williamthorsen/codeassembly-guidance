@@ -1,13 +1,15 @@
 ---
 slug: ui-copy-conventions
-description: 'Text in a product surface: written for the person who returns to the page, with rules for labels, helper text, errors, and empty states, and a copy budget. Consult before writing labels, helper text, messages, or empty states for a page, a prototype, or a UI component.'
+description: 'Text in a product surface: written for the person who returns to the page, with rules for labels, helper text, errors, and empty states, and a copy budget. Consult before writing labels, helper text, messages, or empty states for a page, a prototype, or a UI component. Not for tours, onboarding decks, or other presentational content.'
 delivery: [skill]
-version: '3'
+version: '4'
 ---
 
 # UI copy conventions
 
 A tool page is written for the person who uses it every week, not for a first-time visitor. Copy that introduces the page, sells it, or walks through it is text that this person reads past on every visit, and a sentence that declares the task finished decides something that is theirs to decide. These conventions apply to a prototype or a mockup exactly as they apply to a released interface.
+
+Presentational content is outside these conventions: a tour, an onboarding deck, a walkthrough, or other content that introduces the product to a reader who has not used it yet, usually once. Its titles state what the reader gains, its leads show that gain with a concrete example, and it may address the reader. When the agent's guidance includes a plain-speech rule, that rule's carve-out for presentational text applies to such content. The controls of a tour, such as its buttons and its step counter, are product surface and follow these conventions.
 
 When a project names its own content guidelines, such as a design system's, those guidelines take precedence when the two conflict.
 
