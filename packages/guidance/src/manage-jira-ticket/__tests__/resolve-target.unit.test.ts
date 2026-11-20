@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { loadWorkTypes } from '../../lib/work-types.ts';
-import { type JiraPreferences, readJiraPreferences, resolveTarget } from '../resolve-target.ts';
+import { type JiraPreferences, readJiraPreferences, resolveDoneStatus, resolveTarget } from '../resolve-target.ts';
 
 const workTypes = await loadWorkTypes();
 if (workTypes === null) {
@@ -82,14 +82,26 @@ describe(resolveTarget, () => {
   });
 });
 
+describe(resolveDoneStatus, () => {
+  it('takes integrations.jira.done_status', () => {
+    expect(resolveDoneStatus(preferences({ doneStatus: 'Resolved' }))).toBe('Resolved');
+  });
+
+  it('falls back to Done when the status is absent or empty', () => {
+    expect(resolveDoneStatus(preferences({}))).toBe('Done');
+    expect(resolveDoneStatus(preferences({ doneStatus: '' }))).toBe('Done');
+  });
+});
+
 describe(readJiraPreferences, () => {
   it('reads the Jira settings and the ticket-reference prefix', () => {
     const merged = {
-      integrations: { jira: { enabled: true, issue_types: { fix: 'Bug' }, project_key: 'ABC' } },
+      integrations: { jira: { done_status: 'Closed', enabled: true, issue_types: { fix: 'Bug' }, project_key: 'ABC' } },
       project: { ticket_ref_prefix: 'ABC-' },
     };
 
     expect(readJiraPreferences(merged)).toEqual({
+      doneStatus: 'Closed',
       issueTypes: { fix: 'Bug' },
       projectKey: 'ABC',
       ticketRefPrefix: 'ABC-',
@@ -97,7 +109,12 @@ describe(readJiraPreferences, () => {
   });
 
   it('reads absent sections as unset', () => {
-    expect(readJiraPreferences({})).toEqual({ issueTypes: {}, projectKey: undefined, ticketRefPrefix: undefined });
+    expect(readJiraPreferences({})).toEqual({
+      doneStatus: undefined,
+      issueTypes: {},
+      projectKey: undefined,
+      ticketRefPrefix: undefined,
+    });
   });
 
   it('throws with the key path when a field has the wrong type', () => {
@@ -111,7 +128,7 @@ describe(readJiraPreferences, () => {
 
 /** Builds Jira preferences from the fields that a test sets. */
 function preferences(fields: Partial<JiraPreferences>): JiraPreferences {
-  return { issueTypes: {}, projectKey: undefined, ticketRefPrefix: undefined, ...fields };
+  return { doneStatus: undefined, issueTypes: {}, projectKey: undefined, ticketRefPrefix: undefined, ...fields };
 }
 
 // endregion | Helpers

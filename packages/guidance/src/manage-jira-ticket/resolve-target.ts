@@ -3,6 +3,7 @@ import { resolveWorkType, type WorkType } from '../lib/work-types.ts';
 
 /** The Jira settings that target resolution reads from the merged preferences. */
 export interface JiraPreferences {
+  doneStatus: string | undefined;
   issueTypes: Readonly<Record<string, string>>;
   projectKey: string | undefined;
   ticketRefPrefix: string | undefined;
@@ -31,10 +32,16 @@ export function readJiraPreferences(merged: Readonly<Record<string, unknown>>): 
   }
 
   return {
+    doneStatus: readString(jira['done_status'], 'integrations.jira.done_status'),
     issueTypes,
     projectKey: readString(jira['project_key'], 'integrations.jira.project_key'),
     ticketRefPrefix: readString(project['ticket_ref_prefix'], 'project.ticket_ref_prefix'),
   };
+}
+
+/** Resolves the status to which a close transitions a work item: `integrations.jira.done_status`, else `Done`. */
+export function resolveDoneStatus(preferences: JiraPreferences): string {
+  return nonEmpty(preferences.doneStatus) ?? 'Done';
 }
 
 /**

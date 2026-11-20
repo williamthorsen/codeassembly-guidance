@@ -14,12 +14,13 @@ const execFileAsync = promisify(execFile);
 
 const CLI_PATH = fileURLToPath(new URL('../cli.ts', import.meta.url));
 
-// An `acli` stand-in: It appends its argv, and the content of any `--description-file`, to the log as one JSON line.
-// `auth status` reports `STUB_SITE` as the active site, or fails as an unauthenticated `acli` when it is unset.
+// An `acli` stand-in: It appends its argv, and the content of any `--description-file` or `--body-file`, to the log as
+// one JSON line. `auth status` reports `STUB_SITE` as the active site, or fails as an unauthenticated `acli` when it is
+// unset. `comment list` reports `STUB_COMMENTS`, a JSON array of bodies, and `view` reports `STUB_STATUS_CATEGORY`.
 const ACLI_STUB = String.raw`#!${process.execPath}
 const fs = require('node:fs');
 const args = process.argv.slice(2);
-const fileIndex = args.indexOf('--description-file');
+const fileIndex = Math.max(args.indexOf('--description-file'), args.indexOf('--body-file'));
 const description = fileIndex === -1 ? null : JSON.parse(fs.readFileSync(args[fileIndex + 1], 'utf8'));
 fs.appendFileSync(process.env.STUB_LOG, JSON.stringify({ args, description }) + '\n');
 if (args[1] === 'auth' && args[2] === 'status') {
@@ -29,6 +30,12 @@ if (args[1] === 'auth' && args[2] === 'status') {
     process.stderr.write("✗ Error: unauthorized: use 'acli jira auth login' to authenticate\n");
     process.exitCode = 1;
   }
+} else if (args[2] === 'comment' && args[3] === 'list') {
+  const comments = JSON.parse(process.env.STUB_COMMENTS || '[]').map((body) => ({ author: 'Example User', body }));
+  process.stdout.write(JSON.stringify({ comments, isLast: true, total: comments.length }));
+} else if (args[2] === 'view') {
+  const category = process.env.STUB_STATUS_CATEGORY || 'new';
+  process.stdout.write(JSON.stringify({ fields: { status: { name: 'Status', statusCategory: { key: category } } } }));
 } else {
   process.stdout.write(args[2] === 'create' ? '{"key":"ABC-7"}' : '');
 }
@@ -160,6 +167,66 @@ describe('manage-jira-ticket CLI', () => {
 
     expect(result.exitCode).toBe(1);
     expect(JSON.parse(result.stdout)).toHaveProperty('fallback', 'no-project-key');
+    expect(await readCalls()).toEqual([]);
+  });
+
+  it('posts the conclusion and transitions the work item to the configured done status', async () => {
+    await writePreferences('integrations:\n  jira:\n    done_status: Closed\n');
+    const postFile = await writeInput('post.md', '**Conclusion** of the spike\n\n- [x] answered\n');
+
+    const result = await runCli(['close', '--key', 'ABC-7', '--post', postFile]);
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      posted: 'made',
+      status: { category: 'new', name: 'Status' },
+      transitioned: 'made',
+    });
+    const calls = await readCalls();
+    expect(calls[1]).toMatchObject({
+      description: { type: 'doc', content: [{ type: 'paragraph' }, { type: 'taskList' }] },
+    });
+    expect(calls[3]).toMatchObject({ args: expect.arrayContaining(['--status', 'Closed', '--yes']) });
+    expect(await readSubcommands()).toEqual([
+      'workitem comment',
+      'workitem comment',
+      'workitem view',
+      'workitem transition',
+    ]);
+  });
+
+  it('makes neither write on a rerun', async () => {
+    const postFile = await writeInput('post.md', '**Conclusion** of the spike\n\nDetails.\n');
+
+    const result = await runCli(['close', '--key', 'ABC-7', '--post', postFile], {
+      STUB_COMMENTS: JSON.stringify([' Conclusion of the spike Details.']),
+      STUB_STATUS_CATEGORY: 'done',
+    });
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toMatchObject({ posted: 'skipped', transitioned: 'skipped' });
+    expect(await readSubcommands()).toEqual(['workitem comment', 'workitem view']);
+  });
+
+  it('refuses to close on another site without any other acli call', async () => {
+    await writePreferences(SITE_PREFERENCES);
+    const postFile = await writeInput('post.md', 'Conclusion\n');
+
+    const result = await runCli(['close', '--key', 'ABC-7', '--post', postFile], { STUB_SITE: 'other.atlassian.net' });
+
+    expect(result.exitCode).toBe(1);
+    expect(JSON.parse(result.stdout)).toMatchObject({ fallback: 'wrong-site', targetSite: 'example.atlassian.net' });
+    expect(result.stderr).toContain('Jira work item not closed');
+    expect(await readSubcommands()).toEqual(['auth status']);
+  });
+
+  it('refuses a post whose first block does not contain any text, without calling acli', async () => {
+    const postFile = await writeInput('post.md', '---\n\nConclusion\n');
+
+    const result = await runCli(['close', '--key', 'ABC-7', '--post', postFile]);
+
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("the post's first block does not contain any text");
     expect(await readCalls()).toEqual([]);
   });
 
