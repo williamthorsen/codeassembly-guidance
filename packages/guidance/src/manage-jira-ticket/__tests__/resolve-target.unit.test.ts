@@ -77,6 +77,48 @@ describe(resolveTarget, () => {
     expect(target).toHaveProperty('issueType', 'Task');
   });
 
+  it('takes Epic for an umbrella, whatever the work type maps to', () => {
+    const target = resolveTarget(
+      'fix',
+      preferences({ projectKey: 'ABC', issueTypes: { default: 'Story', fix: 'Bug' } }),
+      workTypes,
+      { umbrella: true },
+    );
+
+    expect(target).toEqual({ issueType: 'Epic', projectKey: 'ABC' });
+  });
+
+  it('takes integrations.jira.umbrella_issue_type for an umbrella when it is set', () => {
+    const target = resolveTarget(
+      'feat',
+      preferences({ projectKey: 'ABC', umbrellaIssueType: 'Initiative' }),
+      workTypes,
+      {
+        umbrella: true,
+      },
+    );
+
+    expect(target).toHaveProperty('issueType', 'Initiative');
+  });
+
+  it('takes Epic for an umbrella when the umbrella issue type is empty', () => {
+    const target = resolveTarget('feat', preferences({ projectKey: 'ABC', umbrellaIssueType: '' }), workTypes, {
+      umbrella: true,
+    });
+
+    expect(target).toHaveProperty('issueType', 'Epic');
+  });
+
+  it('ignores the umbrella issue type for a work item that is not an umbrella', () => {
+    const target = resolveTarget(
+      'feat',
+      preferences({ projectKey: 'ABC', umbrellaIssueType: 'Initiative' }),
+      workTypes,
+    );
+
+    expect(target).toHaveProperty('issueType', 'Task');
+  });
+
   it('throws on a work type that the taxonomy does not declare', () => {
     expect(() => resolveTarget('feature-ish', preferences({}), workTypes)).toThrow("unknown work type 'feature-ish'");
   });
@@ -96,7 +138,15 @@ describe(resolveDoneStatus, () => {
 describe(readJiraPreferences, () => {
   it('reads the Jira settings and the ticket-reference prefix', () => {
     const merged = {
-      integrations: { jira: { done_status: 'Closed', enabled: true, issue_types: { fix: 'Bug' }, project_key: 'ABC' } },
+      integrations: {
+        jira: {
+          done_status: 'Closed',
+          enabled: true,
+          issue_types: { fix: 'Bug' },
+          project_key: 'ABC',
+          umbrella_issue_type: 'Epic',
+        },
+      },
       project: { ticket_ref_prefix: 'ABC-' },
     };
 
@@ -105,6 +155,7 @@ describe(readJiraPreferences, () => {
       issueTypes: { fix: 'Bug' },
       projectKey: 'ABC',
       ticketRefPrefix: 'ABC-',
+      umbrellaIssueType: 'Epic',
     });
   });
 
@@ -114,6 +165,7 @@ describe(readJiraPreferences, () => {
       issueTypes: {},
       projectKey: undefined,
       ticketRefPrefix: undefined,
+      umbrellaIssueType: undefined,
     });
   });
 
@@ -122,13 +174,26 @@ describe(readJiraPreferences, () => {
 
     expect(() => readJiraPreferences(merged)).toThrow("'integrations.jira.issue_types.fix' must be a string");
   });
+
+  it('throws with the key path when the umbrella issue type is not a string', () => {
+    const merged = { integrations: { jira: { umbrella_issue_type: 1 } } };
+
+    expect(() => readJiraPreferences(merged)).toThrow("'integrations.jira.umbrella_issue_type' must be a string");
+  });
 });
 
 // region | Helpers
 
 /** Builds Jira preferences from the fields that a test sets. */
 function preferences(fields: Partial<JiraPreferences>): JiraPreferences {
-  return { doneStatus: undefined, issueTypes: {}, projectKey: undefined, ticketRefPrefix: undefined, ...fields };
+  return {
+    doneStatus: undefined,
+    issueTypes: {},
+    projectKey: undefined,
+    ticketRefPrefix: undefined,
+    umbrellaIssueType: undefined,
+    ...fields,
+  };
 }
 
 // endregion | Helpers

@@ -22,7 +22,7 @@ For each item, find the strongest argument against its disposition and against e
 
 <!-- include: ../_partials/finding-grades.md / -->
 
-The dispositions are `ticket` (a new ticket, under the triage's umbrella on GitHub), `comment` (a note on an existing issue), `merge` (folded into another item's ticket), and `drop`.
+The dispositions are `ticket` (a new ticket, under the triage's umbrella), `comment` (a note on an existing issue), `merge` (folded into another item's ticket), and `drop`.
 
 <HARD-GATE>
 Never write to the tracker: Do not comment, edit, label, close, or create anything, through `gh`, `acli`, or any other means. Run only `gh` and `acli` commands that read.

@@ -13,13 +13,14 @@ Create a ticket on the appropriate platform. The remote platform (e.g., GitHub) 
 
 ## Arguments
 
-| Argument              | Effect                                                                                        |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| `--parent <ref>`      | Make the new ticket a child of the referenced ticket. One reference; a ticket has one parent. |
-| `--blocked-by <refs>` | Mark the new ticket as blocked by the referenced tickets.                                     |
-| `--blocking <refs>`   | Mark the new ticket as blocking the referenced tickets.                                       |
-| `--label <labels>`    | Apply these labels with the ones that step 5 resolves. GitHub only.                           |
-| `--repo <OWNER/REPO>` | File the ticket in this GitHub repository. See [Another repository](#another-repository).     |
+| Argument              | Effect                                                                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--parent <ref>`      | Make the new ticket a child of the referenced ticket. One reference; a ticket has one parent.                                                                                                                                                                                      |
+| `--blocked-by <refs>` | Mark the new ticket as blocked by the referenced tickets.                                                                                                                                                                                                                          |
+| `--blocking <refs>`   | Mark the new ticket as blocking the referenced tickets.                                                                                                                                                                                                                            |
+| `--label <labels>`    | Apply these labels with the ones that step 5 resolves. GitHub only.                                                                                                                                                                                                                |
+| `--repo <OWNER/REPO>` | File the ticket in this GitHub repository. See [Another repository](#another-repository).                                                                                                                                                                                          |
+| `--umbrella`          | Create the ticket as an umbrella, whose children do its work. On Jira, it takes the issue type that `integrations.jira.umbrella_issue_type` sets (`Epic` by default) in place of the work type's, so that Jira accepts it as its children's parent. On GitHub, it changes nothing. |
 
 The three relationship arguments take ticket references in the project's own form (`#123`, `ABC-123`), comma-separated when more than one applies. Each is optional, and each overrides the inference in step 4 for its own relationship. `--label` takes label names, comma-separated, exactly as the repository spells them.
 
@@ -107,6 +108,8 @@ Decide which apply from the reason this ticket is being created, narrowed by `br
 
 For a [target repository](#another-repository), do not infer any relationship from `branch_ticket_id`, which identifies a ticket in the session's repository; apply only those that the arguments state. A reference resolves in the target, so pass a ticket in any other repository as its URL.
 
+On Jira, an `--umbrella` ticket does not take a parent that this step infers: An umbrella is an epic by default, and Jira rejects a level-0 work item or another epic as an epic's parent, which would fail the creation itself. Report the inferred parent skipped in the completion output. A parent given through `--parent` is passed through, because the caller may name a higher-level item, such as an initiative.
+
 **Most tickets have none, and for those, say nothing.** When nothing applies, continue to step 5 without asking.
 
 When one or more apply, state each relationship and its target in the project's own reference form and confirm before anything is created, so that a wrong target is visible while it is still free to correct. A relationship supplied through an argument is one that the caller has already confirmed: State it in the completion output and do not ask about it; the confirmation covers the inferred relationships alone. If the platform resolved in step 3 cannot express one of them, say so here rather than reporting it as a skip in step 7.
@@ -173,10 +176,10 @@ Construct the ticket ID from `ticket_ref_prefix` (step 1) and `number`:
 ##### Resolve the target
 
 ```bash
-node {harness_home_dir}/scripts/manage-jira-ticket.mjs resolve-target --work-type {type}
+node {harness_home_dir}/scripts/manage-jira-ticket.mjs resolve-target --work-type {type} {umbrella_flag}
 ```
 
-`{type}` is the work type decided in step 2. The helper reads `integrations.jira` and `project.ticket_ref_prefix` from the repository's `.agents/preferences.yaml`, never from the global file, and prints `{"projectKey": "...", "issueType": "..."}`. Use both values as printed: Never infer a key from the repository name or from a ticket reference seen elsewhere in the session, and never choose an issue type from the ticket's content, because a project need not define `Story` or `Bug`.
+`{type}` is the work type decided in step 2, and `{umbrella_flag}` is `--umbrella` when the caller passed it, and empty otherwise. The helper reads `integrations.jira` and `project.ticket_ref_prefix` from the repository's `.agents/preferences.yaml`, never from the global file, and prints `{"projectKey": "...", "issueType": "..."}`. Use both values as printed: Never infer a key from the repository name or from a ticket reference seen elsewhere in the session, and never choose an issue type from the ticket's content, because a project need not define `Story` or `Bug`.
 
 When the preferences do not name a project, the helper prints `{"fallback": "no-project-key", "warning": "..."}` instead. Take the [no-remote fallback](#fallback-no-remote-platform) with that warning.
 
@@ -191,10 +194,10 @@ Identify the client per {skill?:update-jira-ticket}, which ranks the three clien
 - **`acli`**: Write the step-2 body as Markdown to a scratch file per [gh body file](#gh-body-file), naming it `jira-body-{timestamp}.md`, and run the helper once:
 
   ```bash
-  node {harness_home_dir}/scripts/manage-jira-ticket.mjs create --summary "{ticket_title}" --body-file {absolute body path} --work-type {type} {parent_flag}
+  node {harness_home_dir}/scripts/manage-jira-ticket.mjs create --summary "{ticket_title}" --body-file {absolute body path} --work-type {type} {parent_flag} {umbrella_flag}
   ```
 
-  `{parent_flag}` is `--parent {parent}` when step 4 decided a parent, and empty otherwise. Pass the body path as the literal absolute path, unquoted, without a shell variable or a guard: The helper refuses a missing or empty file before it calls `acli`.
+  `{parent_flag}` is `--parent {parent}` when step 4 decided a parent, and empty otherwise; `{umbrella_flag}` is as for `resolve-target`. Pass the body path as the literal absolute path, unquoted, without a shell variable or a guard: The helper refuses a missing or empty file before it calls `acli`.
 
   When `ticket.base_url` is set, in the repository's preferences or the global file, the helper first compares `acli`'s active site with the base URL's host, because `acli` creates on whichever site it is signed in to. It then converts the body to ADF, checks a parent with `acli jira workitem view`, and runs `acli jira workitem create` exactly once. It prints `{"key": "ABC-123", "rawOutput": "...", "parentSkipped": false, "activeSite": "..."}`, in which `activeSite` is null when `ticket.base_url` is unset. `parentSkipped: true` means that Jira rejected the parent reference and the work item was created without it; report the parent skipped per step 7.
 

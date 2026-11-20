@@ -80,6 +80,10 @@
             "project_key": {
               "type": "string",
               "description": "Key of the Jira project to create work items in (e.g., `MAC`). Overrides the key derived from `project.ticket_ref_prefix` minus its trailing separator."
+            },
+            "umbrella_issue_type": {
+              "type": "string",
+              "description": "Jira issue-type name of an umbrella, a work item that `create-ticket --umbrella` creates for its children to be parented to (e.g., `Epic`). Overrides the `Epic` default; the work type does not apply."
             }
           },
           "required": ["enabled"]

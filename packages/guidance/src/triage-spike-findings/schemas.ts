@@ -59,7 +59,7 @@ export const RecordSchema = z.object({
   platform: z.enum(PLATFORMS).default('github'),
   source: z.string().min(1),
   triageTicket: IssueReferenceSchema,
-  /** Always null on Jira, which does not have an umbrella. */
+  /** Null until the umbrella is created, and on a record that does not need one. */
   umbrella: IssueReferenceSchema.nullable(),
   /** The HEAD at which the dispositions were approved; required when any item has evidence. */
   commit: CommitSchema.optional(),
@@ -86,10 +86,10 @@ export interface GateViolation {
 
 /**
  * Checks a parsed record against the gate: every issue reference takes the form of the record's platform; a Jira record
- * does not have an umbrella or an item id shaped like a key; a `low` item never takes a ticket; a `merge` targets a
- * `ticket` item by id; a `comment` targets an issue; a `ticket` or `drop` item does not have a target; only a `ticket`
- * item has a ticket or blockers; a blocker that is not an issue names another `ticket` item, once; the blockers do not
- * form a cycle; an item has evidence only when the record has a commit; and ids are unique.
+ * does not have an item id shaped like a key; a `low` item never takes a ticket; a `merge` targets a `ticket` item by
+ * id; a `comment` targets an issue; a `ticket` or `drop` item does not have a target; only a `ticket` item has a ticket
+ * or blockers; a blocker that is not an issue names another `ticket` item, once; the blockers do not form a cycle; an
+ * item has evidence only when the record has a commit; and ids are unique.
  * Returns every violation, so that one run reports them all.
  */
 export function checkGate(record: DispositionsRecord): GateViolation[] {
@@ -124,19 +124,15 @@ export function checkGate(record: DispositionsRecord): GateViolation[] {
 }
 
 /**
- * Returns the ids of the `ticket` items without a ticket, and whether the umbrella is missing. Only a GitHub record
- * that has a `ticket` item needs an umbrella, so the umbrella of any other record is never missing.
+ * Returns the ids of the `ticket` items without a ticket, and whether the umbrella is missing. The umbrella is missing
+ * only while a `ticket` item lacks its ticket, so that a record whose children were created without one, as on Jira
+ * before umbrellas were created there, is not given an umbrella without children.
  */
 export function findMissingTickets(record: DispositionsRecord): { items: string[]; umbrella: boolean } {
-  return {
-    items: record.items.filter((item) => item.disposition === 'ticket' && item.ticket === null).map((item) => item.id),
-    umbrella: record.platform === 'github' && record.umbrella === null && hasTicketItem(record),
-  };
-}
-
-/** Returns whether any item of the record takes a ticket. */
-export function hasTicketItem(record: DispositionsRecord): boolean {
-  return record.items.some((item) => item.disposition === 'ticket');
+  const items = record.items
+    .filter((item) => item.disposition === 'ticket' && item.ticket === null)
+    .map((item) => item.id);
+  return { items, umbrella: record.umbrella === null && items.length > 0 };
 }
 
 /**
@@ -193,16 +189,14 @@ function checkBlockers(item: Item, byId: ReadonlyMap<string, Item>, platform: Pl
   return violations;
 }
 
-/** Checks the record's own references: the triage ticket's form, and the umbrella's form or, on Jira, its absence. */
+/** Checks the record's own references: the forms of the triage ticket and of the umbrella. */
 function checkRecordReferences(record: DispositionsRecord): GateViolation[] {
   const issue = describeReference(record.platform);
   const violations: GateViolation[] = [];
   if (!isReference(record.triageTicket, record.platform)) {
     violations.push({ id: 'triageTicket', clause: `the triage ticket is ${issue}` });
   }
-  if (record.platform === 'jira' && record.umbrella !== null) {
-    violations.push({ id: 'umbrella', clause: 'a Jira record does not have an umbrella' });
-  } else if (record.umbrella !== null && !isReference(record.umbrella, record.platform)) {
+  if (record.umbrella !== null && !isReference(record.umbrella, record.platform)) {
     violations.push({ id: 'umbrella', clause: `the umbrella is ${issue}` });
   }
   return violations;

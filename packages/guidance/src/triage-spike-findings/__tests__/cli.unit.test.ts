@@ -69,7 +69,7 @@ describe(runCli, () => {
     it('reports the platform of a Jira record', async () => {
       const result = await runCli(['validate', '--file', writeRecord(root, buildJiraRecord())], context);
 
-      expect(result).toMatchObject({ ok: true, platform: 'jira', missingTickets: { items: ['C1'], umbrella: false } });
+      expect(result).toMatchObject({ ok: true, platform: 'jira', missingTickets: { items: ['C1'], umbrella: true } });
     });
 
     it('reports record-not-found for a missing file and invalid-record for a malformed one', async () => {
@@ -155,8 +155,9 @@ describe(runCli, () => {
       expect(readFileSync(path.join(root, 'out', 'dispositions-comment.md'), 'utf8')).toContain('#282');
     });
 
-    it('writes a Jira record without an umbrella, naming each comment file for its key', async () => {
+    it('writes a Jira record, naming each comment file for its key', async () => {
       const record = buildJiraRecord({
+        umbrella: 'SCRATCHA-281',
         items: [
           buildItem({ id: 'C1', ticket: 'SCRATCHA-282' }),
           buildItem({ id: 'C2', disposition: 'comment', target: 'SCRATCHA-272' }),
