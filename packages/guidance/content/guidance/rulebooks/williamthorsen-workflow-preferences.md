@@ -2,7 +2,7 @@
 slug: williamthorsen-workflow-preferences
 description: William Thorsen's personal preferences for how work moves -- scope, branches and worktrees, guidance capture, and the arc of product development.
 delivery: ambient
-version: '14'
+version: '15'
 ---
 
 # William Thorsen's workflow preferences
@@ -18,6 +18,8 @@ version: '14'
 ## Branch and worktree management
 
 Never create a branch or worktree without explicit authorization. Each ticket is implemented in its own worktree, and the developer's tooling relies on that: Do all of one ticket's work in that worktree, never switch a worktree to another branch, and start a new session in another ticket's own worktree for work on that ticket. Which branch or worktree a ticket's work uses is settled, so never ask it.
+
+Create an authorized worktree with Worktrunk, never with `git worktree add`, because Worktrunk runs the repository's setup hooks, such as `direnv allow` and `pnpm install`, and a worktree made by plain `git` lacks that setup: `wt switch --create <branch>` for a new branch, and `wt switch <branch>` for an existing one. Do not pass a path, because Worktrunk's path template places the worktree. Do not pass `--yes`, which approves the project's hook commands on the developer's behalf: When Worktrunk asks for approval, ask the developer.
 
 A session works only in its own repository and in its own ticket's worktree. For any other repository or ticket, filing the ticket is the limit of the session's work: Do not create a branch or a worktree there, commit, push, or open a pull request. Reading another repository is not restricted. A request from the developer for that work in this session governs, but a request to file a ticket does not ask for the ticket's work.
 
