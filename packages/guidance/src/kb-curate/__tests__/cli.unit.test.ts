@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { check } from '@williamthorsen/kb/check';
 import { defaultKbConfig, KbLoaderError } from '@williamthorsen/kb/config';
-import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
+import { captureStdio } from '@williamthorsen/toolbelt.testing';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
