@@ -1,4 +1,4 @@
-import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
+import { captureStdio } from '@williamthorsen/toolbelt.testing';
 import { describe, expect, it } from 'vitest';
 
 import { makeFakeGit } from '../../test-utils/make-fake-git.ts';

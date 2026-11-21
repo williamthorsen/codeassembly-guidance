@@ -156,11 +156,12 @@ Only `realGit` has a test that runs git, and that test checks that `listTrackedF
 
 The `testing-conventions` skill states the rule: A passing test prints nothing beyond the runner's report. These are the TypeScript techniques for applying it. Each helper restores what it replaced when its `using` scope ends.
 
-- **Console calls under Vitest:** `silenceConsole` from `@williamthorsen/toolbelt.vitest/candidate` silences the named console methods and returns a spy for each one. To assert on the output, pass a spy to `listConsoleLines` from the same module, which returns one line per call.
-- **Rendered stream output:** `captureStdio` from `@williamthorsen/toolbelt.testing/candidate` buffers what is written to stdout and stderr, including format specifiers and inspected objects. Pass `includeConsole: true` when the code reports through `console`.
+- **Console calls under Vitest:** `silenceConsole` from `@williamthorsen/toolbelt.vitest` silences the named console methods and returns a spy for each one. To assert on the output, pass a spy to `listConsoleLines` from `@williamthorsen/toolbelt.vitest/candidate`, which returns one line per call.
+- **Rendered stream output:** `captureStdio` from `@williamthorsen/toolbelt.testing` buffers what is written to stdout and stderr, including format specifiers and inspected objects. Pass `includeConsole: true` when the code reports through `console`.
 
 ```typescript
-import { listConsoleLines, silenceConsole } from '@williamthorsen/toolbelt.vitest/candidate';
+import { silenceConsole } from '@williamthorsen/toolbelt.vitest';
+import { listConsoleLines } from '@williamthorsen/toolbelt.vitest/candidate';
 
 it('if a deprecated option is passed, warns once', () => {
   using silent = silenceConsole(['warn']);

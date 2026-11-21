@@ -3,6 +3,7 @@ import path from 'node:path';
 import process from 'node:process';
 import { pathToFileURL } from 'node:url';
 
+import { captureStdio } from '@williamthorsen/toolbelt.testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
@@ -56,11 +57,11 @@ describe(isEntryPoint, () => {
   });
 
   it('warns with the program name and returns true when the entry path does not resolve', () => {
-    const write = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+    using stdio = captureStdio();
     setEntry(path.join(dir, 'missing.mjs'));
 
     expect(isEntryPoint(moduleUrl, 'probe')).toBe(true);
-    expect(write).toHaveBeenCalledWith(expect.stringMatching(/^probe: warning: could not determine entry point: /));
+    expect(stdio.stderr).toMatch(/^probe: warning: could not determine entry point: /);
   });
 });
 

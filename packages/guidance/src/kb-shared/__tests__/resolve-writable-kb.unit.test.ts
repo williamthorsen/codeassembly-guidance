@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { captureStdio } from '@williamthorsen/toolbelt.testing/candidate';
+import { captureStdio } from '@williamthorsen/toolbelt.testing';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 
 import { type DiscoverKbOutcome, discoverWritableKb, resolveWritableKb } from '../resolve-writable-kb.ts';
