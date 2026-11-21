@@ -80,9 +80,10 @@ A test file that the change adds to and leaves past the ceiling in the `testing-
 
 ## Test placement
 
-Two defects against the placement rules in the `testing-conventions` skill are Warnings:
+Three defects against the placement rules in the `testing-conventions` skill are Warnings:
 
 - **A misplaced expensive example.** The change adds an example at an expensive tier, and a cheaper tier could observe it. The proposed change moves the case to the cheaper tier. If the change's plan or pull-request description explains why a cheaper tier cannot observe the case, it is not a finding.
+- **A disproportionate expensive example.** The change adds an example at an expensive tier whose cost on every run outweighs the defect that it catches, at the project's declared stage, or an example that runs the project's build to inspect its output. The proposed change deletes the example, or moves its check into the build step that CI runs. An explanation of why a cheaper tier cannot observe the case does not clear this finding, because the defect is the cost, not the tier.
 - **A kept superseded suite.** The change adds cheaper coverage but keeps the higher-tier examples that the new coverage supersedes. The proposed change deletes those examples. To find them, read each process-spawning or full-fixture example that exercises the logic which the change's new tests cover, and compare its assertions with the new tests.
 
 The same defects in tests that the change neither adds nor supersedes are Legacy.
