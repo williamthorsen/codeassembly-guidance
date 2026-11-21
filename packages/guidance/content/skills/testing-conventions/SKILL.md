@@ -31,7 +31,7 @@ A test that guards a behavior still has to clear two checks:
 1. **Nothing else fails first.** If the compiler, the linter, or a gate that already reproduces the failure condition on every run would catch the regression, that gate is the guard, and a narrower test is a weaker and more brittle duplicate. A gate that merely exercises the same area does not qualify; it has to reproduce the condition.
 2. **It would catch the failure that it guards against.** Run it against what it rejects: Break the guarded thing, watch the test fail, restore it. A test that still passes is not a guard. If reaching the cause means replicating a dependency's private shape, the test breaks or silently stops testing at the next upgrade.
 
-If a change needs coverage and every candidate test is ruled out, by these sections or by the cost check in [Where a test goes](#where-a-test-goes), it is merged without one; state which rule ruled out each candidate and the risk that goes uncaught.
+If a change needs coverage and every candidate test is ruled out, by these sections or by the cost check in [Where a test goes](#where-a-test-goes), it is merged without one; state which rule ruled out each candidate and the risk that goes uncaught, in its plan or in its pull-request description's `## Notes for reviewers`.
 
 ## Where a test goes
 
