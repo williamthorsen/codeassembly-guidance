@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.8.1 — 2026-11-21
+
+### 🐛 Bug fixes
+
+- Fixes the issue that the `ui-copy-conventions` rulebook covered tours, onboarding decks, and walkthroughs, which introduce the product to a first-time reader, with rules written for a person who returns to the page. (#235)
+- Fixes the issue that agents created an authorized worktree with `git worktree add`, which skips the repository's setup hooks, by directing them in the `williamthorsen-workflow-preferences` rulebook to run `wt switch --create <branch>` or `wt switch <branch>` without a path or `--yes`. (#237)
+- Fixes the issue that the `typescript-testing-conventions` skill taught importing `silenceConsole` and `captureStdio` from the `/candidate` subpaths, from which `@williamthorsen/toolbelt.vitest` 0.14.0 and `@williamthorsen/toolbelt.testing` 0.9.0 no longer export them. (#239)
+
 ## 0.8.0 — 2026-11-20
 
 ### 🎉 Features

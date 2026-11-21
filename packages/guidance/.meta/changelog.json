@@ -1,5 +1,32 @@
 [
   {
+    "version": "0.8.1",
+    "date": "2026-11-21",
+    "sections": [
+      {
+        "title": "🐛 Bug fixes",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Fixes the issue that the `ui-copy-conventions` rulebook covered tours, onboarding decks, and walkthroughs, which introduce the product to a first-time reader, with rules written for a person who returns to the page. (#235)",
+            "hash": "67fa572f4452f59f6ba21c348f95862a23a67438",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that agents created an authorized worktree with `git worktree add`, which skips the repository's setup hooks, by directing them in the `williamthorsen-workflow-preferences` rulebook to run `wt switch --create <branch>` or `wt switch <branch>` without a path or `--yes`. (#237)",
+            "hash": "d108cb83f21f5d8db301044d62db32f97375c3f5",
+            "entry": 1
+          },
+          {
+            "description": "Fixes the issue that the `typescript-testing-conventions` skill taught importing `silenceConsole` and `captureStdio` from the `/candidate` subpaths, from which `@williamthorsen/toolbelt.vitest` 0.14.0 and `@williamthorsen/toolbelt.testing` 0.9.0 no longer export them. (#239)",
+            "hash": "773ba9174aa4e061cadf890e8a0b100ea16c0255",
+            "entry": 1
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.8.0",
     "date": "2026-11-20",
     "sections": [
