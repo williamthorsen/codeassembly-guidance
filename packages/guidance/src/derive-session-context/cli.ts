@@ -342,6 +342,10 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
           mutations.push({ field: 'pr_url', value: null });
 
           break;
+        case '--clear-diff-base':
+          diffBase = { value: null };
+
+          break;
         case '--set-diff-base':
           diffBase = { value: consumeValue(argv, i, '--set-diff-base') };
           i += 1;
@@ -350,8 +354,6 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
         default:
           if (arg.startsWith('--set-diff-base=')) {
             diffBase = { value: arg.slice('--set-diff-base='.length) };
-          } else if (arg === '--clear-diff-base') {
-            diffBase = { value: null };
           } else {
             throw new Error(`unknown argument: ${arg}`);
           }
