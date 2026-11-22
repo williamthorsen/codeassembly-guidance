@@ -2,6 +2,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.0 — 2026-11-22
+
+### 🎉 Features
+
+- Adds a rule to the `testing-conventions` skill that weighs an expensive test's cost on every run against the impact and likelihood of the defect that it catches, at the project's declared stage, and holds a regression test for a fix to the same check. (#243)
+- Rules out in `testing-conventions` a test that runs the project's own build to inspect its output, directing that check to the build step that CI runs, and limits the smoke example to entry points that the repository authors, which excludes a build or an export pipeline. (#243)
+- Adds a Warning to the `review-criteria` skill for an expensive test whose cost outweighs its defect or that runs the build to inspect its output, a finding that an explanation of why a cheaper tier cannot observe the case does not clear. (#243)
+- Names, in the `testing-conventions` skill, the change's plan or its pull-request description's `## Notes for reviewers` as the place to state which rule ruled out each candidate test and what risk is left uncaught when a change merges without a test. (#243)
+- Makes `start-ticket` ask which skill opens the work, rather than invoke one, when the ticket directory contains both spike and prototype artifacts, when a feature plan is newer than the artifacts of the matched spike or prototype route, or when a route's judgment by reading supports both outcomes. (#249)
+- Ends the reports of `triage-feedback`, `triage-spike-findings`, `wrap-up`, and `pull-from-backlog` with a line that names `start-ticket` as the command that starts each ticket in its own worktree. (#249)
+- Has `create-ticket` close with an offer to invoke `start-ticket` when the developer invoked `create-ticket` directly in an interactive session and the new ticket is the branch's own. (#249)
+- Adds a rule to the `williamthorsen-workflow-preferences` rulebook that directs the agent to name `start-ticket`, and not another entry skill, when it tells the developer how to start or resume a ticket in a fresh session. (#249)
+- Reduces each launch prompt of a plan-time split to the `start-ticket` invocation alone, and directs the agent to write a constraint that a piece's session needs into the "## Dependencies" section of that piece's plan, or into the ticket's "## Context" when the piece does not have a plan. (#249)
+- Adds the `record-external-operation` skill to the `recommended` collection, which keeps one `docs/operations/{service}.md` per hosted service with each resource's current state, its credentials by name and location, the steps to recreate and remove it, and a history list, and which checks those documents with a `scan` command that exits 1 on a secret-shaped value. (#250)
+- Adds an "Operations on hosted services" section to the shared agent instructions, which directs an agent to read `docs/operations/{service}.md` before it creates, changes, or deletes a resource, a setting, a variable, or a credential on a hosted service, and to record the operation with `record-external-operation` after it succeeds. (#250)
+- Adds routes to `start-ticket` for the stages after implementation, which invoke `respond-to-review` when the newest review has findings without a response, report an open pull request's state and the step that remains rather than treating the ticket as done, review a split piece against its stored diff base, and ask which skill comes next for a branch that has commits. (#251)
+- Adds `--set-diff-base` and `--clear-diff-base` to `derive-session-context`, which store and remove a branch's diff base in its git config, and adds the stored value to the manifest as `diff_base`. (#251)
+- Adds a `state` subcommand to `resolve-review-run`, which reports whether the active review run contains a review, the run's newest review or response, and the newest review's count of actionable findings. (#251)
+- Changes the split that `implement-plan` makes after implementation to store each piece's diff base and to give each piece a launch prompt that invokes only `start-ticket`, moving the facts that the prompt listed into the piece's ticket. (#251)
+
+### 🐛 Bug fixes
+
+- Fixes the issue that every prototype in a `prepare-prototype-brief` round used the brief's own words on its buttons and counts, by requiring each user-facing word in the brief to be the conventional word of comparable products or to be listed under a new "Working terms" section, for which each builder chooses its own wording. (#242)
+- Fixes the issue that the publish gate printed by `list-implementation-order` read `📦 publish {package}, upgrade in {prefixes}`, which implied an existing dependency and named repositories rather than tickets, by naming the tickets that wait for the release instead, as in `📦 publish tank, needed by wo.1000, cs.75`. (#252)
+
 ## 0.8.1 — 2026-11-21
 
 ### 🐛 Bug fixes
