@@ -96,6 +96,13 @@ describe('entry points', () => {
     expect(content).toContain('say that the branch does not encode a ticket and ask for the ticket ref');
   });
 
+  it('has start-ticket gather the route inputs and never merge, push, or open a pull request', async () => {
+    const content = await readContentFile('skills/start-ticket/SKILL.md');
+    expect(content).toContain('`pr_url`, `diff_base`, and `ticket_dir`');
+    expect(content).toContain('Gather the inputs that [entry points](../_data/entry-points.md#inputs) lists');
+    expect(content).toContain('`start-ticket` never merges, pushes, or opens a pull request');
+  });
+
   it.each(PLAN_SPLIT_CONSUMERS)('%s sends every split piece to start-ticket', async (slug) => {
     const content = await readContentFile(`skills/${slug}/SKILL.md`);
     expect(content).toContain('start-ticket}`, invoked without arguments');
