@@ -9,6 +9,8 @@ describe(extractReferences, () => {
     { text: 'See https://github.com/other/widgets for details.', expected: ['other/widgets'] },
     { text: 'See https://www.github.com/other/widgets/issues/4.', expected: ['other/widgets'] },
     { text: 'Clone https://github.com/other/widgets.git first', expected: ['other/widgets'] },
+    { text: 'See github.com/other/secret for details.', expected: ['other/secret'] },
+    { text: 'See www.github.com/other/widgets/pull/7', expected: ['other/widgets'] },
     { text: 'Fixed in other/widgets#12.', expected: ['other/widgets'] },
     { text: 'Depends on (other/widgets#12)', expected: ['other/widgets'] },
     { text: 'The acme/widgets repository', expected: ['acme/widgets'] },

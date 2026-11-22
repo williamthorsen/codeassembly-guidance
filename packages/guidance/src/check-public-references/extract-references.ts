@@ -34,7 +34,8 @@ const OWNER = '([A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)';
 const NAME = '([A-Za-z0-9._-]+)';
 const LEADING_BOUNDARY = String.raw`(?<![@\w./-])`;
 
-const URL_PATTERN = new RegExp(String.raw`https?://(?:www\.)?github\.com/${OWNER}/${NAME}`, 'gi');
+// The scheme is optional, because prose often cites `github.com/owner/name` without one.
+const URL_PATTERN = new RegExp(String.raw`(?<![\w.-])(?:https?://)?(?:www\.)?github\.com/${OWNER}/${NAME}`, 'gi');
 
 // A trailing `/` makes the match a path segment, not a reference.
 const ISSUE_REFERENCE_PATTERN = new RegExp(String.raw`${LEADING_BOUNDARY}${OWNER}/${NAME}#\d+(?![\w/])`, 'g');
