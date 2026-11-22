@@ -117,7 +117,7 @@ Nothing before this step writes to a tracker or a store. Process each approved o
 
   ```bash
   body_path="{absolute path of the composed comment}"
-  [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+  node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" >/dev/null || exit 1
   gh issue comment {issue} --body-file "$body_path"
   ```
 

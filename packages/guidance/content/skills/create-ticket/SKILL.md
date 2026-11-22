@@ -159,7 +159,7 @@ Write the body to a scratch file per [gh body file](#gh-body-file), naming it `g
 
 ```bash
 body_path="{absolute path from the write step}"
-[ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+node {harness_home_dir}/scripts/check-public-references.mjs --title "{ticket_title}" --body-file "$body_path" {repo_flag} >/dev/null || exit 1
 gh issue create --title "{ticket_title}" --body-file "$body_path" {label_flags} {repo_flag}
 ```
 
@@ -344,7 +344,7 @@ Then attach it as a comment on the remote ticket, through the platform resolved 
 
 ```bash
 body_path="{absolute path from the write step}"
-[ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" {repo_flag} >/dev/null || exit 1
 gh issue comment {number} --body-file "$body_path" {repo_flag}
 ```
 

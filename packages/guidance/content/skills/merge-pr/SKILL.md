@@ -198,7 +198,14 @@ node {harness_home_dir}/scripts/describe-change.mjs amend-entry \
 
 The helper rewrites the file in place and refuses an amendment that would leave the entry defective. [`amend-entry`](../_data/title-templates.md#amend-entry) states its refusals. Then write the amended body to the PR:
 
-- **`"github"`**: `gh pr edit {number} --body-file "$body_path"`, in a call that opens with the same assignment and guard.
+- **`"github"`**: Write it in a call that opens with the same assignment and runs the public-reference check in place of the guard:
+
+  ```bash
+  body_path="{absolute path from the re-read}"
+  node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" >/dev/null || exit 1
+  gh pr edit {number} --body-file "$body_path"
+  ```
+
 - **`"bitbucket"`**: [Bitbucket pull-request access](../_data/bitbucket-pr-access.md) does not document a description-write action. Stop, showing the amended `change-record` block from the body file and saying that the author pastes it over the description's block in the Bitbucket UI, then runs the merge again.
 
 Then re-run step 3 with the same override set and the same `--head`. Its fresh read of the body confirms that the PR contains the amendment.
