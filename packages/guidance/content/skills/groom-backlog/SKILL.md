@@ -188,7 +188,7 @@ Every action on a ticket follows one order: apply the drafted edit when the deci
 
    ```bash
    body_path="{child path}"
-   [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+   node {harness_home_dir}/scripts/check-public-references.mjs --title "{child title}" --body-file "$body_path" >/dev/null || exit 1
    gh issue create --title "{child title}" --body-file "$body_path"
    ```
 
@@ -200,7 +200,7 @@ Every action on a ticket follows one order: apply the drafted edit when the deci
 
    ```bash
    body_path="{body path}"
-   [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+   node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" >/dev/null || exit 1
    gh issue edit {number} --body-file "$body_path"
    ```
 
@@ -222,7 +222,7 @@ Every action on a ticket follows one order: apply the drafted edit when the deci
 
    ```bash
    body_path="{scratch}/comments/{number}.md"
-   [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+   node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" >/dev/null || exit 1
    gh issue comment {number} --body-file "$body_path"
    ```
 

@@ -111,7 +111,7 @@ Nothing before this step writes anything remote. On a failed write, stop and rep
 
    ```bash
    body_path="{ticket_dir}/triage/rendered/comment-{issue}.md"
-   [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+   node {harness_home_dir}/scripts/check-public-references.mjs --body-file "$body_path" >/dev/null || exit 1
    gh issue comment {issue} --body-file "$body_path"
    ```
 

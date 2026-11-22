@@ -35,7 +35,7 @@ Write the body to a scratch file per [gh body file](#gh-body-file); do not inlin
 
 ```bash
 body_path="{absolute path from the write step}"
-[ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
+node {harness_home_dir}/scripts/check-public-references.mjs --title "{title}" --body-file "$body_path" >/dev/null || exit 1
 gh pr create \
   --title "{title}" \
   --body-file "$body_path" \
@@ -57,7 +57,7 @@ If `gh pr create` fails and the error indicates that one or more labels are inva
 
 1. Identify the failing labels, the assignee, or both from the error message.
 2. Remove the failing `--label` flags, and remove `--assignee` if the assignee failed.
-3. Retry `gh pr create` once without them, re-stating the `body_path` assignment and the guard for the same scratch file; do not rewrite the body or inline it.
+3. Retry `gh pr create` once without them, re-stating the `body_path` assignment and the `check-public-references.mjs` line, with the same `--title`, for the same scratch file; do not rewrite the body or inline it.
 4. Record which labels were skipped, and whether the assignee was skipped, with the reason from the error.
 
 If the failure is unrelated to labels and the assignee, report the error and stop.
