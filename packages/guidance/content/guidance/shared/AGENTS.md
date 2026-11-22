@@ -45,6 +45,10 @@ Read-only exercises (`--dry-run`, help text, preview tables, `--list`, exit-code
 
 An operation on a hosted service creates, changes, or deletes a resource, a setting, a variable, or a credential on the developer's behalf. Before one, read `docs/operations/{service}.md` in the repository that the work serves, when it exists. After it succeeds, record it with the `record-external-operation` skill.
 
+## Public repositories
+
+Before writing a reference to another repository, or a fact learned from one, into an issue, a pull request, a comment, a commit message, or a tracked file of a public repository, check the referenced repository's visibility with `gh repo view {owner}/{name} --json visibility`. When it is private, or the check cannot run, describe the situation generically ("a private app repository", "a consuming project") without naming the repository, its tickets, or its project. Check text copied from an existing ticket or artifact the same way, because it may name a private repository. The check does not apply to writes to a private store, such as a KB or the artifact directory.
+
 <!-- include: ../../_partials/technical-recommendations.md / -->
 
 ## Artifacts

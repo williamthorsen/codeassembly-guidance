@@ -3,8 +3,9 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import type { GhResult, GhRunner } from '../../shared/gh.ts';
 import { makeScratchDir } from '../../test-utils/make-scratch-dir.ts';
-import { type GhResult, type GhRunner, resolveTicketTarget } from '../resolve-ticket-target.ts';
+import { resolveTicketTarget } from '../resolve-ticket-target.ts';
 
 const LABEL_MAP = '{"scopes":{"guidance":"scope:guidance"},"types":{"feat":"feature"}}';
 

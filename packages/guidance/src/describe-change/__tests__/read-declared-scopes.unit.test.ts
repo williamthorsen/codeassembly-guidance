@@ -9,13 +9,13 @@ import { readDeclaredScopes } from '../read-declared-scopes.ts';
 describe(readDeclaredScopes, () => {
   it('reads each declared directory, naming it by `name` or else by its basename', async () => {
     const root = await writeRoot(
-      ['apps/devopticon', 'tools/ios-shell'],
-      'project:\n  scopes:\n    - path: apps/devopticon\n    - path: tools/ios-shell\n      name: ios\n',
+      ['apps/dashboard', 'tools/ios-shell'],
+      'project:\n  scopes:\n    - path: apps/dashboard\n    - path: tools/ios-shell\n      name: ios\n',
     );
 
     expect(await readDeclaredScopes(root)).toEqual({
       scopeDirs: [
-        { dir: join(root, 'apps/devopticon'), name: 'devopticon' },
+        { dir: join(root, 'apps/dashboard'), name: 'dashboard' },
         { dir: join(root, 'tools/ios-shell'), name: 'ios' },
       ],
       warnings: [],
@@ -23,10 +23,10 @@ describe(readDeclaredScopes, () => {
   });
 
   it('normalizes a path with a leading `./` or a trailing slash', async () => {
-    const root = await writeRoot(['apps/devopticon'], 'project:\n  scopes:\n    - path: ./apps/devopticon/\n');
+    const root = await writeRoot(['apps/dashboard'], 'project:\n  scopes:\n    - path: ./apps/dashboard/\n');
 
     expect((await readDeclaredScopes(root)).scopeDirs).toEqual([
-      { dir: join(root, 'apps/devopticon'), name: 'devopticon' },
+      { dir: join(root, 'apps/dashboard'), name: 'dashboard' },
     ]);
   });
 
@@ -67,7 +67,7 @@ describe(readDeclaredScopes, () => {
   });
 
   it('warns and reads nothing when `project.scopes` is not a list', async () => {
-    const root = await writeRoot(['apps/devopticon'], 'project:\n  scopes:\n    path: apps/devopticon\n');
+    const root = await writeRoot(['apps/dashboard'], 'project:\n  scopes:\n    path: apps/dashboard\n');
 
     expect(await readDeclaredScopes(root)).toEqual({
       scopeDirs: [],
@@ -76,18 +76,18 @@ describe(readDeclaredScopes, () => {
   });
 
   it('warns about each faulty entry and still reads the valid one beside it', async () => {
-    const root = await writeRoot(['apps/devopticon', 'apps'], '');
+    const root = await writeRoot(['apps/dashboard', 'apps'], '');
     await writeFile(join(root, 'apps', 'README.md'), '', 'utf8');
     const entries = [
-      '- apps/devopticon',
+      '- apps/dashboard',
       '- name: orphan',
       '- path: 42',
-      '- path: apps/devopticon\n  name: ""',
+      '- path: apps/dashboard\n  name: ""',
       '- path: /etc',
       '- path: ../elsewhere',
       '- path: apps/missing',
       '- path: apps/README.md',
-      '- path: apps/devopticon',
+      '- path: apps/dashboard',
     ];
     await writeFile(
       join(root, '.agents', 'preferences.yaml'),
@@ -97,7 +97,7 @@ describe(readDeclaredScopes, () => {
     const file = join(root, '.agents', 'preferences.yaml');
 
     expect(await readDeclaredScopes(root)).toEqual({
-      scopeDirs: [{ dir: join(root, 'apps/devopticon'), name: 'devopticon' }],
+      scopeDirs: [{ dir: join(root, 'apps/dashboard'), name: 'dashboard' }],
       warnings: [
         `${file}: project.scopes[0] is not a mapping; skipping it`,
         `${file}: project.scopes[1] does not have a string \`path\`; skipping it`,

@@ -504,7 +504,7 @@ node {harness_home_dir}/scripts/describe-change.mjs resolve-scopes \
 ```yaml
 project:
   scopes:
-    - path: apps/devopticon
+    - path: apps/dashboard
     - path: tools/ios-shell
       name: ios
 ```

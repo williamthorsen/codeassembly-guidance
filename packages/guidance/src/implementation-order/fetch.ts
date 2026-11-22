@@ -1,18 +1,5 @@
-import { execFile } from 'node:child_process';
-import { promisify } from 'node:util';
-
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
+import type { GhRunner } from '../shared/gh.ts';
 import { ISSUE_VIEW_FIELDS, IssueViewSchema } from './schemas.ts';
-
-/** What one `gh` call reported. */
-export interface GhResult {
-  exitCode: number;
-  stderr: string;
-  stdout: string;
-}
-
-/** Runs `gh` with the given arguments. */
-export type GhRunner = (args: readonly string[]) => Promise<GhResult>;
 
 /** A GitHub issue as the list needs it. */
 export interface GithubTicket {
@@ -80,30 +67,7 @@ export function parseTicketRef(text: string): { number: number; repository: stri
   return repository === undefined || number === undefined ? undefined : { number: Number(number), repository };
 }
 
-/** Runs `gh` without a shell and reports its exit code and output; throws when `gh` cannot be started. */
-export async function runGh(args: readonly string[]): Promise<GhResult> {
-  try {
-    const { stderr, stdout } = await execFileAsync('gh', args, { maxBuffer: 16_777_216 });
-    return { exitCode: 0, stderr, stdout };
-  } catch (error) {
-    if (isEnoent(error)) {
-      throw new Error('gh is not installed or not on PATH', { cause: error });
-    }
-    if (
-      isRecord(error) &&
-      typeof error['code'] === 'number' &&
-      typeof error['stderr'] === 'string' &&
-      typeof error['stdout'] === 'string'
-    ) {
-      return { exitCode: error['code'], stderr: error['stderr'], stdout: error['stdout'] };
-    }
-    throw error;
-  }
-}
-
 // region | Helpers
-
-const execFileAsync = promisify(execFile);
 
 /** Parses JSON, or returns `undefined` when the text is not JSON. */
 function parseJson(text: string): unknown {

@@ -178,7 +178,7 @@ describe('preferences.v1.json schema', () => {
   it('accepts `project.scopes` entries with and without a `name`', async () => {
     const output = await validate(
       schemaId,
-      { project: { scopes: [{ path: 'apps/devopticon' }, { name: 'ios', path: 'tools/ios-shell' }] } },
+      { project: { scopes: [{ path: 'apps/dashboard' }, { name: 'ios', path: 'tools/ios-shell' }] } },
       FLAG,
     );
     expect(output).toMatchObject({ valid: true });
@@ -187,7 +187,7 @@ describe('preferences.v1.json schema', () => {
   it('rejects a `project.scopes` entry missing `path` or naming an unknown key', async () => {
     const missingPath = await validate(schemaId, { project: { scopes: [{ name: 'ios' }] } }, FLAG);
     expect(missingPath).toMatchObject({ valid: false });
-    const unknownKey = await validate(schemaId, { project: { scopes: [{ dir: 'apps/devopticon', path: 'x' }] } }, FLAG);
+    const unknownKey = await validate(schemaId, { project: { scopes: [{ dir: 'apps/dashboard', path: 'x' }] } }, FLAG);
     expect(unknownKey).toMatchObject({ valid: false });
   });
 

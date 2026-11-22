@@ -22,8 +22,7 @@ const REGENERATE_FIX = 'Run `codeassembly generate label-map --force` to regener
  * Default internal rdy kit for the codeassembly monorepo.
  *
  * Diagnostic checks for files that this repo owns as the source of truth.
- * Generic monorepo and git checks are in upstream kits; see
- * williamthorsen/templates.node-monorepo and williamthorsen/git-recon.
+ * Generic monorepo and git checks are in upstream kits; see williamthorsen/git-recon.
  * Project-guidance checks are in the kit published by the `codeassembly` package,
  * which `.config/readyup.config.ts` names in its `packages` list.
  */
