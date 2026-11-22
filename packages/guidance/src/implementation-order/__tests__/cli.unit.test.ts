@@ -194,6 +194,42 @@ describe(listImplementationOrder, () => {
     expect(order.tickets[0]?.blockerLine).toBe('  ⛔ by cl.1, cl.3');
   });
 
+  it('names the listed tickets in another repository that a ticket blocks, wherever the tree places them', async () => {
+    const gh = makeGh({
+      'acme/app#2': { blockedBy: ['acme/core-lib#1'] },
+      'acme/core-lib#1': {},
+      'acme/core-lib#3': { blockedBy: ['acme/core-lib#1'] },
+      'acme/site-tools#5': { blockedBy: ['acme/app#2', 'acme/core-lib#1'] },
+    });
+
+    const order = await listImplementationOrder(
+      [
+        '--ticket',
+        'acme/core-lib#1',
+        '--ticket',
+        'acme/app#2',
+        '--ticket',
+        'acme/core-lib#3',
+        '--ticket',
+        'acme/site-tools#5',
+      ],
+      gh,
+    );
+
+    expect(order.tickets.find(({ label }) => label === 'cl.1')?.crossRepositoryBlocked).toEqual(['ap.2', 'st.5']);
+    expect(order.tickets.find(({ label }) => label === 'ap.2')?.crossRepositoryBlocked).toEqual(['st.5']);
+    expect(order.tickets.find(({ label }) => label === 'cl.3')?.crossRepositoryBlocked).toEqual([]);
+  });
+
+  it('leaves the gate line the rest of 60 characters after its lead', async () => {
+    const gh = makeGh({ 'acme/app#1': {}, 'acme/app#2': { blockedBy: ['acme/app#1'] } });
+
+    const order = await listImplementationOrder(['--ticket', 'acme/app#1', '--ticket', 'acme/app#2'], gh);
+
+    expect(order.tickets.map(({ gateLead }) => gateLead)).toEqual(['  📦 publish ', '    📦 publish ']);
+    expect(order.tickets.map(({ gateBudget, gateLead }) => gateLead.length + gateBudget)).toEqual([60, 60]);
+  });
+
   it('fails the whole run, naming the ticket, when one ticket cannot be read', async () => {
     const gh = makeGh({ 'acme/app#1': {} });
 

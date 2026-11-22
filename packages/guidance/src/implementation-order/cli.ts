@@ -31,8 +31,15 @@ export interface ListedBlocker {
 export interface ListedTicket {
   /** The whole line that names `otherBlockers`, or null when there are none. */
   blockerLine: string | null;
+  /** The labels of the listed tickets in another repository that this ticket blocks, in list order. */
+  crossRepositoryBlocked: string[];
   depth: number;
-  /** The start of the line that states a publish gate after this ticket; the caller adds the package and its consumers. */
+  /** The characters left on the gate line once `gateLead` is counted. */
+  gateBudget: number;
+  /**
+   * The start of the line that states a publish gate after this ticket; the caller adds the package and the tickets
+   * that wait for its release.
+   */
   gateLead: string;
   /** The ticket's name in the list: `prefix.N`, or a key outside GitHub, after `prefix.` when it names a repository. */
   label: string;
@@ -66,7 +73,7 @@ export interface OmittedTicket {
 
 const PROGRAM = 'implementation-order';
 
-/** The most characters that a ticket's line may have, its indent included. */
+/** The most characters that a ticket's line or its gate line may have, the indent included. */
 const LINE_WIDTH = 60;
 
 const INDENT_WIDTH = 2;
@@ -145,13 +152,21 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
         });
       const lead = `${' '.repeat(depth * INDENT_WIDTH)}— ${ticket.label} `;
       const noteIndent = ' '.repeat((depth + 1) * INDENT_WIDTH);
+      const gateLead = `${noteIndent}📦 publish `;
+      const crossRepositoryBlocked = placed
+        .filter((other) => findOpenBlockers(other.id, edges, entries).includes(id))
+        .map((other) => describeEntry(other.id, entries, prefixes))
+        .filter((other) => isCrossRepository(other.repository, ticket.repository))
+        .map(({ label }) => label);
       return {
         blockerLine:
           otherBlockers.length === 0
             ? null
             : `${noteIndent}⛔ by ${otherBlockers.map(({ label }) => label).join(', ')}`,
+        crossRepositoryBlocked,
         depth,
-        gateLead: `${noteIndent}📦 publish `,
+        gateBudget: Math.max(0, LINE_WIDTH - gateLead.length),
+        gateLead,
         label: ticket.label,
         lead,
         number: ticket.number,
