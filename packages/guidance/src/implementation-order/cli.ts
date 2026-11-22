@@ -3,16 +3,13 @@
 // CLI entry point for the implementation-order helper: reads the named tickets and their blockers, and prints them
 // as JSON in implementation order, arranged as a tree.
 
-import { execFile } from 'node:child_process';
 import process from 'node:process';
-import { promisify } from 'node:util';
 
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { scanFlags } from '../lib/parse-flags.ts';
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
-import { fetchTicket, type GhResult, type GhRunner, type GithubTicket, parseTicketRef } from './fetch.ts';
+import { fetchTicket, type GhRunner, type GithubTicket, parseTicketRef, runGh } from './fetch.ts';
 import { type Edge, orderTickets } from './order.ts';
 import { derivePrefixes } from './prefix.ts';
 
@@ -80,8 +77,6 @@ const INDENT_WIDTH = 2;
 
 /** The repository that an `--external` may name: `NAME` or `OWNER/NAME`. */
 const REPOSITORY_PATTERN = /^[^\s/:]+(?:\/[^\s/:]+)?$/;
-
-const execFileAsync = promisify(execFile);
 
 /**
  * Lists the tickets that `argv` names in implementation order. `--ticket OWNER/REPO#N` names a GitHub ticket,
@@ -373,27 +368,6 @@ function resolveEdgeSide(text: string, request: Request): string | undefined {
     return buildId(ticket);
   }
   return request.externals.some((external) => external.key === text) ? text : undefined;
-}
-
-/** Runs `gh` without a shell and reports its exit code and output; throws when `gh` cannot be started. */
-async function runGh(args: readonly string[]): Promise<GhResult> {
-  try {
-    const { stderr, stdout } = await execFileAsync('gh', args, { maxBuffer: 16_777_216 });
-    return { exitCode: 0, stderr, stdout };
-  } catch (error) {
-    if (isEnoent(error)) {
-      throw new Error('gh is not installed or not on PATH', { cause: error });
-    }
-    if (
-      isRecord(error) &&
-      typeof error['code'] === 'number' &&
-      typeof error['stderr'] === 'string' &&
-      typeof error['stdout'] === 'string'
-    ) {
-      return { exitCode: error['code'], stderr: error['stderr'], stdout: error['stdout'] };
-    }
-    throw error;
-  }
 }
 
 // endregion | Helpers
