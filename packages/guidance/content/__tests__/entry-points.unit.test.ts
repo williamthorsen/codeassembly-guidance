@@ -103,10 +103,13 @@ describe('entry points', () => {
     expect(content).toMatch(/Start #\{N\} in its own worktree: \S*start-ticket/);
   });
 
-  it('asks instead of invoking on conflicting evidence or an unclear judgment', async () => {
+  it('asks instead of invoking on conflicting evidence, a later plan, or an unclear judgment', async () => {
     const dataFile = await readContentFile(ENTRY_POINTS);
     expect(dataFile).toContain('## When to ask instead');
     expect(dataFile).toContain('**Conflicting evidence.** The first match is route 3 or route 4');
+    expect(dataFile).toContain(
+      '**A later plan.** The first match is route 3 or route 4, and the newest plan is a feature plan',
+    );
     expect(dataFile).toContain('**An unclear judgment.**');
     expect(dataFile).toContain('A judgment that the reading settles is announced with its reason and invoked.');
 

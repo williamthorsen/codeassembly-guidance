@@ -38,7 +38,8 @@ Check the routes in order and stop at the first match. Each route names the skil
 
 ## When to ask instead
 
-A clear first match is invoked without asking. In the two cases below, {skill?:start-ticket} does not invoke a skill: It announces what it found, names the candidate skills, and asks which one opens the work.
+A clear first match is invoked without asking. In the cases below, {skill?:start-ticket} does not invoke a skill: It announces what it found, names the candidate skills, and asks which one opens the work.
 
 - **Conflicting evidence.** The first match is route 3 or route 4, and the ticket directory contains artifacts of both kinds: a spike artifact (`spike-findings`, `dispositions`, or `triage/dispositions.json`) and a prototype artifact (a prototype set, or a `brief`, `comparison`, `idea-decisions`, or `refinement-log` artifact).
+- **A later plan.** The first match is route 3 or route 4, and the newest plan is a feature plan, one that contains `## Tasks`, whose filename prefix is greater than that of every artifact that the matched route names. The candidates are the matched route's skill and {skill?:implement-plan} with that plan.
 - **An unclear judgment.** The match depends on a condition that a route judges by reading (whether the findings propose work in route 3, whether the ticket calls for competing prototypes in route 4, whether the ticket is ready in route 5c), and the reading supports both outcomes. A judgment that the reading settles is announced with its reason and invoked.
