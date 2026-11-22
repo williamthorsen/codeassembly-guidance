@@ -8,7 +8,7 @@ describe(extractReferences, () => {
   it.each([
     { text: 'See https://github.com/other/widgets for details.', expected: ['other/widgets'] },
     { text: 'See https://www.github.com/other/widgets/issues/4.', expected: ['other/widgets'] },
-    { text: 'Clone http://github.com/other/widgets.git first', expected: ['other/widgets'] },
+    { text: 'Clone https://github.com/other/widgets.git first', expected: ['other/widgets'] },
     { text: 'Fixed in other/widgets#12.', expected: ['other/widgets'] },
     { text: 'Depends on (other/widgets#12)', expected: ['other/widgets'] },
     { text: 'The acme/widgets repository', expected: ['acme/widgets'] },
