@@ -62,6 +62,8 @@ const URL_CREDENTIALS_REGEX = /\b([a-z][a-z0-9+.-]*:\/\/)([^\s:/@]+):[^\s/@]+@/g
 
 const ENTROPY_CANDIDATE_REGEX = /[A-Za-z0-9+/=_-]{32,}/g;
 
+const URL_REGEX = /\b[a-z][a-z0-9+.-]*:\/\/[^\s<>`]+/gi;
+
 // Random tokens of 32 or more characters score 4.7 to 5.0 bits per character; identifiers that mix cases and digits
 // score about 4.1, and hex cannot exceed 4.0.
 const MIN_ENTROPY_BITS = 4.5;
@@ -98,12 +100,20 @@ function findSecretsInLine(lineText: string, line: number): SecretMatch[] {
   for (const match of lineText.matchAll(URL_CREDENTIALS_REGEX)) {
     add('url-credentials', match.index, match.index + match[0].length, `${match[1]}${match[2]}:…`);
   }
+  const urlSpans = lineText
+    .matchAll(URL_REGEX)
+    .map((match) => ({ end: match.index + match[0].length, start: match.index }))
+    .toArray();
   for (const match of lineText.matchAll(ENTROPY_CANDIDATE_REGEX)) {
-    const start = match.index;
-    const end = start + match[0].length;
-    const overlaps = found.some((entry) => entry.start < end && start < entry.end);
-    if (!overlaps && isHighEntropy(match[0])) {
-      add('high-entropy', start, end, `${match[0].slice(0, 4)}…`);
+    // Inside a URL, `/` separates path segments, so a run that spans segments is scored one segment at a time.
+    const inUrl = urlSpans.some((span) => span.start <= match.index && match.index < span.end);
+    const segments = inUrl ? splitOnSlash(match[0], match.index) : [{ start: match.index, text: match[0] }];
+    for (const segment of segments) {
+      const end = segment.start + segment.text.length;
+      const overlaps = found.some((entry) => entry.start < end && segment.start < entry.end);
+      if (!overlaps && segment.text.length >= 32 && isHighEntropy(segment.text)) {
+        add('high-entropy', segment.start, end, `${segment.text.slice(0, 4)}…`);
+      }
     }
   }
 
@@ -127,6 +137,17 @@ function shannonEntropy(value: string): number {
     entropy -= probability * Math.log2(probability);
   }
   return entropy;
+}
+
+/** Returns the `/`-delimited segments of `text`, each with its offset in a line in which `text` starts at `start`. */
+function splitOnSlash(text: string, start: number): { start: number; text: string }[] {
+  const segments: { start: number; text: string }[] = [];
+  let offset = start;
+  for (const part of text.split('/')) {
+    segments.push({ start: offset, text: part });
+    offset += part.length + 1;
+  }
+  return segments;
 }
 
 // endregion | Helpers

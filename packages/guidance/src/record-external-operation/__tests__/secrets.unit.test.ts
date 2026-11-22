@@ -46,6 +46,14 @@ describe('findSecrets', () => {
     ]);
   });
 
+  it('flags a high-entropy token in a URL path segment', () => {
+    const token = makeFakeToken('', 40);
+
+    expect(findSecrets(`https://hooks.example.com/services/${token}/notify`)).toEqual([
+      { excerpt: `${token.slice(0, 4)}…`, kind: 'high-entropy', line: 1 },
+    ]);
+  });
+
   it('reports a match once, under its specific kind, when the high-entropy pattern also covers it', () => {
     const token = makeFakeToken('sk-', 40);
 
@@ -63,6 +71,10 @@ describe('findSecrets', () => {
     ['a bare prefix in prose', 'Keys that start with sk- or npm_ belong in the vault.'],
     ['a variable name', '`REDIS_REST_TOKEN_FOR_PRODUCTION_DEPLOYMENTS` in Vercel (production)'],
     ['a URL without credentials', 'https://vercel.com/my-team/my-project/settings/environment-variables'],
+    [
+      'a permalink with a SHA and mixed-case path segments',
+      'https://github.com/acme/storefront/blob/5cd80ea1f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7/apps/WebApp/src/Config.ts',
+    ],
     ['a UUID', 'Database ID: 3f2b8c1e-9a4d-4e7f-b6c5-1d2e3f4a5b6c'],
     ['a git SHA', 'Commit 5cd80ea1f3b2c4d5e6f7a8b9c0d1e2f3a4b5c6d7'],
     ['a 32-character hex ID', 'Account ID 9f86d081884c7d659a2feaa0c55ad015'],
