@@ -17,7 +17,6 @@
  *   `pr_url`, or a `diff_base`. Because the default branch is not derived from any ticket and does not belong to
  *   any pull request or split, a stored value there is wrong rather than stale. See `enforceDefaultBranchInvariant`.
  */
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
@@ -25,13 +24,15 @@ import process from 'node:process';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
+import { isRecord } from '../lib/type-guards.ts';
 import { resolveCurrentBranch, sanitizeBranch } from '../shared/branch-helpers.ts';
 import { realGit, type SharedGit } from '../shared/git.ts';
 import { resolveProjectRoot } from '../shared/resolve-project-root.ts';
 import { composeManifest, DEFAULT_REMOTE_NAME } from './compose-manifest.ts';
+import { readPriorManifest, writeManifest } from './manifest-file.ts';
 import { readPreferences, readProjectPreferences } from './read-preferences.ts';
 import { readProjectStage, readSubdirectoryStages } from './read-project-stage.ts';
+import { type DiffBaseMutation, resolveDiffBase } from './resolve-diff-base.ts';
 import type { BranchManifest, ExplicitUrls } from './types.ts';
 
 /** The manifest fields written by the mutation flags, and the ones that the default-branch invariant governs. */
@@ -39,17 +40,9 @@ const STORED_URL_FIELDS = ['ticket_url', 'pr_url'] as const;
 
 type StoredUrlField = (typeof STORED_URL_FIELDS)[number];
 
-/** The variable name, under a branch's `branch.<name>` config section, that stores the branch's diff base. */
-const DIFF_BASE_CONFIG_NAME = 'codeassemblyDiffBase';
-
 /** A request to set or clear one stored URL field. */
 interface ManifestMutation {
   readonly field: StoredUrlField;
-  readonly value: string | null;
-}
-
-/** A request to set or clear the branch's stored diff base. */
-interface DiffBaseMutation {
   readonly value: string | null;
 }
 
@@ -59,13 +52,6 @@ interface ParsedArgs {
   readonly diffBase: DiffBaseMutation | undefined;
   readonly home: string | null;
   readonly mutations: readonly ManifestMutation[];
-}
-
-/** A manifest file read from disk: its text, and its parsed content when that is an object. */
-interface PriorManifest {
-  readonly path: string;
-  readonly text: string;
-  readonly record: Record<string, unknown> | undefined;
 }
 
 /** Executes the deriver from `process.argv`, writing the JSON manifest to stdout. */
@@ -133,7 +119,13 @@ export async function deriveSessionContext(input: {
     applyMutations(carried, mutations),
     mutations,
   );
-  const diffBase = await resolveDiffBase({ git, cwd: input.cwd, composed, mutation: input.diffBaseMutation });
+  const diffBase = await resolveDiffBase({
+    git,
+    cwd: input.cwd,
+    branchName: composed.branch_name,
+    isDefaultBranch: isOnDefaultBranch(composed),
+    mutation: input.diffBaseMutation,
+  });
   const manifest = buildManifest(seeded, explicitUrls, prior?.record, diffBase);
 
   const content = `${JSON.stringify(manifest, null, 2)}\n`;
@@ -279,88 +271,12 @@ function readExplicitUrls(prior: Record<string, unknown>, composed: BranchManife
   return result;
 }
 
-/**
- * Reads the manifest file at `filePath`, or returns `null` when the file does not exist. Content that is not valid JSON
- * or not an object yields an undefined `record`.
- */
-async function readPriorManifest(filePath: string): Promise<PriorManifest | null> {
-  let text: string;
-  try {
-    text = await readFile(filePath, 'utf8');
-  } catch (error) {
-    if (isEnoent(error)) {
-      return null;
-    }
-    throw error;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    // Warn so that an operator can explain a vanished `ticket_url` or `pr_url`.
-    process.stderr.write(
-      `derive-session-context: warning: prior manifest at ${filePath} is corrupt; stored URLs not carried forward\n`,
-    );
-    return { path: filePath, text, record: undefined };
-  }
-  return { path: filePath, text, record: isRecord(parsed) ? parsed : undefined };
-}
-
-/**
- * Applies the diff-base mutation to the branch's git config key and returns the key's value. On the default branch,
- * which is not a piece of any split, a set is refused with a stderr report and the value is null. A git failure while
- * reading yields null, as an unresolvable remote does.
- */
-async function resolveDiffBase(input: {
-  git: SharedGit;
-  cwd: string;
-  composed: BranchManifest;
-  mutation: DiffBaseMutation | undefined;
-}): Promise<string | null> {
-  const { git, cwd, composed, mutation } = input;
-  if (isOnDefaultBranch(composed)) {
-    if (mutation?.value !== undefined && mutation.value !== null) {
-      process.stderr.write(
-        `derive-session-context: refusing to store diff_base on default branch ${composed.branch_name}\n`,
-      );
-    }
-    return null;
-  }
-  const key = `branch.${composed.branch_name}.${DIFF_BASE_CONFIG_NAME}`;
-  if (mutation !== undefined) {
-    await (mutation.value === null ? git.unsetConfig(cwd, key) : git.writeConfig(cwd, key, mutation.value));
-  }
-  try {
-    return (await git.readConfig(cwd, key)) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 /** Returns the flag-written value of `field` when one is recorded, else the composed one. */
 function resolveStoredUrl(field: StoredUrlField, composed: BranchManifest, explicitUrls: ExplicitUrls): string | null {
   if (Object.hasOwn(explicitUrls, field)) {
     return explicitUrls[field] ?? null;
   }
   return composed[field] ?? null;
-}
-
-/**
- * Writes `content` to `targetPath` atomically: writes a sibling temp file, then renames it over the target with
- * `rename()` so that a concurrent reader never observes a half-written file. The temp file shares the target's
- * directory so that the rename stays within one filesystem.
- */
-async function writeManifest(targetPath: string, content: string): Promise<void> {
-  const dir = path.dirname(targetPath);
-  await mkdir(dir, { recursive: true });
-  const tempPath = path.join(dir, `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp`);
-  try {
-    await writeFile(tempPath, content, 'utf8');
-    await rename(tempPath, targetPath);
-  } catch (error) {
-    await rm(tempPath, { force: true });
-    throw error;
-  }
 }
 
 /**
