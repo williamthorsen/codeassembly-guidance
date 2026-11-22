@@ -147,12 +147,12 @@ describe(listImplementationOrder, () => {
     const gh = makeGh({ 'acme/core-lib#1': {} });
 
     const order = await listImplementationOrder(
-      ['--external', 'workbench:WB-3=Adopt the helper', '--edge', 'acme/core-lib#1>WB-3'],
+      ['--external', 'warehouse:WB-3=Adopt the helper', '--edge', 'acme/core-lib#1>WB-3'],
       gh,
     );
 
     expect(order.tickets).toMatchObject([
-      { label: 'wo.WB-3', otherBlockers: [{ crossRepository: true, label: 'cl.1' }] },
+      { label: 'wa.WB-3', otherBlockers: [{ crossRepository: true, label: 'cl.1' }] },
     ]);
   });
 

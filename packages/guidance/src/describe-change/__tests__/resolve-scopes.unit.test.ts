@@ -172,17 +172,17 @@ describe(resolveScopes, () => {
 
   it('resolves a package nested in a declared directory to the package', () => {
     const resolution = resolveScopes({
-      paths: ['apps/devopticon/Package.swift', 'apps/devopticon/web/src/main.ts'],
+      paths: ['apps/dashboard/Package.swift', 'apps/dashboard/web/src/main.ts'],
       projectRoot,
       scopeDirs: [
-        { dir: '/repo/apps/devopticon', name: 'devopticon' },
-        { dir: '/repo/apps/devopticon/web', name: 'web' },
+        { dir: '/repo/apps/dashboard', name: 'dashboard' },
+        { dir: '/repo/apps/dashboard/web', name: 'web' },
       ],
     });
 
     expect(resolution.pathScopes).toEqual({
-      'apps/devopticon/Package.swift': 'devopticon',
-      'apps/devopticon/web/src/main.ts': 'web',
+      'apps/dashboard/Package.swift': 'dashboard',
+      'apps/dashboard/web/src/main.ts': 'web',
     });
   });
 

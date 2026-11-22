@@ -81,15 +81,15 @@ describe('resolve-scopes', () => {
   });
 
   it('resolves a declared directory in a repository that does not declare any workspaces', async () => {
-    const scopes = 'project:\n  scopes:\n    - path: apps/devopticon\n    - path: tools/ios-shell\n      name: ios';
+    const scopes = 'project:\n  scopes:\n    - path: apps/dashboard\n    - path: tools/ios-shell\n      name: ios';
     const { cwd, git, home } = await makeRepo(`${HOUSE_TEMPLATES}\n${scopes}`);
-    await mkdir(join(cwd, 'apps', 'devopticon'), { recursive: true });
+    await mkdir(join(cwd, 'apps', 'dashboard'), { recursive: true });
     await mkdir(join(cwd, 'tools', 'ios-shell'), { recursive: true });
 
     const argv = [
       'resolve-scopes',
       '--path',
-      'apps/devopticon/Package.swift',
+      'apps/dashboard/Package.swift',
       '--path',
       'tools/ios-shell/App.swift',
       '--path',
@@ -99,11 +99,11 @@ describe('resolve-scopes', () => {
 
     expect(output).toStrictEqual({
       path_scopes: {
-        'apps/devopticon/Package.swift': 'devopticon',
+        'apps/dashboard/Package.swift': 'dashboard',
         'tools/ios-shell/App.swift': 'ios',
         'AGENTS.md': 'root',
       },
-      scopes: ['devopticon', 'ios', 'root'],
+      scopes: ['dashboard', 'ios', 'root'],
     });
     expect(warnings).toStrictEqual([]);
   });
@@ -125,16 +125,16 @@ describe('resolve-scopes', () => {
   });
 
   it('warns about a faulty declared entry, skips it, and still resolves the valid one', async () => {
-    const scopes = 'project:\n  scopes:\n    - path: apps/missing\n    - path: apps/devopticon';
+    const scopes = 'project:\n  scopes:\n    - path: apps/missing\n    - path: apps/dashboard';
     const { cwd, git, home } = await makeRepo(`${HOUSE_TEMPLATES}\n${scopes}`);
-    await mkdir(join(cwd, 'apps', 'devopticon'), { recursive: true });
+    await mkdir(join(cwd, 'apps', 'dashboard'), { recursive: true });
 
-    const argv = ['resolve-scopes', '--path', 'apps/devopticon/Package.swift', '--path', 'apps/missing/x.swift'];
+    const argv = ['resolve-scopes', '--path', 'apps/dashboard/Package.swift', '--path', 'apps/missing/x.swift'];
     const { output, warnings } = await runDescribe({ argv, cwd, git, dataDir: DATA_DIR, home });
 
     expect(output).toStrictEqual({
-      path_scopes: { 'apps/devopticon/Package.swift': 'devopticon', 'apps/missing/x.swift': 'root' },
-      scopes: ['devopticon', 'root'],
+      path_scopes: { 'apps/dashboard/Package.swift': 'dashboard', 'apps/missing/x.swift': 'root' },
+      scopes: ['dashboard', 'root'],
     });
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toMatch(
@@ -144,13 +144,13 @@ describe('resolve-scopes', () => {
 
   it('ignores scopes declared in the global preferences file', async () => {
     const { cwd, git, home } = await makeRepo(HOUSE_TEMPLATES);
-    await mkdir(join(cwd, 'apps', 'devopticon'), { recursive: true });
-    await writeAgentsPreferences(home, 'project:\n  scopes:\n    - path: apps/devopticon');
+    await mkdir(join(cwd, 'apps', 'dashboard'), { recursive: true });
+    await writeAgentsPreferences(home, 'project:\n  scopes:\n    - path: apps/dashboard');
 
-    const argv = ['resolve-scopes', '--path', 'apps/devopticon/Package.swift'];
+    const argv = ['resolve-scopes', '--path', 'apps/dashboard/Package.swift'];
     const { output, warnings } = await runDescribe({ argv, cwd, git, dataDir: DATA_DIR, home });
 
-    expect(output).toStrictEqual({ path_scopes: { 'apps/devopticon/Package.swift': 'root' }, scopes: ['root'] });
+    expect(output).toStrictEqual({ path_scopes: { 'apps/dashboard/Package.swift': 'root' }, scopes: ['root'] });
     expect(warnings).toStrictEqual([]);
   });
 
