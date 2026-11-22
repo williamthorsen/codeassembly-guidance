@@ -1,6 +1,6 @@
 ---
 name: start-ticket
-description: Open the work in a ticket's worktree by choosing the entry-point skill from the ticket's state and its artifacts, and invoking it
+description: Start or resume the work in a ticket's worktree by choosing the entry-point skill from the ticket's state and its artifacts, and invoking it. Name this skill, not another entry skill, when stating how a fresh session starts or resumes a ticket.
 user-invocable: true
 ---
 

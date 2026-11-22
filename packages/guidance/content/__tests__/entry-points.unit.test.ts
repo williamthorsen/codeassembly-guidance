@@ -8,6 +8,7 @@ import { readContentFile } from '../test-utils/read-content-file.ts';
 // in one of them drifts from the data file without anything reporting it.
 
 const ENTRY_POINTS = 'skills/_data/entry-points.md';
+const WORKFLOW_PREFERENCES = 'guidance/rulebooks/williamthorsen-workflow-preferences.md';
 
 /** Each route's skill, with the phrase that states the condition that selects it. */
 const ROUTES: ReadonlyArray<{ readonly skill: string; readonly condition: string }> = [
@@ -112,6 +113,21 @@ describe('entry points', () => {
     const skill = await readContentFile('skills/start-ticket/SKILL.md');
     expect(countOccurrences(skill, '#when-to-ask-instead')).toBe(2);
     expect(skill).toContain('name the candidate skills, and ask, rather than invoke');
+  });
+
+  it('names start-ticket in its description as the command for a fresh session', async () => {
+    const content = await readContentFile('skills/start-ticket/SKILL.md');
+    expect(content).toMatch(/^description: Start or resume the work in a ticket's worktree/m);
+    expect(content).toContain('when stating how a fresh session starts or resumes a ticket');
+  });
+
+  it('limits the workflow rule on the launch command to a fresh session', async () => {
+    const content = await readContentFile(WORKFLOW_PREFERENCES);
+    expect(content).toContain(
+      "When telling the developer how to start or resume a ticket's work in a fresh session, name `start-ticket`",
+    );
+    expect(content).toContain('a next-steps menu within a session names its own skills');
+    expect(content).toContain('outside a skill that closes with its own next-steps menu');
   });
 
   it('has create-ticket offer to start the ticket of its own branch', async () => {
