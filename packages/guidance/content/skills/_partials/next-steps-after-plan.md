@@ -87,13 +87,13 @@ Each skill supplies its own recommendation context (e.g., whether the plan was d
 
 <!-- include: split-ticket-compose.md / -->
 
-**Cut the plans.** Cut a plan per piece from the approved plan, so that each piece's session can start at Implement. Keep each piece's plan in context when its ticket is created, so that `{skill:create-ticket}` saves the plan beside the ticket artifact and posts it on the ticket.
+**Cut the plans.** Cut a plan per piece from the approved plan, so that each piece's session can start at Implement. Keep each piece's plan in context when its ticket is created, so that `{skill:create-ticket}` saves the plan beside the ticket artifact and posts it on the ticket. Write each constraint that a piece's session needs, such as "merge only after `live` contains #N", into the `## Dependencies` section of that piece's plan before its ticket is created; a piece without a plan takes the constraint in its ticket's `## Context`.
 
 <!-- include: split-ticket-create.md / -->
 
 **Save the first piece's plan.** With two pieces, save the first piece's plan in the originating ticket's directory per `{skill:save-artifact}`. Its timestamp is later than the approved plan's, so `implement-plan` resolves it rather than the unsplit plan.
 
-**Report.** Report the ticket references and the plan paths. Every piece enters at `{skill?:start-ticket}`, invoked without arguments, which chooses the skill that opens the work from the piece's artifacts per [entry points](../_data/entry-points.md). A fact that the choice needs and that the artifacts do not state belongs in the piece's ticket or plan, not in its prompt.
+**Report.** Report the ticket references and the plan paths. Every piece enters at `{skill?:start-ticket}`, invoked without arguments, which chooses the skill that opens the work from the piece's artifacts per [entry points](../_data/entry-points.md). A fact that the choice needs and that the artifacts do not state belongs in the piece's ticket or plan, not in its prompt. The fenced block of each launch prompt contains that invocation alone, without a plan path, a scope note, a blocker, or another skill.
 
 <!-- include: split-launch-prompts.md / -->
 

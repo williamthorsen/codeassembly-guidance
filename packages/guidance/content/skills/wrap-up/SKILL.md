@@ -401,6 +401,8 @@ Omit empty sections. The "Artifacts saved" section is omitted when the skill did
 
 When "Tickets created" lists two or more tickets, print the list for them after the report, per [implementation-order list](#implementation-order-list). Pass a ticket kept in a file as `--external "{ticket-id}={title}"`; its path stays in the report line alone.
 
+<!-- include: ../_partials/launch-command.md / -->
+
 ### Phase 5: PR prompt
 
 After the results report, check whether the branch has commits ahead of the default branch (`git log --oneline {default_branch}..HEAD`). If there are commits (whether from the session's earlier work, drive-by fixes applied in Phase 2a, or both), prompt the user to create a PR:

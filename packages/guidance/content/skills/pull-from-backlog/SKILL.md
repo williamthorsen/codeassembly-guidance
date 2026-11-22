@@ -76,7 +76,7 @@ Close the turn with an action-items block that asks for the pick. When `groomSta
 
    If the command fails, report `gh`'s message and do not retry. The `pull` record stands: The pick happened, and only the assignment failed.
 
-3. Close with one line: "Start #{N} in its own session."
+3. Close with one line: "Start #{N} in its own worktree: {skill?:start-ticket}"
 
 <!-- include: ../_partials/option-format.md / -->
 
