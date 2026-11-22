@@ -41,6 +41,10 @@ Why it matters:
 
 Read-only exercises (`--dry-run`, help text, preview tables, `--list`, exit-code checks on pure-read commands) are safe in the working repo. Anything that writes, even "just for a second", is not.
 
+## Operations on hosted services
+
+An operation on a hosted service creates, changes, or deletes a resource, a setting, a variable, or a credential on the developer's behalf. Before one, read `docs/operations/{service}.md` in the repository that the work serves, when it exists. After it succeeds, record it with the `record-external-operation` skill.
+
 <!-- include: ../../_partials/technical-recommendations.md / -->
 
 ## Artifacts

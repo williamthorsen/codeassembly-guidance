@@ -45,6 +45,7 @@ import { makeLessonClustersSmokeTest } from '../test-utils/make-lesson-clusters-
 import { makeManageJiraTicketSmokeTest } from '../test-utils/make-manage-jira-ticket-smoke-test.ts';
 import { makeMergeGhPrSmokeTest } from '../test-utils/make-merge-gh-pr-smoke-test.ts';
 import { makePullFromBacklogSmokeTest } from '../test-utils/make-pull-from-backlog-smoke-test.ts';
+import { makeRecordExternalOperationSmokeTest } from '../test-utils/make-record-external-operation-smoke-test.ts';
 import { makeResolveReviewRunSmokeTest } from '../test-utils/make-resolve-review-run-smoke-test.ts';
 import { makeResolveTicketTargetSmokeTest } from '../test-utils/make-resolve-ticket-target-smoke-test.ts';
 import { makeReviseProseSmokeTest } from '../test-utils/make-revise-prose-smoke-test.ts';
@@ -146,6 +147,7 @@ function buildSmokeTests(): Record<string, SmokeTestInvocation> {
     '../src/manage-jira-ticket/cli.ts': makeManageJiraTicketSmokeTest(),
     '../src/merge-gh-pr/cli.ts': makeMergeGhPrSmokeTest(),
     '../src/pull-from-backlog/cli.ts': makePullFromBacklogSmokeTest(),
+    '../src/record-external-operation/cli.ts': makeRecordExternalOperationSmokeTest(),
     '../src/resolve-review-run/cli.ts': makeResolveReviewRunSmokeTest(),
     '../src/resolve-ticket-target/cli.ts': makeResolveTicketTargetSmokeTest(),
     '../src/revise-prose/cli.ts': makeReviseProseSmokeTest(),

@@ -37,6 +37,10 @@ const SHARED_GUIDANCE_SECTIONS: ReadonlyArray<{ heading: string; phrase: string 
     heading: "## Don't test write operations against a live repo",
     phrase: 'Never exercise destructive or side-effecting operations',
   },
+  {
+    heading: '## Operations on hosted services',
+    phrase: 'record it with the `record-external-operation` skill',
+  },
   { heading: '## Technical recommendations', phrase: 'Default to current best practices' },
   { heading: '## Artifacts', phrase: 'invoke the `save-artifact` skill to resolve path and naming' },
   {
