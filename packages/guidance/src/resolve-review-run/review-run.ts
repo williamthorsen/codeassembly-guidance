@@ -8,7 +8,8 @@ const INTERACTIVE_MODE = 'interactive';
 
 /**
  * Matches the heading of an actionable finding in the per-finding template that `review-branch` writes, such as
- * `#### F1: {title}`. A legacy finding's `-L` suffix does not match, because the finding scheme excludes it from action.
+ * `#### F1: {title}`. A legacy finding's `-L` suffix does not match, because the finding scheme excludes it from
+ * action.
  */
 export const ACTIONABLE_FINDING_HEADING = /^#### [FWTRS]\d+:/gm;
 
@@ -75,8 +76,8 @@ export interface RunState {
 }
 
 /**
- * Reports the newest review or change summary in the ticket's active run. A change summary counts as newer than a review
- * with the same timestamp, because it answers that review.
+ * Reports the newest review or change summary in the ticket's active run. A change summary counts as newer than a
+ * review with the same timestamp, because it answers that review.
  */
 export async function readRunState(ticketDir: string): Promise<RunState> {
   const runDir = await findActiveRun(ticketDir);

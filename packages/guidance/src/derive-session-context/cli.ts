@@ -14,8 +14,8 @@
  *   invocation, and `--set-diff-base` and `--clear-diff-base` write that key. Git config is shared by every worktree
  *   of the repository, so a value written before a branch's worktree exists is visible from it.
  * - Default-branch invariant: A manifest whose branch is the default branch does not store a `ticket_url`, a
- *   `pr_url`, or a `diff_base`. Because the default branch is not derived from any ticket and does not belong to any pull
- *   request, a stored URL there is wrong rather than stale. See `enforceDefaultBranchInvariant`.
+ *   `pr_url`, or a `diff_base`. Because the default branch is not derived from any ticket and does not belong to
+ *   any pull request or split, a stored value there is wrong rather than stale. See `enforceDefaultBranchInvariant`.
  */
 import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
