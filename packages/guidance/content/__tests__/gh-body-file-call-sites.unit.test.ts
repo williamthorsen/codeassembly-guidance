@@ -30,6 +30,9 @@ const GITHUB_WRITE = /\bgh (?:issue|pr) (?:create|edit|comment)\b/;
 /** The guard itself, which turns a missing or empty body file into a refusal. */
 const GUARD = '[ -s "$body_path" ]';
 
+/** A target-repository argument, written as `--repo` or as a placeholder whose name contains `repo`. */
+const REPO_ARGUMENT = /--repo[ =](?:"[^"]*"|\S+)|\{\w*repo\w*\}/g;
+
 /** A title argument and the text that it passes. */
 const TITLE_ARGUMENT = /--title "([^"]*)"/g;
 
@@ -94,6 +97,9 @@ function findUncheckedGithubWrite(block: string): string | undefined {
   }
   for (const match of writeText.matchAll(TITLE_ARGUMENT)) {
     if (!checkLine.includes(match[0])) return `${CHECK} does not check the title ${match[0]}`;
+  }
+  for (const match of writeText.matchAll(REPO_ARGUMENT)) {
+    if (!checkLine.includes(match[0])) return `${CHECK} does not check the target ${match[0]}`;
   }
   return undefined;
 }
