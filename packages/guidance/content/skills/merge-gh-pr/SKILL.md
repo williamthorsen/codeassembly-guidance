@@ -77,6 +77,14 @@ Write `body` to a scratch file per [gh body file](#gh-body-file), naming it for 
 
 **Read both files back before step 5.** Read each path that step 5 is about to pass, with the {tool:Read} tool rather than a shell command, and compare its content against the `body` and `title` received by this delegate; a single trailing newline in the title file is ignored. Refuse with the [refusal summary](#refusal-summary) when either differs, naming the PR and the path: "Body file for PR #{n} at {path} is not the approved merge body." or "Title file for PR #{n} at {path} is not the approved merge title." A squash merge onto a protected default branch publishes a commit message that cannot be amended, so this is the last point at which a wrong message can be caught. Read the paths being passed rather than the ones written earlier in this step, so that a path left over from another PR is caught rather than confirmed.
 
+**Check the files for private references.** When step 5 passes a title file, a body file, or both, run the public-reference check on the same literal paths, as a call of its own, passing a `--body-file` for each file that step 5 passes:
+
+```bash
+node {harness_home_dir}/scripts/check-public-references.mjs --body-file {absolute title path} --body-file {absolute body path}
+```
+
+On a non-zero exit, do not run step 5: Refuse with the [refusal summary](#refusal-summary), naming the PR and each reference that the helper's stderr names. A `rebase` merge passes neither file, so it skips the check.
+
 ### 5. Merge and delete the branch
 
 Run the bundled helper as one command. It merges the PR, confirms that the PR is `MERGED`, and deletes the head branch as `deletion_strategy` requests:
