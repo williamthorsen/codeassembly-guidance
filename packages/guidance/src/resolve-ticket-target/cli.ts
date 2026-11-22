@@ -3,21 +3,17 @@
 // CLI entry point for the resolve-ticket-target helper: fetches another repository's ticket configuration and prints
 // where it was written as JSON.
 
-import { execFile } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import process from 'node:process';
-import { promisify } from 'node:util';
 
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { scanFlags, valueFlagMap } from '../lib/parse-flags.ts';
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
-import { type GhResult, resolveTicketTarget } from './resolve-ticket-target.ts';
+import { runGh } from '../shared/gh.ts';
+import { resolveTicketTarget } from './resolve-ticket-target.ts';
 
 const PROGRAM = 'resolve-ticket-target';
-
-const execFileAsync = promisify(execFile);
 
 /** Resolves the target that `--repo` names, writing the result to stdout and a warning per missing file to stderr. */
 async function main(): Promise<void> {
@@ -45,28 +41,3 @@ async function main(): Promise<void> {
 if (isEntryPoint(import.meta.url, PROGRAM)) {
   await main();
 }
-
-// region | Helpers
-
-/** Runs `gh` without a shell and reports its exit code and output; throws when `gh` cannot be started. */
-async function runGh(args: readonly string[]): Promise<GhResult> {
-  try {
-    const { stderr, stdout } = await execFileAsync('gh', args, { maxBuffer: 16_777_216 });
-    return { exitCode: 0, stderr, stdout };
-  } catch (error) {
-    if (isEnoent(error)) {
-      throw new Error('gh is not installed or not on PATH', { cause: error });
-    }
-    if (
-      isRecord(error) &&
-      typeof error['code'] === 'number' &&
-      typeof error['stderr'] === 'string' &&
-      typeof error['stdout'] === 'string'
-    ) {
-      return { exitCode: error['code'], stderr: error['stderr'], stdout: error['stdout'] };
-    }
-    throw error;
-  }
-}
-
-// endregion | Helpers

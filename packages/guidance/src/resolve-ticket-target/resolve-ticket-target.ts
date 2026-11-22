@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { readProjectPreferences } from '../derive-session-context/read-preferences.ts';
 import { isRecord } from '../lib/type-guards.ts';
+import type { GhResult, GhRunner } from '../shared/gh.ts';
 
 /**
  * Fetches the configuration against which a ticket filed in `repo` resolves, from the repository's default branch,
@@ -62,16 +63,6 @@ export async function resolveTicketTarget(input: {
     repo: fullName,
     ticketRefPrefix: readString(preferences, 'project', 'ticket_ref_prefix') ?? '',
   };
-}
-
-/** Runs `gh` with the given arguments and reports its exit code and output. */
-export type GhRunner = (args: readonly string[]) => Promise<GhResult>;
-
-/** What one `gh` run reports. */
-export interface GhResult {
-  exitCode: number;
-  stderr: string;
-  stdout: string;
 }
 
 /** The configuration against which a ticket in another repository resolves. */

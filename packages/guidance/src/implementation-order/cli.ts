@@ -9,7 +9,8 @@ import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { scanFlags } from '../lib/parse-flags.ts';
-import { fetchTicket, type GhRunner, type GithubTicket, parseTicketRef, runGh } from './fetch.ts';
+import { type GhRunner, runGh } from '../shared/gh.ts';
+import { fetchTicket, type GithubTicket, parseTicketRef } from './fetch.ts';
 import { type Edge, orderTickets } from './order.ts';
 import { derivePrefixes } from './prefix.ts';
 

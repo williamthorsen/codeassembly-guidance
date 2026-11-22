@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import type { GhRunner } from '../../shared/gh.ts';
 import { listImplementationOrder } from '../cli.ts';
-import type { GhRunner } from '../fetch.ts';
 
 interface FakeIssue {
   blockedBy?: string[];
