@@ -35,3 +35,10 @@ Check the routes in order and stop at the first match. Each route names the skil
    - b. Any other plan: {skill?:implement-plan} with `--plan={path}` and `--ticket={ticket_ref}`.
    - c. The ticket is ready: It states a problem, a proposed solution, and acceptance criteria, and applying [ticket evaluation](ticket-evaluation.md) does not find any divergence that needs a design conversation. This is a judgment, and the announcement states its reason. {skill?:plan} with the ticket ref.
    - d. Otherwise: {skill?:design-and-plan} with the ticket ref.
+
+## When to ask instead
+
+A clear first match is invoked without asking. In the two cases below, {skill?:start-ticket} does not invoke a skill: It announces what it found, names the candidate skills, and asks which one opens the work.
+
+- **Conflicting evidence.** The first match is route 3 or route 4, and the ticket directory contains artifacts of both kinds: a spike artifact (`spike-findings`, `dispositions`, or `triage/dispositions.json`) and a prototype artifact (a prototype set, or a `brief`, `comparison`, `idea-decisions`, or `refinement-log` artifact).
+- **An unclear judgment.** The match depends on a condition that a route judges by reading (whether the findings propose work in route 3, whether the ticket calls for competing prototypes in route 4, whether the ticket is ready in route 5c), and the reading supports both outcomes. A judgment that the reading settles is announced with its reason and invoked.
