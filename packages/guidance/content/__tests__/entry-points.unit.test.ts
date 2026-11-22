@@ -102,6 +102,13 @@ describe('entry points', () => {
     expect(content).toMatch(/Start #\{N\} in its own worktree: \S*start-ticket/);
   });
 
+  it('has create-ticket offer to start the ticket of its own branch', async () => {
+    const content = await readContentFile('skills/create-ticket/SKILL.md');
+    expect(content).toContain('Nothing else, with one exception.');
+    expect(content).toContain("Step 6 persisted the branch association, so the new ticket is the branch's own.");
+    expect(content).toContain("When a step of another skill invoked it, that skill's report closes the turn.");
+  });
+
   it('keeps review-branch as the entry of a split made after implementation', async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
     expect(content).toContain('Every piece enters at `{skill:review-branch}`');

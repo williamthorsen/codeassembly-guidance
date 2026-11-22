@@ -394,6 +394,10 @@ Start in its worktree: {skill?:start-ticket} <- omitted for a ticket in another 
 Target configuration missing: {files}      <- only when the target's default branch lacks a file in `missing`
 ```
 
-Nothing else.
+Nothing else, with one exception. When all three conditions below hold, close the turn with an action-items block, as step 4 states it, that offers to invoke {skill?:start-ticket}:
+
+- The session is interactive, not a dispatched subagent's.
+- The developer invoked this skill directly. When a step of another skill invoked it, that skill's report closes the turn.
+- Step 6 persisted the branch association, so the new ticket is the branch's own.
 
 <!-- include: ../_partials/gh-body-file.md / -->
