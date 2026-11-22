@@ -177,8 +177,8 @@ const SPLIT_LAUNCH_PROMPTS: Spec = {
     'With two pieces, the originating ticket gets one; an umbrella does not get one',
     // Work order. Without it the developer has to work out which prompts can run before which.
     'A ticket comes after every ticket that blocks it',
-    // The prompt's contents. Without the blockers the developer cannot tell which prompts can run now.
-    "The ticket's blockers, by reference",
+    // The prompt's contents. Each kind of split names them in its own report, so the partial must point there.
+    'which the **Report** paragraph above names',
   ],
 };
 

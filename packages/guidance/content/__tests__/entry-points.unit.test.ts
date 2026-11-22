@@ -59,6 +59,31 @@ describe('entry points', () => {
     expect(countOccurrences(content, RETIRED_ROUTE_LIST)).toBe(0);
   });
 
+  it.each([...PLAN_SPLIT_CONSUMERS, 'implement-plan'])(
+    '%s leaves the contents of a launch prompt to its own split report',
+    async (slug) => {
+      const content = await readContentFile(`skills/${slug}/SKILL.md`);
+      expect(content).toContain('which the **Report** paragraph above names');
+      expect(content).not.toContain('{entry_skill}');
+    },
+  );
+
+  it.each(PLAN_SPLIT_CONSUMERS)('%s puts start-ticket alone in the launch prompt of a split', async (slug) => {
+    const content = await readContentFile(`skills/${slug}/SKILL.md`);
+    expect(content).toContain(
+      'contains that invocation alone, without a plan path, a scope note, a blocker, or another skill',
+    );
+    expect(content).toContain("into the `## Dependencies` section of that piece's plan before its ticket is created");
+  });
+
+  it('keeps the review-branch invocation, scope notes, and blockers in the prompt of a split made after implementation', async () => {
+    const content = await readContentFile('skills/implement-plan/SKILL.md');
+    expect(content).toContain("`--diff-base=<previous piece's branch>`");
+    expect(content).toContain(
+      "then the scope notes that the session needs and that the artifacts do not state, then the ticket's blockers",
+    );
+  });
+
   it('keeps review-branch as the entry of a split made after implementation', async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
     expect(content).toContain('Every piece enters at `{skill:review-branch}`');
