@@ -8,15 +8,25 @@ Pass composed content to a CLI through a file, never through the shell. This gov
 
 **Assign the path and guard it inside the call that consumes it.** Nothing survives a Bash invocation: neither `$TMPDIR`, whose value changes between calls, nor a variable set by an earlier call. Every invocation that passes a body file opens with the assignment and refuses on a missing or empty file.
 
+A call that writes a title, a body, or a comment to GitHub guards it with `check-public-references.mjs`, which refuses a reference to a repository that is not public when the target is public, and refuses a missing or empty body file itself. A title passed through `--title` bypasses the body file, so the call passes the same title to the helper. A call that writes to another repository passes the helper the same `--repo`. Its flags and exit codes are in its `--help`.
+
+```bash
+body_path="{absolute path from the write step}"
+node {harness_home_dir}/scripts/check-public-references.mjs --title "{title}" --body-file "$body_path" >/dev/null || exit 1
+gh issue create --title "{title}" --body-file "$body_path"
+```
+
+Every other call, such as `git commit`, a Jira write, or a local helper, guards the file with `[ -s ]`:
+
 ```bash
 body_path="{absolute path from the write step}"
 [ -s "$body_path" ] || { echo "Body file missing or empty: $body_path" >&2; exit 1; }
 ```
 
-The guard makes the failure loud. `gh` accepts `--body-file ""` without complaint and publishes its own default body in place of the composed one, and given an empty file it publishes an empty body just as quietly. An unset variable fails `[ -s ]`, so the refusal holds even when the assignment is dropped.
+The guard makes the failure loud. `gh` accepts `--body-file ""` without complaint and publishes its own default body in place of the composed one, and given an empty file it publishes an empty body just as quietly. An unset variable fails `[ -s ]`, and the helper refuses `--body-file ""`, so the refusal holds even when the assignment is dropped.
 
 A retry re-states the assignment rather than inheriting it. The file is the same file; only the handoff is re-done.
 
-A bundled helper that refuses a missing or empty file itself takes the literal absolute path, unquoted, without the assignment or the guard. The skill that invokes such a helper says so at the call.
+A bundled helper that refuses a missing or empty file itself takes the literal absolute path, unquoted, without the assignment or the guard. The skill that invokes such a helper says so at the call. When that helper writes to GitHub, the skill runs `check-public-references.mjs` on the same literal paths in a call of its own before it, and does not run the helper after a non-zero exit.
 
 Why a file rather than the shell, and why the path is re-stated at every call: [gh body file](../_data/gh-body-file.md).
