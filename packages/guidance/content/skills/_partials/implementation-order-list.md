@@ -15,12 +15,12 @@ Print open tickets that have work of their own in the order in which to implemen
 
 2. **Shorten each title** to at most the ticket's `titleBudget` characters. Cut words rather than end with an ellipsis, and keep the leading verb. Leave a title that already fits as it is.
 
-3. **Find the publish gates.** A gate follows a ticket when its change must be published, and the dependency upgraded in a consuming repository, before a ticket that it blocks can start. Look for one wherever a ticket blocks a ticket in another repository; `crossRepository` marks those among `otherBlockers`, and a child in the tree whose `repository` differs from its parent's is another. The tracker does not record whether the blocked repository consumes the blocking one as a published package, so judge that from the tickets and the conversation.
+3. **Find the publish gates.** A gate follows a ticket when its change must be published before a ticket that it blocks can start, because the blocked ticket adds the published package as a dependency or raises its version. The candidates are the tickets in the ticket's `crossRepositoryBlocked`. The tracker does not record whether a blocked ticket consumes the blocking repository as a published package, so judge that for each candidate from the tickets and the conversation.
 
 4. **Print the list** as one fenced block. For each ticket, in order:
    - Its line: `lead`, then the shortened title.
    - Its `blockerLine`, when that is not null.
-   - Its gate, when step 3 found one: `gateLead`, then the package's name, then `, upgrade in `, then the prefix of each consuming repository in the list, separated by commas. Name the package rather than the repository when the two differ.
+   - Its gate, when step 3 found one: `gateLead`, then the package's name, then `, needed by `, then the label of each candidate that consumes the package, separated by commas: `📦 publish tank, needed by wo.1000, cs.75`. Name the package rather than the repository when the two differ. When the text after `gateLead` exceeds `gateBudget` characters, break the line after a comma and indent each continuation two spaces past `gateLead`'s indent.
 
    A ticket's place states its blocker: It is indented under the ticket that blocks it. `blockerLine` names the blockers that the indent does not state.
 

@@ -3,16 +3,13 @@
 // CLI entry point for the implementation-order helper: reads the named tickets and their blockers, and prints them
 // as JSON in implementation order, arranged as a tree.
 
-import { execFile } from 'node:child_process';
 import process from 'node:process';
-import { promisify } from 'node:util';
 
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { scanFlags } from '../lib/parse-flags.ts';
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
-import { fetchTicket, type GhResult, type GhRunner, type GithubTicket, parseTicketRef } from './fetch.ts';
+import { fetchTicket, type GhRunner, type GithubTicket, parseTicketRef, runGh } from './fetch.ts';
 import { type Edge, orderTickets } from './order.ts';
 import { derivePrefixes } from './prefix.ts';
 
@@ -31,8 +28,15 @@ export interface ListedBlocker {
 export interface ListedTicket {
   /** The whole line that names `otherBlockers`, or null when there are none. */
   blockerLine: string | null;
+  /** The labels of the listed tickets in another repository that this ticket blocks, in list order. */
+  crossRepositoryBlocked: string[];
   depth: number;
-  /** The start of the line that states a publish gate after this ticket; the caller adds the package and its consumers. */
+  /** The characters left on the gate line once `gateLead` is counted. */
+  gateBudget: number;
+  /**
+   * The start of the line that states a publish gate after this ticket; the caller adds the package and the tickets
+   * that wait for its release.
+   */
   gateLead: string;
   /** The ticket's name in the list: `prefix.N`, or a key outside GitHub, after `prefix.` when it names a repository. */
   label: string;
@@ -66,15 +70,13 @@ export interface OmittedTicket {
 
 const PROGRAM = 'implementation-order';
 
-/** The most characters that a ticket's line may have, its indent included. */
+/** The most characters that a ticket's line or its gate line may have, the indent included. */
 const LINE_WIDTH = 60;
 
 const INDENT_WIDTH = 2;
 
 /** The repository that an `--external` may name: `NAME` or `OWNER/NAME`. */
 const REPOSITORY_PATTERN = /^[^\s/:]+(?:\/[^\s/:]+)?$/;
-
-const execFileAsync = promisify(execFile);
 
 /**
  * Lists the tickets that `argv` names in implementation order. `--ticket OWNER/REPO#N` names a GitHub ticket,
@@ -145,13 +147,21 @@ export async function listImplementationOrder(argv: readonly string[], gh: GhRun
         });
       const lead = `${' '.repeat(depth * INDENT_WIDTH)}— ${ticket.label} `;
       const noteIndent = ' '.repeat((depth + 1) * INDENT_WIDTH);
+      const gateLead = `${noteIndent}📦 publish `;
+      const crossRepositoryBlocked = placed
+        .filter((other) => findOpenBlockers(other.id, edges, entries).includes(id))
+        .map((other) => describeEntry(other.id, entries, prefixes))
+        .filter((other) => isCrossRepository(other.repository, ticket.repository))
+        .map(({ label }) => label);
       return {
         blockerLine:
           otherBlockers.length === 0
             ? null
             : `${noteIndent}⛔ by ${otherBlockers.map(({ label }) => label).join(', ')}`,
+        crossRepositoryBlocked,
         depth,
-        gateLead: `${noteIndent}📦 publish `,
+        gateBudget: Math.max(0, LINE_WIDTH - gateLead.length),
+        gateLead,
         label: ticket.label,
         lead,
         number: ticket.number,
@@ -358,27 +368,6 @@ function resolveEdgeSide(text: string, request: Request): string | undefined {
     return buildId(ticket);
   }
   return request.externals.some((external) => external.key === text) ? text : undefined;
-}
-
-/** Runs `gh` without a shell and reports its exit code and output; throws when `gh` cannot be started. */
-async function runGh(args: readonly string[]): Promise<GhResult> {
-  try {
-    const { stderr, stdout } = await execFileAsync('gh', args, { maxBuffer: 16_777_216 });
-    return { exitCode: 0, stderr, stdout };
-  } catch (error) {
-    if (isEnoent(error)) {
-      throw new Error('gh is not installed or not on PATH', { cause: error });
-    }
-    if (
-      isRecord(error) &&
-      typeof error['code'] === 'number' &&
-      typeof error['stderr'] === 'string' &&
-      typeof error['stdout'] === 'string'
-    ) {
-      return { exitCode: error['code'], stderr: error['stderr'], stdout: error['stdout'] };
-    }
-    throw error;
-  }
 }
 
 // endregion | Helpers
