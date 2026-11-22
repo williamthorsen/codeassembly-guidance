@@ -126,12 +126,11 @@ describe('entry points', () => {
     expect(content).toContain("into the `## Dependencies` section of that piece's plan before its ticket is created");
   });
 
-  it('keeps the review-branch invocation, scope notes, and blockers in the prompt of a split made after implementation', async () => {
+  it("stores each piece's diff base in a split made after implementation", async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
-    expect(content).toContain("`--diff-base=<previous piece's branch>`");
-    expect(content).toContain(
-      "then the scope notes that the session needs and that the artifacts do not state, then the ticket's blockers",
-    );
+    expect(content).toContain('--branch {piece_branch} --set-diff-base {base}');
+    expect(content).toContain("each later piece's is its predecessor's branch");
+    expect(content).not.toContain("`--diff-base=<previous piece's branch>`");
   });
 
   it.each(BATCH_REPORTERS)('%s names start-ticket once in its report of created tickets', async (slug) => {
@@ -183,9 +182,10 @@ describe('entry points', () => {
     expect(content).toContain("When a step of another skill invoked it, that skill's report closes the turn.");
   });
 
-  it('keeps review-branch as the entry of a split made after implementation', async () => {
+  it('sends every piece of a split made after implementation to start-ticket alone', async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
-    expect(content).toContain('Every piece enters at `{skill:review-branch}`');
-    expect(content).not.toContain('start-ticket');
+    expect(content).toMatch(/Every piece enters at `\S*start-ticket\S*`, invoked without arguments/);
+    expect(content).toContain('The fenced block of each launch prompt contains that invocation alone.');
+    expect(content).not.toContain('then the scope notes that the session needs');
   });
 });
