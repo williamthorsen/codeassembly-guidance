@@ -75,3 +75,5 @@ helpers:
     out: skills/write-progress-report/write-progress-report.mjs
   - entry: ../src/list-gh-progress-items/cli.ts
     out: skills/list-gh-progress-items/list-gh-progress-items.mjs
+  - entry: ../src/record-external-operation/cli.ts
+    out: skills/record-external-operation/record-external-operation.mjs
