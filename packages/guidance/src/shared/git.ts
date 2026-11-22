@@ -16,6 +16,12 @@ export interface SharedGit {
   findTopLevel(startDir: string): TopLevelResult;
   /** Returns the remote names in the order that git lists them. Throws when git fails. */
   listRemotes(cwd: string): Promise<string[]>;
+  /** Returns the value of a git config key, or undefined when the key is not set. Throws when git fails otherwise. */
+  readConfig(cwd: string, key: string): Promise<string | undefined>;
+  /** Removes a git config key; a key that is not set is left as it is. Throws when git fails otherwise. */
+  unsetConfig(cwd: string, key: string): Promise<void>;
+  /** Sets a git config key in the repository's local config. Throws when git fails. */
+  writeConfig(cwd: string, key: string, value: string): Promise<void>;
 }
 
 /** The git working-tree root, or the diagnostic produced by git when it could not supply one. */
@@ -27,11 +33,20 @@ export const realGit: SharedGit = {
   findRemoteUrl,
   findTopLevel,
   listRemotes,
+  readConfig,
+  unsetConfig,
+  writeConfig,
 };
 
 // region | Helpers
 
 const execFileAsync = promisify(execFile);
+
+/** The exit code of `git config --get` for a key that is not set. */
+const CONFIG_KEY_NOT_SET = 1;
+
+/** The exit code of `git config --unset` for a key that is not set. */
+const CONFIG_UNSET_KEY_NOT_SET = 5;
 
 /** Extracts git's own message from a failed `execFileSync` call, falling back to the thrown error's own text. */
 function describeGitFailure(error: unknown): string {
@@ -76,6 +91,41 @@ async function listRemotes(cwd: string): Promise<string[]> {
     .split('\n')
     .map((name) => name.trim())
     .filter((name) => name !== '');
+}
+
+/** Runs `git config --get`, which exits 1 when the key is not set. */
+async function readConfig(cwd: string, key: string): Promise<string | undefined> {
+  try {
+    const { stdout } = await execFileAsync('git', ['-C', cwd, 'config', '--get', key]);
+    return stdout.trim();
+  } catch (error) {
+    if (readExitCode(error) === CONFIG_KEY_NOT_SET) {
+      return undefined;
+    }
+    throw error;
+  }
+}
+
+/** Returns the exit code of a failed `execFile` call, or undefined when the process did not exit with one. */
+function readExitCode(error: unknown): number | undefined {
+  const code = isRecord(error) ? error['code'] : undefined;
+  return typeof code === 'number' ? code : undefined;
+}
+
+/** Runs `git config --unset`, which exits 5 when the key is not set. */
+async function unsetConfig(cwd: string, key: string): Promise<void> {
+  try {
+    await execFileAsync('git', ['-C', cwd, 'config', '--unset', key]);
+  } catch (error) {
+    if (readExitCode(error) !== CONFIG_UNSET_KEY_NOT_SET) {
+      throw error;
+    }
+  }
+}
+
+/** Runs `git config --local` to set the key. */
+async function writeConfig(cwd: string, key: string, value: string): Promise<void> {
+  await execFileAsync('git', ['-C', cwd, 'config', '--local', key, value]);
 }
 
 // endregion | Helpers

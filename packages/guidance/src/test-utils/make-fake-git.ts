@@ -4,6 +4,8 @@ import type { SharedGit, TopLevelResult } from '../shared/git.ts';
 export interface FakeGitAnswers {
   /** The checked-out branch; an empty string stands for a detached HEAD. */
   branch?: string;
+  /** The git config, which `writeConfig` and `unsetConfig` change in place. */
+  config?: Map<string, string>;
   /** Errors that the named methods throw in place of answering. */
   errors?: Partial<Record<keyof SharedGit, Error>>;
   /** The remotes, in the order that git lists them. */
@@ -23,6 +25,7 @@ export function makeEnoentError(): Error {
 export function makeFakeGit(answers: FakeGitAnswers = {}): SharedGit {
   const { errors = {} } = answers;
   const remotes = answers.remotes ?? [];
+  const config = answers.config ?? new Map<string, string>();
   return {
     findCurrentBranch: () => answerWith(errors.findCurrentBranch, () => answers.branch ?? 'main'),
     findRemoteUrl: (_cwd, name) =>
@@ -36,6 +39,15 @@ export function makeFakeGit(answers: FakeGitAnswers = {}): SharedGit {
       return answers.topLevel ?? { failure: 'fatal: not a git repository' };
     },
     listRemotes: () => answerWith(errors.listRemotes, () => remotes.map((entry) => entry.name)),
+    readConfig: (_cwd, key) => answerWith(errors.readConfig, () => config.get(key)),
+    unsetConfig: (_cwd, key) =>
+      answerWith(errors.unsetConfig, () => {
+        config.delete(key);
+      }),
+    writeConfig: (_cwd, key, value) =>
+      answerWith(errors.writeConfig, () => {
+        config.set(key, value);
+      }),
   };
 }
 
