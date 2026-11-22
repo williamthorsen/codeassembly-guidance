@@ -41,7 +41,7 @@ These are out of scope:
 
    Never weaken a value to pass the scan, such as by truncating or splitting a token. Run the scan again until it reports `ok: true`.
 
-5. **Commit the document with the ticket's work.** When the branch that contains the change will not merge, move the change to another branch rather than discard it: The operation happened whether or not the code merges.
+5. **Commit the document with the ticket's work.** When the branch that contains the change will not merge, ask the developer which branch should take the document rather than discard it: The operation happened whether or not the code merges.
 
 ## Template
 
