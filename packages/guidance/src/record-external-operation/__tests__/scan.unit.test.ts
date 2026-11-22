@@ -17,11 +17,11 @@ describe('scanOperationsDocs', () => {
   it('reports each finding with its path relative to the root, including in subdirectories', () => {
     const root = makeScratchDir('record-external-operation-');
     writeDoc(root, 'vercel.md', `# Vercel\n\n- **Credentials:** ${makeFakeToken('sk-', 30)}\n`);
-    writeDoc(root, 'archive/upstash.md', `# Upstash\n\n${makeFakeToken('', 40)}\n`);
+    writeDoc(root, 'archive/neon.md', `# Neon\n\n${makeFakeToken('', 40)}\n`);
 
     expect(scanOperationsDocs(root)).toEqual({
       findings: [
-        { excerpt: expect.any(String), file: 'docs/operations/archive/upstash.md', kind: 'high-entropy', line: 3 },
+        { excerpt: expect.any(String), file: 'docs/operations/archive/neon.md', kind: 'high-entropy', line: 3 },
         { excerpt: 'sk-…', file: 'docs/operations/vercel.md', kind: 'known-prefix', line: 3 },
       ],
       ok: false,
