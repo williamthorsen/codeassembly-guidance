@@ -7,8 +7,9 @@ import { CONTENT_ROOT } from '../test-utils/content-root.ts';
 import { DOCTRINE_REACH } from '../test-utils/doctrine-reach.ts';
 
 // `gh` accepts `--body-file ""` without complaint and publishes its own default body, so a call site that invokes the
-// CLI with an unset path fails silently. `doctrine-reach.unit.test.ts` checks that each carrier inlines the contract;
-// this file checks that the calls written in each carrier follow it.
+// CLI with an unset path fails silently. A GitHub write also publishes whatever repository the text names, so its guard
+// is the public-reference check, which refuses an unset path as well. `doctrine-reach.unit.test.ts` checks that each
+// carrier inlines the contract; this file checks that the calls written in each carrier follow it.
 
 const CONTRACT = readContract();
 
@@ -20,13 +21,23 @@ const CONTRACT = readContract();
  */
 const BODY_FILE_ARGUMENT = /--(?:body|description|pr-body)-file "\$(\w+)"/g;
 
+/** The helper that guards a GitHub write, refusing a private reference and a missing or empty body file. */
+const CHECK = 'check-public-references.mjs';
+
+/** A `gh` call that publishes a title, a body, or a comment. */
+const GITHUB_WRITE = /\bgh (?:issue|pr) (?:create|edit|comment)\b/;
+
 /** The guard itself, which turns a missing or empty body file into a refusal. */
 const GUARD = '[ -s "$body_path" ]';
 
+/** A title argument and the text that it passes. */
+const TITLE_ARGUMENT = /--title "([^"]*)"/g;
+
 describe('gh-body-file call sites', () => {
-  it('includes the guard in the partial', async () => {
+  it('includes both guards in the partial', async () => {
     const partial = await readFile(path.join(CONTENT_ROOT, CONTRACT.source), 'utf8');
     expect(partial).toContain(GUARD);
+    expect(partial).toContain(CHECK);
   });
 
   it('guards every call that passes a body file', async () => {
@@ -34,13 +45,12 @@ describe('gh-body-file call sites', () => {
     for (const relativePath of CONTRACT.carriers) {
       const content = await readFile(path.join(CONTENT_ROOT, relativePath), 'utf8');
       for (const block of listShellBlocks(content)) {
-        for (const variable of listBodyFileVariables(block)) {
-          if (block.includes(`[ -s "$${variable}" ]`)) continue;
-          violations.push(`${relativePath} -> $${variable}`);
-        }
+        if (listBodyFileVariables(block).length === 0) continue;
+        const violation = GITHUB_WRITE.test(block) ? findUncheckedGithubWrite(block) : findUnguardedVariable(block);
+        if (violation !== undefined) violations.push(`${relativePath} -> ${violation}`);
       }
     }
-    const message = `An unguarded body-file call publishes the platform's default body when the path is unset; these paths are passed to a CLI without a guard on the variable that the call passes:\n  ${violations.join('\n  ')}`;
+    const message = `An unguarded body-file call publishes the platform's default body when the path is unset, and an unchecked GitHub write publishes the private references in its text; these calls lack the guard that their target needs:\n  ${violations.join('\n  ')}`;
     expect(violations, message).toEqual([]);
   });
 
@@ -58,9 +68,41 @@ describe('gh-body-file call sites', () => {
       }
     },
   );
+
+  it('checks the merge files before merge-gh-pr merges', async () => {
+    const content = await readFile(path.join(CONTENT_ROOT, 'skills/merge-gh-pr/SKILL.md'), 'utf8');
+    const blocks = listShellBlocks(content);
+    const checkIndex = blocks.findIndex((block) => block.includes(CHECK));
+    const mergeIndex = blocks.findIndex((block) => block.includes('merge-gh-pr.mjs'));
+
+    expect(checkIndex).toBeGreaterThanOrEqual(0);
+    expect(checkIndex).toBeLessThan(mergeIndex);
+  });
 });
 
 // region | Helpers
+
+/** Describes how a GitHub write block departs from the check pattern, or returns `undefined` when it follows it. */
+function findUncheckedGithubWrite(block: string): string | undefined {
+  const lines = block.split('\n');
+  const checkLine = lines.find((line) => line.includes(CHECK));
+  if (checkLine === undefined) return `GitHub write without ${CHECK}`;
+  if (!checkLine.trimEnd().endsWith('|| exit 1')) return `${CHECK} does not stop the write on a refusal`;
+  const writeText = lines.filter((line) => line !== checkLine).join('\n');
+  for (const variable of listBodyFileVariables(writeText)) {
+    if (!checkLine.includes(`--body-file "$${variable}"`)) return `${CHECK} does not check $${variable}`;
+  }
+  for (const match of writeText.matchAll(TITLE_ARGUMENT)) {
+    if (!checkLine.includes(match[0])) return `${CHECK} does not check the title ${match[0]}`;
+  }
+  return undefined;
+}
+
+/** Names the first body-file variable that the block passes without a `[ -s ]` guard on it. */
+function findUnguardedVariable(block: string): string | undefined {
+  const unguarded = listBodyFileVariables(block).find((variable) => !block.includes(`[ -s "$${variable}" ]`));
+  return unguarded === undefined ? undefined : `$${unguarded}`;
+}
 
 /** Returns the variable passed by each of a block's body-file arguments, one entry per argument. */
 function listBodyFileVariables(block: string): Array<string> {
