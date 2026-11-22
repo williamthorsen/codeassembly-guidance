@@ -10,11 +10,13 @@
  * composition cannot reproduce: `created_at` and the URLs written by the mutation flags, recorded in `explicit_urls`.
  * The file is rewritten only when its content changes.
  *
- * - Default-branch invariant: A manifest whose branch is the default branch does not store a `ticket_url`
- *   or a `pr_url`. Because the default branch is not derived from any ticket and does not belong to any pull
- *   request, a stored URL there is wrong rather than stale. See `enforceDefaultBranchInvariant`.
+ * - Diff base: `diff_base` is read from the git config key `branch.<branch>.codeassemblyDiffBase` on every
+ *   invocation, and `--set-diff-base` and `--clear-diff-base` write that key. Git config is shared by every worktree
+ *   of the repository, so a value written before a branch's worktree exists is visible from it.
+ * - Default-branch invariant: A manifest whose branch is the default branch does not store a `ticket_url`, a
+ *   `pr_url`, or a `diff_base`. Because the default branch is not derived from any ticket and does not belong to
+ *   any pull request or split, a stored value there is wrong rather than stale. See `enforceDefaultBranchInvariant`.
  */
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
@@ -22,13 +24,15 @@ import process from 'node:process';
 import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
-import { isEnoent, isRecord } from '../lib/type-guards.ts';
+import { isRecord } from '../lib/type-guards.ts';
 import { resolveCurrentBranch, sanitizeBranch } from '../shared/branch-helpers.ts';
 import { realGit, type SharedGit } from '../shared/git.ts';
 import { resolveProjectRoot } from '../shared/resolve-project-root.ts';
 import { composeManifest, DEFAULT_REMOTE_NAME } from './compose-manifest.ts';
+import { readPriorManifest, writeManifest } from './manifest-file.ts';
 import { readPreferences, readProjectPreferences } from './read-preferences.ts';
 import { readProjectStage, readSubdirectoryStages } from './read-project-stage.ts';
+import { type DiffBaseMutation, resolveDiffBase } from './resolve-diff-base.ts';
 import type { BranchManifest, ExplicitUrls } from './types.ts';
 
 /** The manifest fields written by the mutation flags, and the ones that the default-branch invariant governs. */
@@ -45,15 +49,9 @@ interface ManifestMutation {
 interface ParsedArgs {
   readonly branch: string | null;
   readonly cwd: string | null;
+  readonly diffBase: DiffBaseMutation | undefined;
   readonly home: string | null;
   readonly mutations: readonly ManifestMutation[];
-}
-
-/** A manifest file read from disk: its text, and its parsed content when that is an object. */
-interface PriorManifest {
-  readonly path: string;
-  readonly text: string;
-  readonly record: Record<string, unknown> | undefined;
 }
 
 /** Executes the deriver from `process.argv`, writing the JSON manifest to stdout. */
@@ -68,6 +66,7 @@ async function main(): Promise<void> {
       branch,
       now: new Date(),
       mutations: parsed.mutations,
+      ...(parsed.diffBase !== undefined && { diffBaseMutation: parsed.diffBase }),
       ...(parsed.home !== null && { home: parsed.home }),
     });
     process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
@@ -80,7 +79,8 @@ async function main(): Promise<void> {
 
 /**
  * Composes the manifest for `branch` from the current preferences, carrying `created_at` and the flag-written URLs
- * forward from the prior manifest file and applying any mutations. The default-branch invariant is enforced last.
+ * forward from the prior manifest file, applying any mutations, and reading the stored diff base. The default-branch
+ * invariant is enforced last.
  *
  * @internal Exported for testing.
  */
@@ -91,6 +91,7 @@ export async function deriveSessionContext(input: {
   git?: SharedGit;
   home?: string;
   mutations?: readonly ManifestMutation[];
+  diffBaseMutation?: DiffBaseMutation;
 }): Promise<BranchManifest> {
   if (input.branch === '' || input.branch === 'HEAD') {
     throw new Error('Detached HEAD: This script requires an active branch. Create or check out a branch first.');
@@ -102,10 +103,11 @@ export async function deriveSessionContext(input: {
   const oldPath = path.join(input.cwd, '.agents', `${sanitizedBranch}.manifest.json`);
   const mutations = input.mutations ?? [];
 
+  const git = input.git ?? realGit;
   const prior = (await readPriorManifest(newPath)) ?? (await readPriorManifest(oldPath));
   const composed = await composeFromPreferences({
     cwd: input.cwd,
-    git: input.git ?? realGit,
+    git,
     home,
     branch: input.branch,
     now: input.now,
@@ -117,7 +119,14 @@ export async function deriveSessionContext(input: {
     applyMutations(carried, mutations),
     mutations,
   );
-  const manifest = buildManifest(seeded, explicitUrls, prior?.record);
+  const diffBase = await resolveDiffBase({
+    git,
+    cwd: input.cwd,
+    branchName: composed.branch_name,
+    isDefaultBranch: isOnDefaultBranch(composed),
+    mutation: input.diffBaseMutation,
+  });
+  const manifest = buildManifest(seeded, explicitUrls, prior?.record, diffBase);
 
   const content = `${JSON.stringify(manifest, null, 2)}\n`;
   const priorText = prior?.path === newPath ? prior.text : undefined;
@@ -137,13 +146,14 @@ function applyMutations(explicitUrls: ExplicitUrls, mutations: readonly Manifest
 }
 
 /**
- * Builds the emitted manifest: the composed fields, the prior `created_at` when one is recorded, and each stored-URL
- * field taken from `explicitUrls` when a flag wrote it, else from composition.
+ * Builds the emitted manifest: the composed fields, the prior `created_at` when one is recorded, each stored-URL field
+ * taken from `explicitUrls` when a flag wrote it, else from composition, and the branch's diff base.
  */
 function buildManifest(
   composed: BranchManifest,
   explicitUrls: ExplicitUrls,
   prior: Record<string, unknown> | undefined,
+  diffBase: string | null,
 ): BranchManifest {
   const createdAt = typeof prior?.['created_at'] === 'string' ? prior['created_at'] : composed.created_at;
   return {
@@ -151,6 +161,7 @@ function buildManifest(
     created_at: createdAt,
     ticket_url: resolveStoredUrl('ticket_url', composed, explicitUrls),
     pr_url: resolveStoredUrl('pr_url', composed, explicitUrls),
+    diff_base: diffBase,
     explicit_urls: explicitUrls,
   };
 }
@@ -260,57 +271,12 @@ function readExplicitUrls(prior: Record<string, unknown>, composed: BranchManife
   return result;
 }
 
-/**
- * Reads the manifest file at `filePath`, or returns `null` when the file does not exist. Content that is not valid JSON
- * or not an object yields an undefined `record`.
- */
-async function readPriorManifest(filePath: string): Promise<PriorManifest | null> {
-  let text: string;
-  try {
-    text = await readFile(filePath, 'utf8');
-  } catch (error) {
-    if (isEnoent(error)) {
-      return null;
-    }
-    throw error;
-  }
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    // Warn so that an operator can explain a vanished `ticket_url` or `pr_url`.
-    process.stderr.write(
-      `derive-session-context: warning: prior manifest at ${filePath} is corrupt; stored URLs not carried forward\n`,
-    );
-    return { path: filePath, text, record: undefined };
-  }
-  return { path: filePath, text, record: isRecord(parsed) ? parsed : undefined };
-}
-
 /** Returns the flag-written value of `field` when one is recorded, else the composed one. */
 function resolveStoredUrl(field: StoredUrlField, composed: BranchManifest, explicitUrls: ExplicitUrls): string | null {
   if (Object.hasOwn(explicitUrls, field)) {
     return explicitUrls[field] ?? null;
   }
   return composed[field] ?? null;
-}
-
-/**
- * Writes `content` to `targetPath` atomically: writes a sibling temp file, then renames it over the target with
- * `rename()` so that a concurrent reader never observes a half-written file. The temp file shares the target's
- * directory so that the rename stays within one filesystem.
- */
-async function writeManifest(targetPath: string, content: string): Promise<void> {
-  const dir = path.dirname(targetPath);
-  await mkdir(dir, { recursive: true });
-  const tempPath = path.join(dir, `.${path.basename(targetPath)}.${process.pid}.${Date.now()}.tmp`);
-  try {
-    await writeFile(tempPath, content, 'utf8');
-    await rename(tempPath, targetPath);
-  } catch (error) {
-    await rm(tempPath, { force: true });
-    throw error;
-  }
 }
 
 /**
@@ -333,6 +299,7 @@ async function resolveRemoteUrl(git: SharedGit, cwd: string, remoteName: string)
 export function parseArgs(argv: readonly string[]): ParsedArgs {
   let branch: string | null = null;
   let cwd: string | null = null;
+  let diffBase: DiffBaseMutation | undefined;
   let home: string | null = null;
   const mutations: ManifestMutation[] = [];
   for (let i = 0; i < argv.length; i += 1) {
@@ -365,15 +332,34 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
       i += 1;
     } else if (arg.startsWith('--set-pr-url=')) {
       mutations.push({ field: 'pr_url', value: arg.slice('--set-pr-url='.length) });
-    } else if (arg === '--clear-ticket-url') {
-      mutations.push({ field: 'ticket_url', value: null });
-    } else if (arg === '--clear-pr-url') {
-      mutations.push({ field: 'pr_url', value: null });
-    } else {
-      throw new Error(`unknown argument: ${arg}`);
-    }
+    } else
+      switch (arg) {
+        case '--clear-ticket-url':
+          mutations.push({ field: 'ticket_url', value: null });
+
+          break;
+        case '--clear-pr-url':
+          mutations.push({ field: 'pr_url', value: null });
+
+          break;
+        case '--clear-diff-base':
+          diffBase = { value: null };
+
+          break;
+        case '--set-diff-base':
+          diffBase = { value: consumeValue(argv, i, '--set-diff-base') };
+          i += 1;
+
+          break;
+        default:
+          if (arg.startsWith('--set-diff-base=')) {
+            diffBase = { value: arg.slice('--set-diff-base='.length) };
+          } else {
+            throw new Error(`unknown argument: ${arg}`);
+          }
+      }
   }
-  return { branch, cwd, home, mutations };
+  return { branch, cwd, diffBase, home, mutations };
 }
 
 /** Reads the value following a space-delimited flag at `index`. Throws when missing. */

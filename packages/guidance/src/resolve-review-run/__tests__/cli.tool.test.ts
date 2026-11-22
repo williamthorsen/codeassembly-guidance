@@ -62,8 +62,22 @@ describe('resolve-review-run CLI', () => {
     expect(result.stderr).toContain(`${ticketDir} does not contain an interactive run directory`);
   });
 
+  it('prints the run state as JSON, exiting 0 when the ticket directory does not contain a run', async () => {
+    const result = await runCli(['state', '--ticket-dir', ticketDir]);
+
+    expect(result.exitCode).toBe(0);
+    expect(JSON.parse(result.stdout)).toEqual({
+      runDir: null,
+      hasReview: false,
+      newestPath: null,
+      newestKind: null,
+      findings: null,
+    });
+  });
+
   it.each([
     [['open', '--ticket-dir', '/tmp/x'], '--timestamp is required'],
+    [['state', '--ticket-dir', '/tmp/x', '--timestamp', '20261004-101500Z'], 'state does not take --timestamp'],
     [['active', '--ticket-dir', '/tmp/x', '--timestamp', '20261004-101500Z'], 'active does not take --timestamp'],
     [['latest', '--ticket-dir', '/tmp/x', '--timestamp', '20261004-101500Z'], 'latest does not take --timestamp'],
     [['create', '--ticket-dir', '/tmp/x'], 'unknown command: create'],

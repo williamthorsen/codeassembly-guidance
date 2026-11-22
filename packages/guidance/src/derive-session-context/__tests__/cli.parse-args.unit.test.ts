@@ -37,6 +37,17 @@ describe(parseArgs, () => {
     );
   });
 
+  it('parses --set-diff-base in both forms, and --clear-diff-base as a null value', () => {
+    expect(parseArgs(['--set-diff-base', '12-first-piece']).diffBase).toEqual({ value: '12-first-piece' });
+    expect(parseArgs(['--set-diff-base=origin/main']).diffBase).toEqual({ value: 'origin/main' });
+    expect(parseArgs(['--clear-diff-base']).diffBase).toEqual({ value: null });
+    expect(parseArgs([]).diffBase).toBeUndefined();
+  });
+
+  it('throws when --set-diff-base lacks a value', () => {
+    expect(() => parseArgs(['--set-diff-base'])).toThrow('--set-diff-base requires a value');
+  });
+
   it('parses --set-ticket-url=value inline form', () => {
     expect(parseArgs(['--set-ticket-url=https://x/issues/1']).mutations).toEqual([
       { field: 'ticket_url', value: 'https://x/issues/1' },

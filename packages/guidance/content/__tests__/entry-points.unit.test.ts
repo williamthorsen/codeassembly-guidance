@@ -19,6 +19,8 @@ const ROUTES: ReadonlyArray<{ readonly skill: string; readonly condition: string
   { skill: 'prepare-prototype-brief', condition: 'decide the ideas (step 7)' },
   { skill: 'refine-plan', condition: 'inside its `## Decisions taken` section whose text starts with 🔲' },
   { skill: 'refine-prototype', condition: 'does not contain an `open` row' },
+  { skill: 'respond-to-review', condition: '`newestKind` is `review` and `findings` is above 0' },
+  { skill: 'review-branch', condition: '`diff_base` is set, the commit count is above 0, and `hasReview` is false' },
   { skill: 'triage-spike-findings', condition: 'proposes work' },
   { skill: 'triage-spike-findings', condition: '`triage/dispositions.json` without a `dispositions` artifact' },
 ];
@@ -46,7 +48,41 @@ describe('entry points', () => {
 
   it('stops on a closed ticket or a merged pull request', async () => {
     const content = await readContentFile(ENTRY_POINTS);
-    expect(content).toContain('The ticket is closed, or the branch has a pull request that is open or merged');
+    expect(content).toContain("The ticket is closed, or the branch's pull request is merged: Stop");
+  });
+
+  it('stops on an open pull request, reporting what remains', async () => {
+    const content = await readContentFile(ENTRY_POINTS);
+    expect(content).toContain("**Open pull request.** The branch's pull request is open: Stop, and report its state");
+  });
+
+  it('asks on implemented work that is not reviewed, and on reviewed work', async () => {
+    const content = await readContentFile(ENTRY_POINTS);
+    expect(content).toContain('The commit count is above 0 and `hasReview` is false: Ask.');
+    expect(content).toContain(
+      'The commit count is above 0, `hasReview` is true, and the newest artifact is a response',
+    );
+    expect(content).toContain('Routes 5 and 6 always ask');
+  });
+
+  it('names the command that reports each fact on which a route after implementation matches', async () => {
+    const content = await readContentFile(ENTRY_POINTS);
+    expect(content).toContain('git rev-list --count $(git merge-base HEAD {default_branch})..HEAD');
+    expect(content).toContain('resolve-review-run.mjs state --ticket-dir {ticket_dir}');
+    expect(content).toContain('--json url,state,isDraft,reviewDecision,statusCheckRollup,mergeable');
+    expect(content).toContain('git merge-base --is-ancestor {diff_base} HEAD');
+  });
+
+  it('never merges, pushes, or opens a pull request', async () => {
+    const content = await readContentFile(ENTRY_POINTS);
+    expect(content).toContain('No route merges, pushes, or opens a pull request.');
+  });
+
+  it('sends a feature plan newer than the spike or prototype artifacts to implement-plan', async () => {
+    const content = await readContentFile(ENTRY_POINTS);
+    const sentence =
+      'The newest plan is a feature plan, one that contains `## Tasks`, whose filename prefix is greater than that of every artifact that this route names: ';
+    expect(countOccurrences(content, sentence)).toBe(2);
   });
 
   it('passes the spike signal on to the feature routes', async () => {
@@ -58,6 +94,13 @@ describe('entry points', () => {
     const content = await readContentFile('skills/start-ticket/SKILL.md');
     expect(content).toContain('entry-points.md');
     expect(content).toContain('say that the branch does not encode a ticket and ask for the ticket ref');
+  });
+
+  it('has start-ticket gather the route inputs and never merge, push, or open a pull request', async () => {
+    const content = await readContentFile('skills/start-ticket/SKILL.md');
+    expect(content).toContain('`pr_url`, `diff_base`, and `ticket_dir`');
+    expect(content).toContain('Gather the inputs that [entry points](../_data/entry-points.md#inputs) lists');
+    expect(content).toContain('`start-ticket` never merges, pushes, or opens a pull request');
   });
 
   it.each(PLAN_SPLIT_CONSUMERS)('%s sends every split piece to start-ticket', async (slug) => {
@@ -83,12 +126,11 @@ describe('entry points', () => {
     expect(content).toContain("into the `## Dependencies` section of that piece's plan before its ticket is created");
   });
 
-  it('keeps the review-branch invocation, scope notes, and blockers in the prompt of a split made after implementation', async () => {
+  it("stores each piece's diff base in a split made after implementation", async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
-    expect(content).toContain("`--diff-base=<previous piece's branch>`");
-    expect(content).toContain(
-      "then the scope notes that the session needs and that the artifacts do not state, then the ticket's blockers",
-    );
+    expect(content).toContain('--branch {piece_branch} --set-diff-base {base}');
+    expect(content).toContain("each later piece's is its predecessor's branch");
+    expect(content).not.toContain("`--diff-base=<previous piece's branch>`");
   });
 
   it.each(BATCH_REPORTERS)('%s names start-ticket once in its report of created tickets', async (slug) => {
@@ -103,13 +145,13 @@ describe('entry points', () => {
     expect(content).toMatch(/Start #\{N\} in its own worktree: \S*start-ticket/);
   });
 
-  it('asks instead of invoking on conflicting evidence, a later plan, or an unclear judgment', async () => {
+  it('asks instead of invoking on conflicting evidence or an unclear judgment', async () => {
     const dataFile = await readContentFile(ENTRY_POINTS);
     expect(dataFile).toContain('## When to ask instead');
-    expect(dataFile).toContain('**Conflicting evidence.** The first match is route 3 or route 4');
     expect(dataFile).toContain(
-      '**A later plan.** The first match is route 3 or route 4, and the newest plan is a feature plan',
+      '**Conflicting evidence.** The first match is route 8 (Spike) or route 9 (Prototype round)',
     );
+    expect(dataFile).not.toContain('**A later plan.**');
     expect(dataFile).toContain('**An unclear judgment.**');
     expect(dataFile).toContain('A judgment that the reading settles is announced with its reason and invoked.');
 
@@ -140,9 +182,10 @@ describe('entry points', () => {
     expect(content).toContain("When a step of another skill invoked it, that skill's report closes the turn.");
   });
 
-  it('keeps review-branch as the entry of a split made after implementation', async () => {
+  it('sends every piece of a split made after implementation to start-ticket alone', async () => {
     const content = await readContentFile('skills/implement-plan/SKILL.md');
-    expect(content).toContain('Every piece enters at `{skill:review-branch}`');
-    expect(content).not.toContain('start-ticket');
+    expect(content).toMatch(/Every piece enters at `\S*start-ticket\S*`, invoked without arguments/);
+    expect(content).toContain('The fenced block of each launch prompt contains that invocation alone.');
+    expect(content).not.toContain('then the scope notes that the session needs');
   });
 });

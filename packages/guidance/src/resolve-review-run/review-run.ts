@@ -1,10 +1,17 @@
-import { mkdir, readdir } from 'node:fs/promises';
+import { mkdir, readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { isEnoent } from '../lib/type-guards.ts';
 
 /** The mode of every run directory that a skill creates; a run of any other mode is never active. */
 const INTERACTIVE_MODE = 'interactive';
+
+/**
+ * Matches the heading of an actionable finding in the per-finding template that `review-branch` writes, such as
+ * `#### F1: {title}`. A legacy finding's `-L` suffix does not match, because the finding scheme excludes it from
+ * action.
+ */
+export const ACTIONABLE_FINDING_HEADING = /^#### [FWTRS]\d+:/gm;
 
 /** A review that `findLatestReview` selected, with the run directory that contains it. */
 export interface LatestReview {
@@ -15,6 +22,7 @@ export interface LatestReview {
 // The capture group is the UTC `YYYYMMDD-HHMMSSZ` timestamp; its fixed width makes string order chronological.
 const ACTIVE_RUN_DIR_PATTERN = new RegExp(String.raw`^(\d{8}-\d{6}Z)-${INTERACTIVE_MODE}$`);
 const REVIEW_FILE_PATTERN = /^(\d{8}-\d{6}Z)_(?:overseer|reviewer)_review\.md$/;
+const RESPONSE_FILE_PATTERN = /^(\d{8}-\d{6}Z)_coder_change-summary\.md$/;
 const TIMESTAMP_PATTERN = /^\d{8}-\d{6}Z$/;
 
 /** Returns the ticket's active run: its newest `interactive` run directory, or `undefined` when it does not contain one. */
@@ -56,6 +64,42 @@ export async function openRun(ticketDir: string, timestamp: string): Promise<str
   return runDir;
 }
 
+/** The state of a ticket's active run that `readRunState` reports. */
+export interface RunState {
+  runDir: string | null;
+  /** True when the run contains any review. */
+  hasReview: boolean;
+  newestPath: string | null;
+  newestKind: 'response' | 'review' | null;
+  /** The actionable findings in the newest artifact when it is a review, else null. */
+  findings: number | null;
+}
+
+/**
+ * Reports the newest review or change summary in the ticket's active run. A change summary counts as newer than a
+ * review with the same timestamp, because it answers that review.
+ */
+export async function readRunState(ticketDir: string): Promise<RunState> {
+  const runDir = await findActiveRun(ticketDir);
+  if (runDir === undefined) {
+    return { runDir: null, hasReview: false, newestPath: null, newestKind: null, findings: null };
+  }
+  const names = await listEntryNames(runDir, 'file');
+  const review = selectNewest(names, REVIEW_FILE_PATTERN);
+  const response = selectNewest(names, RESPONSE_FILE_PATTERN);
+  if (response !== undefined && (review === undefined || readTimestamp(response) >= readTimestamp(review))) {
+    const newestPath = path.join(runDir, response);
+    return { runDir, hasReview: review !== undefined, newestPath, newestKind: 'response', findings: null };
+  }
+  if (review === undefined) {
+    return { runDir, hasReview: false, newestPath: null, newestKind: null, findings: null };
+  }
+  const reviewPath = path.join(runDir, review);
+  const content = await readFile(reviewPath, 'utf8');
+  const findings = content.match(ACTIONABLE_FINDING_HEADING)?.length ?? 0;
+  return { runDir, hasReview: true, newestPath: reviewPath, newestKind: 'review', findings };
+}
+
 // region | Helpers
 
 /** Lists the names of the directory's entries of one kind; a missing directory has none. */
@@ -71,6 +115,11 @@ async function listEntryNames(dir: string, kind: 'directory' | 'file'): Promise<
     }
     throw error;
   }
+}
+
+/** Returns the `YYYYMMDD-HHMMSSZ` timestamp that leads a run artifact's name. */
+function readTimestamp(name: string): string {
+  return name.slice(0, 'YYYYMMDD-HHMMSSZ'.length);
 }
 
 /**

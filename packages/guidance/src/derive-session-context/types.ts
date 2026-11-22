@@ -103,6 +103,11 @@ export interface BranchManifest {
    * initializes it from a `PR-<n>` branch identity, or to `null` otherwise.
    */
   readonly pr_url?: string | null;
+  /**
+   * The ref against which `review-branch` diffs this branch: the branch's `codeassemblyDiffBase` git config value,
+   * which the split made after implementation writes for each piece, or `null` when the branch does not store one.
+   */
+  readonly diff_base?: string | null;
   /** The state in which `create-pr` opens a pull request: the `pr.initial_state` preference, or `draft`. */
   readonly pr_initial_state?: PrInitialState;
   /** Whether `merge-pr` asks before merging: the `merge.approval` preference, or `ask`. */

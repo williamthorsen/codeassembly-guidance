@@ -1,6 +1,7 @@
 /* eslint n/no-process-exit: off -- CLI entry point: The process must exit with the helper's resolved exit code, and `main` runs only behind the `isEntryPoint()` guard, never on import as a library. */
 /* eslint unicorn/no-process-exit: off -- same as above. */
-// CLI entry point for the resolve-review-run helper: finds or opens a ticket's active review run, or finds its newest review.
+// CLI entry point for the resolve-review-run helper: finds or opens a ticket's active review run, finds its newest
+// review, or reports the run's state.
 
 import process from 'node:process';
 
@@ -8,7 +9,7 @@ import { describeError } from '@williamthorsen/toolbelt.errors';
 
 import { isEntryPoint } from '../lib/is-entry-point.ts';
 import { type FlagSpec, scanFlags, valueFlagMap } from '../lib/parse-flags.ts';
-import { findActiveRun, findLatestReview, openRun } from './review-run.ts';
+import { findActiveRun, findLatestReview, openRun, readRunState, type RunState } from './review-run.ts';
 
 const FLAGS = [
   { name: 'ticket-dir', takesValue: true },
@@ -18,7 +19,8 @@ const FLAGS = [
 const USAGE =
   'usage: resolve-review-run active --ticket-dir <dir>\n' +
   '       resolve-review-run latest --ticket-dir <dir>\n' +
-  '       resolve-review-run open --ticket-dir <dir> --timestamp <YYYYMMDD-HHMMSSZ>';
+  '       resolve-review-run open --ticket-dir <dir> --timestamp <YYYYMMDD-HHMMSSZ>\n' +
+  '       resolve-review-run state --ticket-dir <dir>';
 
 /** Runs the subcommand named in `process.argv`, writing the JSON result to stdout and every diagnostic to stderr. */
 async function main(): Promise<void> {
@@ -54,7 +56,7 @@ function requireValue(values: Record<string, string>, name: string): string {
 }
 
 /** Parses argv and runs its subcommand. Throws on an unknown subcommand or flag, or a flag that the subcommand lacks. */
-async function runCommand(argv: readonly string[]): Promise<Record<string, string | null>> {
+async function runCommand(argv: readonly string[]): Promise<Record<string, string | null> | RunState> {
   const { flags, positionals } = scanFlags(argv, FLAGS);
   const [command, ...extra] = positionals;
   if (extra.length > 0) {
@@ -75,6 +77,10 @@ async function runCommand(argv: readonly string[]): Promise<Record<string, strin
   if (command === 'open') {
     const runDir = await openRun(requireValue(values, 'ticket-dir'), requireValue(values, 'timestamp'));
     return { runDir };
+  }
+  if (command === 'state') {
+    rejectTimestamp(values, command);
+    return readRunState(requireValue(values, 'ticket-dir'));
   }
   throw new Error(command === undefined ? USAGE : `unknown command: ${command}\n${USAGE}`);
 }
