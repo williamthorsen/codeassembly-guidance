@@ -64,10 +64,10 @@ These are out of scope:
 - 2026-11-22 (#42): Created the project and set the production and preview variables.
 ```
 
-Field order is fixed: status, app, console, configuration, credentials, created, recreate, remove. Omit an optional field that has no value, such as **App** in a repository with one deployable, rather than writing it empty.
+Field order is fixed: status, app, console, configuration, credentials, created, recreate, remove. Omit an optional field that does not have a value, such as **App** in a repository with one deployable, rather than writing it empty.
 
 - **Status:** `active` or `deleted`.
-- **Console:** where a person finds the resource, as a URL or a navigation path.
+- **Console:** the URL or the navigation path at which a person finds the resource.
 - **Credentials:** each credential by its variable name and its storage location, never its value.
 - **Created:** the date, the ticket, and the route: dashboard, CLI command, or API.
 - **Recreate** and **Remove:** a concrete command or console path for each.

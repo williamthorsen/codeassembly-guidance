@@ -70,3 +70,4 @@ codeassembly-validate-preferences --strict .agents/preferences.yaml
 - [Performance helper](docs/analyze-performance-helper.md): the helper that the `analyze-performance` skill runs.
 - [Feedback triage helpers](docs/triage-feedback-helper.md): the helpers that the `triage-feedback` skill runs.
 - [Feedback curation helper](docs/curate-feedback-helper.md): the helper that the `curate-feedback` skill runs.
+- [External-operation helper](docs/record-external-operation-helper.md): the helper that the `record-external-operation` skill runs.
