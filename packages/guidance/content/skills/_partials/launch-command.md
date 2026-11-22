@@ -1,0 +1,1 @@
+**Launch command.** When the report lists one or more tickets that this run created, print one line as the report's last line, after the implementation-order list when the report prints one: `Start each ticket in its own worktree: {skill?:start-ticket}`. Print it once per report, not once per ticket.

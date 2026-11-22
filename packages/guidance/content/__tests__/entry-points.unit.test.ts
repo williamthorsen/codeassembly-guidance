@@ -25,6 +25,12 @@ const ROUTES: ReadonlyArray<{ readonly skill: string; readonly condition: string
 /** The skills whose split report includes the launch prompts of a plan-time split. */
 const PLAN_SPLIT_CONSUMERS: ReadonlyArray<string> = ['design-and-plan', 'plan', 'refine-plan', 'save-plan'];
 
+/** The skills whose report lists tickets that the run created, for sessions that start later. */
+const BATCH_REPORTERS: ReadonlyArray<string> = ['triage-feedback', 'triage-spike-findings', 'wrap-up'];
+
+/** The line that a batch report prints once, before the rendered name of the skill. */
+const LAUNCH_LINE = 'Start each ticket in its own worktree: ';
+
 /** The opening of the route list that the split report stated before the rule moved to the data file. */
 const RETIRED_ROUTE_LIST = "Choose each ticket's entry point";
 
@@ -82,6 +88,18 @@ describe('entry points', () => {
     expect(content).toContain(
       "then the scope notes that the session needs and that the artifacts do not state, then the ticket's blockers",
     );
+  });
+
+  it.each(BATCH_REPORTERS)('%s names start-ticket once in its report of created tickets', async (slug) => {
+    const content = await readContentFile(`skills/${slug}/SKILL.md`);
+    expect(countOccurrences(content, LAUNCH_LINE)).toBe(1);
+    expect(content).toContain('Print it once per report, not once per ticket');
+  });
+
+  it('names start-ticket for the ticket that pull-from-backlog picks', async () => {
+    const content = await readContentFile('skills/pull-from-backlog/SKILL.md');
+    expect(content).toContain('Start #{N} in its own worktree: ');
+    expect(content).toMatch(/Start #\{N\} in its own worktree: \S*start-ticket/);
   });
 
   it('keeps review-branch as the entry of a split made after implementation', async () => {
