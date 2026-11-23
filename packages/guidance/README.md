@@ -58,6 +58,16 @@ The package publishes a JSON Schema for the file; [Schemas](docs/schemas.md) giv
 codeassembly-validate-preferences --strict .agents/preferences.yaml
 ```
 
+## Skill files
+
+The package exports one skill's `SKILL.md`, which is self-contained and can be served as a download:
+
+```ts
+import skill from 'codeassembly-guidance/skills/convert-agent-prompt/SKILL.md?raw';
+```
+
+The `?raw` query is Vite's; under Node, resolve the specifier to a path and read the file. Nothing else under `content/` is exported.
+
 ## Helper reference
 
 - [Prose sweep helper](docs/revise-prose-helper.md): the sweep that the `revise-prose` skill runs.
