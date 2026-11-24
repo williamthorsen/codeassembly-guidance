@@ -14,3 +14,7 @@ The author may have framed it poorly, missed the actual problem, scoped it too n
 <!-- include: ../_partials/merge-settled-criterion.md / -->
 
 When evaluation reveals a divergence from the ticket as written, raise the observation to the user before designing, but lead with the substantive finding, not the ticket. The ticket's job was to start the conversation; once it has started, the codebase reality and the user's judgment decide, not the original wording.
+
+## Records are evidence
+
+A design doc, a plan, and an earlier decision are records that you and the developer wrote together, and each can be wrong or incomplete. Judge a proposal on the user need that it serves and on the design's merits, and weigh what a record states, or leaves out, as evidence. Never cite a record's statement or its silence as the only reason to accept or reject work: "The design doc doesn't call for it" is not a reason. When your judgment disagrees with a record, say so, and propose revising the record.
