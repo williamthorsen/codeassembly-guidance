@@ -1,8 +1,8 @@
 ---
 slug: visual-design-conventions
-description: 'Visual design of interfaces: marks for the exception, colour as an encoding channel, padding inside bounded containers, alignment, an appearance that follows each element''s role, tags, product identity, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
+description: 'Visual design of interfaces: marks for the exception, explained where they are drawn, colour as an encoding channel with fixed severities, padding inside bounded containers, proximity, alignment, SVG icons, group headings set apart from their labels, an appearance that follows each element''s role, matching controls side by side, tags, product identity, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
 delivery: [skill]
-version: '2'
+version: '3'
 ---
 
 # Visual design conventions
@@ -15,19 +15,31 @@ When a project names its own design system, that system takes precedence where t
 
 A mark, such as bold, italics, a colour, a highlight, or a badge, is for the exception, and the common state is unmarked. A mark that covers most of a text distinguishes nothing, and the reader can no longer find what it was meant to set apart. The glanceable-state rule of {rulebook:accessibility-conventions} names the states that a list marks. Example: ❌ Every term in a paragraph is bold. ✅ Only the term that the paragraph defines is bold.
 
+Every mark that encodes something is explained where it is drawn, by a label or a legend entry that states what it means. A value drawn as a graphic, such as a meter or a bar, is also shown as text. Example: ❌ A meter shows its fill and a threshold tick, and neither is labelled. ✅ The meter reads "72% of quota", and the tick is labelled "Limit 80%".
+
 ## Colour as encoding
 
 Colour is an encoding channel: Use it to tell kinds and states apart, rather than leaving weight and style to do all the work. Pair each colour with a second cue, as the glanceable-state rule of {rulebook:accessibility-conventions} requires. Example: ❌ Errors, warnings, and notes differ only in weight and italics. ✅ Each has a colour and an icon of its own.
 
+Severity has fixed meanings: danger for an action that failed, warning for a condition to meet before acting, and information for a neutral or self-chosen outcome, such as a cancellation. Example: ❌ A failed upload is shown in the warning style. ✅ It is shown in the danger style, and a missing required field before upload in the warning style.
+
 ## Spacing
 
 Text never touches the edge of a container that has a visible boundary, such as a border or a fill: Padding separates the text from every edge. A container without a visible boundary does not have an edge that the text could touch. Example: ❌ A badge's label runs into its border. ✅ The label has padding on every side.
+
+Proximity states what belongs together: The space between groups exceeds the space within one. Fields that a choice reveals are contained in that choice, indented under it or inside its container, never rendered as its siblings. The placement rule of {rulebook:accessibility-conventions} places a control beside what it governs. Example: ❌ Choosing a radio option reveals two fields at the radios' indent, below the last option. ✅ The fields appear indented under the option that reveals them.
 
 ## Alignment
 
 Every block aligns with an edge or an axis of another block on the page. A block does not float in the vertical middle of a region that it does not fill: It starts where the region's content starts, and an empty state sits where the content that it replaces would begin. A dialog centred in the viewport over the page is not such a block. Example: ❌ An empty-list message floats in the middle of a tall panel, aligned with nothing. ✅ The message starts at the top of the panel, on the list's left edge.
 
 Within a block, text and elements are start-aligned, so that each one shares an edge with its neighbours: Everything aligns with something. A column of numbers aligns on its end edge instead, so that digits of the same place value line up. Centring is the rare exception, and it is permitted only for a dialog centred in the viewport, as above, a short single-line label inside a button or a tag, and an icon in a square control. Centred multi-line text never qualifies: Each of its lines starts at a different place, and the reader's eye has to find each start. Example: ❌ A dialog centres its heading and its three-line body, and each line starts at a different place. ✅ The heading and the body start on the dialog's left edge.
+
+An icon control draws an SVG icon, centred on both axes of the control, never a text character, whose glyph metrics set it off centre. Example: ❌ A close button draws "×" and sits low in its square. ✅ It draws an SVG cross, centred in the square.
+
+## Hierarchy
+
+A group's heading differs visibly from the labels that it groups, by size, weight, or both. Example: ❌ A fieldset's legend has the typography of its field labels. ✅ The legend is larger and bolder than the labels beneath it.
 
 ## Roles
 
@@ -40,6 +52,8 @@ The element follows semantics, and the appearance follows the role:
 
 Example: ❌ "View details" and "Delete" are both blue underlined text. ✅ "View details" is a link to the detail view, and "Delete" is a button.
 
+Controls that stand side by side share size, shape, and type, and a component that hosts a control in a slot, such as a dialog's footer, styles that control. Example: ❌ A consumer's button in a dialog's footer is smaller than the dialog's own buttons. ✅ The dialog sizes every button in its footer alike.
+
 ## Identity
 
 The product's name and a link to its home view are visible on every view. A product does not ship a template's placeholder identity, such as the template's favicon.
@@ -49,10 +63,14 @@ The product's name and a link to its home view are visible on every view. A prod
 Check every change to a visible component in a browser before reporting it finished or reviewed, alongside the check in {rulebook:accessibility-conventions}. On each new or changed view, confirm each of these:
 
 - The text in each bordered or filled container has padding on every side.
+- The space between groups exceeds the space within one, and fields that a choice reveals sit inside that choice.
 - Each block aligns with another block, and each block that does not fill its region starts where the region's content starts.
 - Text and the elements within each block are start-aligned, a column of numbers is end-aligned, and centred text appears only in a button's or a tag's single-line label.
-- Marks fall on exceptions only.
-- Each link, navigation item, button, and tag looks like its role.
+- Each icon control draws a centred SVG icon.
+- Each group's heading differs visibly from the labels that it groups.
+- Marks fall on exceptions only, each is explained where it is drawn, and each value drawn as a graphic is also shown as text.
+- Each severity style matches its meaning.
+- Each link, navigation item, button, and tag looks like its role, and controls side by side share size, shape, and type.
 - The product's name and home link are visible, and the favicon is the product's own.
 
 A reading of the diff does not replace this check: Padding and alignment show only once the page renders. When a browser is not available, report that the check did not run and name the views that it would have covered. Never report it as passed.
