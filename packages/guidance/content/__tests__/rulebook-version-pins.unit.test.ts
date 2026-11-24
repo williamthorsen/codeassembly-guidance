@@ -36,7 +36,7 @@ interface RulePin {
 const PINS = new Map<string, RulebookPin>([
   [
     'accessibility-conventions',
-    { bodyHash: '4c92659be0d9a00323c2827e3ca7eedd2311f2e82525e2153c58456b5fe39280', version: '6' },
+    { bodyHash: '6b014971094dde25b20e34b337dc7f3a1890f08727491989da89c0c5cc962474', version: '7' },
   ],
   ['cli-conventions', { bodyHash: '5b1f6c171be28b86b8f61d1ea798be8a232117ecec80ba7f5db83ca7844475e4', version: '6' }],
   [
@@ -78,11 +78,11 @@ const PINS = new Map<string, RulebookPin>([
   ['shell-conventions', { bodyHash: '59c0361c59977741a30b72f9d6b5203314cc939909d930a21e0da037f39da900', version: '6' }],
   [
     'ui-copy-conventions',
-    { bodyHash: '4e1b90099baf892d0e305be30103b3de4c52b40b9aed1647bcae59003cc245d6', version: '4' },
+    { bodyHash: 'fd0609e49dcd482d2dc67bff3fa4448988c75e3fd7cce4849292b3fbc45c6667', version: '5' },
   ],
   [
     'visual-design-conventions',
-    { bodyHash: '5438c85169699f604c64c77496036c99d3fc66f022fee2079b5115f2fd3d4494', version: '2' },
+    { bodyHash: 'ea613eda692d881ac63ade18a8a166478bc77170304741d26997313176ef8079', version: '3' },
   ],
   [
     'williamthorsen-code-layout-preferences',
