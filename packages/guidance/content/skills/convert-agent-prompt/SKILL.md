@@ -1,20 +1,20 @@
 ---
 name: convert-agent-prompt
-description: Convert an agent's prompt file into an agent-logic file, which an agent-logic viewer renders as a statechart. Use when asked to convert, chart, or extract the logic of an agent prompt.
+description: Convert an agent's prompt file into a prompt-logic file, which a viewer renders as a statechart. Use when asked to convert, chart, or extract the logic of an agent prompt.
 standalone: wanted only in projects that convert agent prompts, too rarely to justify a standing skill-index line
 user-invocable: true
 ---
 
 # Convert an agent prompt
 
-Convert a prompt file into an agent-logic file: an XState v5 machine config that contains the prompt's logic and nothing else. You write a draft that quotes the prompt; the `convert` command of the `codeassembly-agent-logic` package turns it into the config, deriving offsets and ids, and refuses to write a config that is not valid.
+Convert a prompt file into a prompt-logic file: an XState v5 machine config that contains the prompt's logic and nothing else. You write a draft that quotes the prompt; the `convert` command of the `codeassembly-agent-logic` package turns it into the config, deriving offsets and ids, and refuses to write a config that is not valid.
 
 Every command runs version 0.1.0 of the package through `pnpm dlx`, so that the extraction rules that you read match the procedure below.
 
 ## Arguments
 
 - The prompt file (required).
-- The output path (optional). Default: beside the prompt, `<base>.agent-logic.json`, where `<base>` is the prompt file's name without its extension.
+- The output path (optional). Default: beside the prompt, `<base>.prompt-logic.json`, where `<base>` is the prompt file's name without its extension.
 - The problems path (optional): where the script writes the problems of a draft that it cannot convert, or the out-of-scope verdict.
 
 ## Prerequisites
