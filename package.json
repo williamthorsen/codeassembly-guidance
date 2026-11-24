@@ -31,10 +31,10 @@
     "@typescript/native-preview": "7.0.0-dev.20260707.2",
     "@vitest/coverage-v8": "5.1.1",
     "@vitest/eslint-plugin": "1.6.28",
-    "@williamthorsen/eslint-config-typescript": "23.0.0",
+    "@williamthorsen/eslint-config-typescript": "23.1.0",
     "@williamthorsen/nmr": "catalog:",
-    "@williamthorsen/release-kit": "18.6.0",
-    "@williamthorsen/strict-lint": "16.0.0",
+    "@williamthorsen/release-kit": "18.7.0",
+    "@williamthorsen/strict-lint": "16.0.1",
     "@williamthorsen/toolbelt.errors": "catalog:",
     "@williamthorsen/toolbelt.testing": "catalog:",
     "@williamthorsen/toolbelt.vitest": "catalog:",
@@ -51,7 +51,7 @@
     "vite": "catalog:",
     "vitest": "catalog:"
   },
-  "packageManager": "pnpm@12.21.0",
+  "packageManager": "pnpm@12.23.0",
   "engines": {
     "node": ">=24"
   }
