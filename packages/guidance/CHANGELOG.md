@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.10.0 — 2026-11-24
+
+### 🎉 Features
+
+- Adds a "Public repositories" section to the shared `AGENTS.md`, which directs an agent to check a repository's visibility with `gh repo view` before writing a reference to it, or a fact learned from it, into an issue, a pull request, a comment, a commit message, or a tracked file of a public repository, and to describe a private repository or one that it cannot check without naming it. (#254)
+- Directs each skill that writes a title, a body, or a comment to GitHub to run `check-public-references.mjs` on the same title, body file, and `--repo` before the `gh` call, and to stop when the helper refuses a reference to a private repository in a write to a public one. (#255)
+- Directs `merge-gh-pr` to run `check-public-references.mjs` on the merge title and body files before it merges, and to refuse the merge when the helper reports a private reference, because a squash merge onto a protected default branch publishes a commit message that cannot be amended. (#255)
+- Adds the `codeassembly-guidance/skills/convert-agent-prompt/SKILL.md` subpath export, which resolves under Node and Vite to the self-contained `convert-agent-prompt` skill file, while every other file under `content/` stays unexported. (#258)
+
+### 🏗️ Internal features
+
+- Adds the `check-public-references.mjs` helper, which refuses a title or body for a public GitHub repository when the text references a repository that GitHub does not report as public, and exits 1 on that refusal. (#254)
+- Removes the names of private repositories from tracked files, replacing them in a code comment, a skill-data example, and test fixtures with public or neutral names. (#254)
+
 ## 0.9.0 — 2026-11-22
 
 ### 🎉 Features

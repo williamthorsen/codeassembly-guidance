@@ -1,5 +1,53 @@
 [
   {
+    "version": "0.10.0",
+    "date": "2026-11-24",
+    "sections": [
+      {
+        "title": "🎉 Features",
+        "audience": "all",
+        "items": [
+          {
+            "description": "Adds a \"Public repositories\" section to the shared `AGENTS.md`, which directs an agent to check a repository's visibility with `gh repo view` before writing a reference to it, or a fact learned from it, into an issue, a pull request, a comment, a commit message, or a tracked file of a public repository, and to describe a private repository or one that it cannot check without naming it. (#254)",
+            "hash": "65d12ab1bb24d1560767dc2ec56ed4229c0e4942",
+            "entry": 1
+          },
+          {
+            "description": "Directs each skill that writes a title, a body, or a comment to GitHub to run `check-public-references.mjs` on the same title, body file, and `--repo` before the `gh` call, and to stop when the helper refuses a reference to a private repository in a write to a public one. (#255)",
+            "hash": "cbb118756656af54cd16984f768b8fe0688ebe31",
+            "entry": 1
+          },
+          {
+            "description": "Directs `merge-gh-pr` to run `check-public-references.mjs` on the merge title and body files before it merges, and to refuse the merge when the helper reports a private reference, because a squash merge onto a protected default branch publishes a commit message that cannot be amended. (#255)",
+            "hash": "cbb118756656af54cd16984f768b8fe0688ebe31",
+            "entry": 2
+          },
+          {
+            "description": "Adds the `codeassembly-guidance/skills/convert-agent-prompt/SKILL.md` subpath export, which resolves under Node and Vite to the self-contained `convert-agent-prompt` skill file, while every other file under `content/` stays unexported. (#258)",
+            "hash": "2efa5c890d362b5c66a015a66bdf996c32ead617",
+            "entry": 1
+          }
+        ]
+      },
+      {
+        "title": "🏗️ Internal features",
+        "audience": "dev",
+        "items": [
+          {
+            "description": "Adds the `check-public-references.mjs` helper, which refuses a title or body for a public GitHub repository when the text references a repository that GitHub does not report as public, and exits 1 on that refusal. (#254)",
+            "hash": "65d12ab1bb24d1560767dc2ec56ed4229c0e4942",
+            "entry": 2
+          },
+          {
+            "description": "Removes the names of private repositories from tracked files, replacing them in a code comment, a skill-data example, and test fixtures with public or neutral names. (#254)",
+            "hash": "65d12ab1bb24d1560767dc2ec56ed4229c0e4942",
+            "entry": 3
+          }
+        ]
+      }
+    ]
+  },
+  {
     "version": "0.9.0",
     "date": "2026-11-22",
     "sections": [
