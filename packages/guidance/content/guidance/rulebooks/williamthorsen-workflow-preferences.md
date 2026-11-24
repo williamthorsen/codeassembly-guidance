@@ -2,7 +2,7 @@
 slug: williamthorsen-workflow-preferences
 description: William Thorsen's personal preferences for how work moves -- scope, branches and worktrees, guidance capture, and the arc of product development.
 delivery: ambient
-version: '16'
+version: '17'
 ---
 
 # William Thorsen's workflow preferences
@@ -63,4 +63,4 @@ Write a ticket in detail when its work is about to be implemented. Until then, k
 
 Once the developer approves the end vision, propose that shape rather than drafting every ticket in detail up front.
 
-Expect the vision to change. At the end of each iteration, re-read the design doc, revise what the iteration disproved, and refine the next sub-issue against the revised doc. The documents exist so that a new session knows the vision without being told.
+Expect the vision to change. At the end of each iteration, re-read the design doc, revise what the iteration disproved, and refine the next sub-issue against the revised doc. The documents exist so that a new session knows the vision without being told. Within an iteration as well as at its end, weigh the design doc as evidence rather than authority, per [records are evidence](../../skills/_data/ticket-evaluation.md#records-are-evidence).
