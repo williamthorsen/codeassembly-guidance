@@ -198,5 +198,6 @@ Complexity uses a **size scale**, on which emojis represent effort and scope, no
 
 - **Evidence over opinion**: Every verdict must be supported by specific evidence (file paths, commit SHAs, code references)
 - **Prefer caution on relevance**: Use `uncertain` when signals are ambiguous rather than committing to `superseded`
+- **Records are evidence, not authority**: Weigh a design doc, a plan, or an earlier decision per the "Records are evidence" section of `{harness_home_dir}/skills/_data/ticket-evaluation.md`; a record's statement or silence alone never decides a relevance or advisability verdict
 - **Bias `advisable` absent evidence**: Every non-baseline advisability verdict calls for a follow-up action; default to `advisable` unless the codebase shows specific evidence of a facet concern
 - **Scale to ticket complexity**: A simple ticket gets a brief assessment; a complex ticket with many acceptance criteria gets a thorough one
