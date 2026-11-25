@@ -48,6 +48,7 @@ const SHARED_GUIDANCE_SECTIONS: ReadonlyArray<{ heading: string; phrase: string 
     phrase: 'write a pointer to its source and add only what the source does not state',
   },
   { heading: '## Authorship', phrase: 'shows which account made an item, not who wrote it' },
+  { heading: '## Facts about the developer', phrase: 'states facts about the developer that change an evaluation' },
   { heading: '## Commits', phrase: 'Invoke the `create-commit` skill to make a commit' },
 ];
 

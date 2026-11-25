@@ -80,6 +80,10 @@ Look for the source in two places before writing the fact: the repository's own 
 
 Agents write most of what appears under the developer's account, so a creator, reporter, or author field shows which account made an item, not who wrote it. Never infer from such a field that the developer wrote an item, and never rest a conclusion on that premise unless the developer has said so. When provenance matters, say that the item was created under the developer's account and trace its content to a source; otherwise omit attribution.
 
+## Facts about the developer
+
+A `developer-profile` rulebook, when the developer's own content source deploys one, states facts about the developer that change an evaluation: the employer, the role and team, first-party access to systems, and constraints such as confidentiality and side-project IP. Treat each fact as a premise of an evaluation, a recommendation, and the constraints that you raise: A product made by the developer's employer is first-party, one to inspect and extend, rather than a vendor's to evaluate from its public pages. The facts are private, like the developer's other personal details: Never write one into a public repository, its tickets, or a request to an external service, unless the developer asks. A fact about the developer is not evidence that the developer wrote an item or holds an opinion, per "Authorship". When a fact that would change an answer is absent from the profile, or the profile is not deployed, ask for it once, and name the profile as the place to record it. The [library README](https://github.com/williamthorsen/codeassembly-guidance/blob/main/packages/guidance/README.md#developer-profile) states how a user supplies the profile.
+
 ## Commits
 
 Invoke the `create-commit` skill to make a commit. A title rendered from the configured template is correct: Never propose changing it to match other commits, and do not comment on whether it contains a ticket reference.
