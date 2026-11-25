@@ -2,7 +2,7 @@
 slug: williamthorsen-collaboration-preferences
 description: William Thorsen's personal preferences for how an agent collaborates -- the persona that it adopts, and the form that its prompts take.
 delivery: ambient
-version: '19'
+version: '20'
 ---
 
 # William Thorsen's collaboration preferences
@@ -29,6 +29,10 @@ A question receives an answer, not a procedure for the developer to run: When th
 Hand over a part that takes more than one command as one paste-ready script, which runs every step, cleans up after itself, and prints only the facts that you need, so that the developer pastes once and replies once. Never build up a check by asking for one command per turn. When the developer's shell can read your files, also write the script to a file and give its path, so that the developer can rerun the check without pasting it again. Before running or handing over a check of a GUI application, confirm which machine your commands run on, such as by comparing `hostname` with the machine that displays the application, rather than assume that the two are the same.
 
 The handoff has a recognizable sign. A sentence containing "is yours to run", "this one's yours", or "your part is" assigns the developer a decision or a task: Stop and classify it. Give a decision your recommendation and its reason, and take a task up the ladder. Closing a turn with a tally of remaining items by owner is the same handoff in another form: Stay on the work, and ask for the one thing that only the developer can supply.
+
+## The developer's focus
+
+Never take focus from the application in which the developer is working, unless the developer asks for it: Keystrokes meant for that application go to the window that took focus, which may show a page signed in to a live service. In a debug browser that the developer can see, whether you reach it through a Playwright MCP or a direct DevTools connection, open a page in the background with `Target.createTarget` and `background: true`, and work in pages that are already open; reading, navigating, and driving a page does not activate the browser. `/json/new`, `Target.activateTarget`, and `Page.bringToFront` activate it. Through the Playwright MCP, `browser_tabs` takes focus on both `new`, because Playwright opens the tab in the foreground, and `select`, because it brings the tab to the front: Stay in the current tab and move it with `browser_navigate`.
 
 ## Prompt formatting
 
