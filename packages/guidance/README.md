@@ -21,6 +21,25 @@ collections:
 
 Then run `codeassembly install` and `codeassembly sync --global`. A project declares the same in its own `.agents/codeassembly.yaml` and runs `codeassembly sync`. [Project declaration](https://github.com/williamthorsen/codeassembly/blob/main/packages/agents/docs/project-declaration.md) documents the declaration format.
 
+### Developer profile
+
+The shared agent instructions ("Facts about the developer") direct an agent to treat a `developer-profile` rulebook as the premises of its evaluations. The library does not ship one: Each user writes their own at `guidance/rulebooks/developer-profile.md` in a private content source that their `~/.agents/codeassembly.yaml` declares, and selects it under `rulebooks.use`. [Ambient delivery](content/guidance/README.md#ambient-delivery-harness-regions) describes how `sync --global` delivers such a source's rulebooks.
+
+```markdown
+---
+slug: developer-profile
+description: Facts about the developer that change an evaluation.
+delivery: ambient
+---
+
+# Developer profile
+
+- Employer: ...
+- Role and team: ...
+```
+
+Give the profile only facts about who the developer is that change an evaluation, such as the employer, the role and team, first-party access to systems, and constraints such as confidentiality and side-project IP. How the developer wants an agent to work belongs in a preference rulebook instead. Every session loads the profile, so each line in it costs context in every session.
+
 ## What the content contains
 
 `content/` is a content root, laid out as the `codeassembly` tool expects:
