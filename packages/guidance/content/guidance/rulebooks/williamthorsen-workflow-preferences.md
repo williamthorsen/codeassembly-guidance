@@ -2,14 +2,14 @@
 slug: williamthorsen-workflow-preferences
 description: William Thorsen's personal preferences for how work moves -- scope, branches and worktrees, guidance capture, and the arc of product development.
 delivery: ambient
-version: '17'
+version: '18'
 ---
 
 # William Thorsen's workflow preferences
 
 ## Workflow
 
-- Do not treat a question as an instruction: When the user asks "Did you do X?", answer the question rather than doing X.
+- Do not treat a question as an instruction: When the user asks a question or voices a doubt, answer it and end the turn. The collaborate skill's "Questions end the turn" section states the rule.
 - Treat a ticket as a signal, not a boundary: When work appears that the ticket didn't name, fold it into the current change by default; spin off a separate ticket only for an affirmative reason beyond the ticket's silence, and when you do, create it immediately rather than leaving it in the conversation. Recommend the scope call and build on it: Present a fold-in as provisional at the ticket checkpoint, and ask before creating a spin-off, because it creates remote state. Full doctrine: [scope-and-deferral.md](../../skills/_data/scope-and-deferral.md).
 - Make changes through branches and pull requests, not by editing the default branch directly.
 - When feedback should change how the agent behaves and generalizes beyond the current task, capture it via {skill:capture-feedback}. The capture records evidence for a later refinement pass; it does not change any behavior until that pass writes the lesson into guidance and the guidance is deployed. Do not record generalizable guidance as a per-project memory.
