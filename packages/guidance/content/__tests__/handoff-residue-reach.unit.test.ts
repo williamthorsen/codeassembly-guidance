@@ -10,10 +10,10 @@ import { readContentFile } from '../test-utils/read-content-file.ts';
 // Each handoff rule is stated once: the residue rule and the question-answer rule in the collaboration rulebook's
 // "Handoffs" section, the overload rule in its "Prompt formatting" section, and the design-time rule in the design
 // priorities' "Who applies the change" section. Every surface that designs, writes, executes, reviews, or closes a
-// step contains a pointer to the rule or the one clause that shapes its output. That redundancy is deliberate: The
-// rulebook is ambient, so a subagent never sees it, and an agent follows a clause beside the step that it governs
-// more reliably than a rule that it must fetch. A streamline pass reads the carriers as restatements and strips the
-// pointers; this suite makes the removal visible.
+// step contains a pointer to the rule or the one clause that shapes its output, a reviewer's proposed-change gate
+// included. That redundancy is deliberate: The rulebook is ambient, so a subagent never sees it, and an agent follows
+// a clause beside the step that it governs more reliably than a rule that it must fetch. A streamline pass reads the
+// carriers as restatements and strips the pointers; this suite makes the removal visible.
 
 /** The rulebook that states the residue rule, and the heading under which it states it. */
 const RULEBOOK = 'guidance/rulebooks/williamthorsen-collaboration-preferences.md';
@@ -32,6 +32,8 @@ const CARRIERS: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
       'Verify yourself',
       'A question receives an answer',
       'When the developer signals overload',
+      'None of these is a rung',
+      'A step that an earlier handoff or plan assigned to the developer',
     ],
   ],
   [
@@ -39,8 +41,19 @@ const CARRIERS: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
     ['retry the command through the permission gate', 'the durable grant'],
   ],
   ['skills/_data/action-items.md', ['is yours to run', 'An overload signal from the user']],
+  [
+    'skills/_data/artifact-conventions.md',
+    ["A finding never makes the author's action conditional on a check that the reviewer could run"],
+  ],
   [DESIGN_PRIORITIES, [DESIGN_RULE_HEADING, 'one script per machine, run once']],
-  ['skills/_partials/action-items.md', ['rather than ask for it']],
+  [
+    'skills/_partials/action-items.md',
+    [
+      'rather than ask for it',
+      '"in a fresh session" without the invocation',
+      'A step handed over in the draft is yours',
+    ],
+  ],
   ['skills/_partials/option-format.md', ['Verification is never in the gated class']],
   [
     'skills/_partials/plan-template.md',
@@ -65,6 +78,7 @@ const CARRIERS: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
     ['**Residue:**', 'never a step for the developer to run', 'stay yours even when the step has a residue line'],
   ],
   ['skills/plan/SKILL.md', ['who applies the change']],
+  ['skills/review-criteria/SKILL.md', ["Never make the author's action conditional on a check that you could run"]],
   ['subagents/handoff-reviewer.md', ['residue reason']],
   ['subagents/plan-reviewer.md', ['Actor assignment']],
 ]);
