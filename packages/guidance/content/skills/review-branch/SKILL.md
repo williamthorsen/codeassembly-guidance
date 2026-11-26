@@ -614,7 +614,7 @@ Shown when something that the user can clear, such as a sandbox denial, a missin
 ```
 {step} was blocked: {blocker}.
 
-1. 🔓 ■■■ {Action that supplies the resource, e.g. run `! {login command}`}, then re-run {step}
+1. 🔓 ■■■ {Action that supplies the resource, e.g. run `{login command}` in a separate terminal}, then re-run {step}
 2. ⏭️ ■□□ Accept the review without {step}
 ```
 
