@@ -70,6 +70,12 @@ const OPTION_FORMAT: Spec = {
     // The principle that the tests serve. Without it the agent reads an uneven menu as a formatting fault and evens it
     // out with a minor con.
     'Bullets report the weight of each option, not a balance between the options',
+    // The test that keeps logistics out of a bullet. Without it the agent writes a release wait, a ticket edit, or a
+    // new worktree as a con, because the elapsed-time ban governs ranking and not the bullet being written.
+    '**Merits, not logistics.**',
+    // The one delay that the logistics test admits. Without it the test also strikes the cost of a workaround that
+    // upstream-first ordering avoids.
+    'A delay is weighed only when it changes the code or the total effort',
     // The size requirement on a con. Without it a con names a cost without saying what it does, and the reader has to
     // investigate to learn that it is trivial.
     'concretely enough that the reader can weigh it without investigating',
