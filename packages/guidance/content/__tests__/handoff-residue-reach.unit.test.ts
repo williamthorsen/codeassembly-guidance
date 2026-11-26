@@ -34,6 +34,7 @@ const CARRIERS: ReadonlyMap<string, ReadonlyArray<string>> = new Map([
       'When the developer signals overload',
       'None of these is a rung',
       'A step that an earlier handoff or plan assigned to the developer',
+      "Claude Code's `!` prefix runs a command without a terminal",
     ],
   ],
   [
