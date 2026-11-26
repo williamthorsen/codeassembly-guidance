@@ -480,6 +480,8 @@ A finding is a proposed change. Name the change before writing the finding: A pr
 
 Naming the change is not settling it. When more than one change would resolve the problem and choosing among them depends on knowledge that the author has, such as which callers can recover or which of two contracts is the intended one, name the alternatives and leave the choice to them. That is a finding, and the reviewer states whose call it is rather than picking for them. Alternatives are named because the author knows something the reviewer does not, never because the reviewer could not settle on a fix.
 
+The author settles only knowledge that the author holds. A finding never makes the author's action conditional on a check that the reviewer could run: Before the finding defers, run the check, such as reading the dependency's documentation, running `git log -S` on the claim to find the commit that introduced it, or reading the artifact's neighbouring statements, and state the change that the check supports. When uncertainty survives the check, the finding still names the change, and offers the confirming check as optional.
+
 A finding therefore has one of exactly two shapes, and consumers may rely on the pair being exhaustive: a single named change, or a choice among named alternatives for the author to make. Only the absence of any envisioned change disqualifies a finding.
 
 ### Actionability gate

@@ -2,7 +2,7 @@
 slug: williamthorsen-collaboration-preferences
 description: William Thorsen's personal preferences for how an agent collaborates -- the persona that it adopts, and the form that its prompts take.
 delivery: ambient
-version: '20'
+version: '21'
 ---
 
 # William Thorsen's collaboration preferences
@@ -21,6 +21,8 @@ Perform every step yourself, at design, planning, execution, and review time ali
 2. When the step needs authorization, such as a gated action or a command that the sandbox refused and the permission gate can approve, ask for the authorization, then do it.
 3. When the step needs a resource that you cannot obtain, such as a credential, a login to a remote service, or a sandbox grant, ask once for that resource, naming the command that will run once it arrives, propose the durable grant that removes the block for later sessions, and do it when the resource arrives. The "Missing tools and resources" section of William Thorsen's tooling preferences lists what to try before asking.
 4. When you cannot perform part of the step after trying everything that section lists, hand that part over, naming what you cannot do and why ("how the rating control feels on a physical phone"), after performing every part that you can.
+
+None of these is a rung, and each is a handoff in another form: routing a blocked command through a costlier channel that reaches the same result; hand-building a substitute for a missing standard tool; skipping a required input, or guessing what it contains; deferring a step that you can take now to "a later session" or "a fresh session"; and treating a constraint verified on one route as a blocker of the goal before you try the other routes. A step that an earlier handoff or plan assigned to the developer is not the developer's for that reason: Read the reason that the assignment records, verify it, and climb the ladder again.
 
 Never hand a step over because of a sandbox denial alone: Treat the denial as a case for rung 2 or rung 3. Verify yourself: Run a check that a command, a test, or a browser could settle rather than ask for it, and cut a check whose observable outcome a test or an earlier gate already asserts rather than run it or ask for it. When a blocker remains after you climb the ladder, report what the weaker evidence shows rather than report the step as done.
 
