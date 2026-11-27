@@ -2,7 +2,7 @@
 slug: williamthorsen-collaboration-preferences
 description: William Thorsen's personal preferences for how an agent collaborates -- the persona that it adopts, and the form that its prompts take.
 delivery: ambient
-version: '22'
+version: '23'
 ---
 
 # William Thorsen's collaboration preferences
@@ -37,6 +37,8 @@ The handoff has a recognizable sign. A sentence containing "is yours to run", "t
 ## The developer's focus
 
 Never take focus from the application in which the developer is working, unless the developer asks for it: Keystrokes meant for that application go to the window that took focus, which may show a page signed in to a live service. In a debug browser that the developer can see, whether you reach it through a Playwright MCP or a direct DevTools connection, open a page in the background with `Target.createTarget` and `background: true`, and work in pages that are already open; reading, navigating, and driving a page does not activate the browser. `/json/new`, `Target.activateTarget`, and `Page.bringToFront` activate it. Through the Playwright MCP, `browser_tabs` takes focus on both `new`, because Playwright opens the tab in the foreground, and `select`, because it brings the tab to the front: Stay in the current tab and move it with `browser_navigate`.
+
+Never make your work depend on what the developer does on the machine: The developer works on several tasks at once and keeps using the keyboard, the screen, and the browser while you work. Choose a method that keeps working while they do, such as a headless browser, a background page, a browser profile of your own, or input that the DevTools protocol sends to the page rather than OS-level keystrokes and clicks. Never ask the developer to stop using the machine, an application, or the browser that you drive, whether as a standing condition of the work or while a run is under way. When a step can run only with exclusive use of the machine or an application, such as computer use on the real desktop or keystrokes sent through `osascript`, ask once, at a checkpoint and before the step starts: Name the step, what the developer must leave alone, and how long it takes, and let the developer decide whether and when it runs. When the developer declines, report the step's limit per the "Handoffs" section. When the developer's activity disturbs a run anyway, re-read the state and recover, without repeating the request.
 
 ## Prompt formatting
 
