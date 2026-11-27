@@ -2,7 +2,7 @@
 slug: visual-design-conventions
 description: 'Visual design of interfaces: marks for the exception, explained where they are drawn, colour as an encoding channel with fixed severities, padding inside bounded containers, proximity, alignment, SVG icons, group headings set apart from their labels, an appearance that follows each element''s role, matching controls side by side, tags, product identity, and the browser check of a visible change. Consult before writing an artifact page, a prototype, or a mockup, before writing CSS or a UI component, and before finishing or reviewing a change to a visible component.'
 delivery: [skill]
-version: '3'
+version: '4'
 ---
 
 # Visual design conventions
@@ -49,6 +49,7 @@ The element follows semantics, and the appearance follows the role:
 - **Navigation item.** An item of a navigation bar or a menu looks like navigation: It sits in the navigation region, and the item for the current view is marked.
 - **Button.** A `<button>` acts, and it looks like a button, as the interaction-state rules of {rulebook:accessibility-conventions} state.
 - **Tag.** A value that tags or classifies an item, such as a status or a category, looks like a tag: a compact shape with a fill or a border, set apart from the body text.
+- **Selected state.** The on state of a toggle, a radio, a segmented control's option, or a selected item is set apart from the view's primary action: It takes a quieter treatment, such as a stronger border, a heavier weight, or a check icon, alone or with a tint, and never the fill that marks the primary action. A selection drawn like the primary action reads as a call to action and draws the eye away from that action. The on-state rule of {rulebook:accessibility-conventions} sets the cue that does not rely on colour and its contrast. Example: ❌ The chosen option of a segmented control has the primary button's solid dark fill. ✅ It has a stronger border and bold text, and only the primary button is filled.
 
 Example: ❌ "View details" and "Delete" are both blue underlined text. ✅ "View details" is a link to the detail view, and "Delete" is a button.
 
@@ -70,7 +71,7 @@ Check every change to a visible component in a browser before reporting it finis
 - Each group's heading differs visibly from the labels that it groups.
 - Marks fall on exceptions only, each is explained where it is drawn, and each value drawn as a graphic is also shown as text.
 - Each severity style matches its meaning.
-- Each link, navigation item, button, and tag looks like its role, and controls side by side share size, shape, and type.
+- Each link, navigation item, button, and tag looks like its role, each selected or on state is set apart from the primary action without taking its fill, and controls side by side share size, shape, and type.
 - The product's name and home link are visible, and the favicon is the product's own.
 
 A reading of the diff does not replace this check: Padding and alignment show only once the page renders. When a browser is not available, report that the check did not run and name the views that it would have covered. Never report it as passed.

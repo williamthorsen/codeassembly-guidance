@@ -82,7 +82,7 @@ const PINS = new Map<string, RulebookPin>([
   ],
   [
     'visual-design-conventions',
-    { bodyHash: 'ea613eda692d881ac63ade18a8a166478bc77170304741d26997313176ef8079', version: '3' },
+    { bodyHash: 'b02bcd973164e1a1ecd9318f36a7bd9a19ddab71d6257cea599f12f09c8031a9', version: '4' },
   ],
   [
     'williamthorsen-code-layout-preferences',
